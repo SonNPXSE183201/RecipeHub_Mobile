@@ -52,7 +52,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             icon: const Icon(Icons.share_outlined, size: 20, color: NomadKit.ink),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Đã sao chép liên kết công thức ${widget.code}')),
+                SnackBar(content: Text('Copied formula link: ${widget.code}')),
               );
             },
           ),
@@ -406,7 +406,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             ),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đang cập nhật phân tích định lượng mới từ Gemini AI...')),
+                const SnackBar(content: Text('Updating nutritional & formulation analysis from Gemini AI...')),
               );
             },
             icon: const Icon(Icons.refresh_rounded, size: 16),

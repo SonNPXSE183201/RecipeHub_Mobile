@@ -66,7 +66,7 @@ class _RecipeEditorPageState extends State<RecipeEditorPage> {
                     ),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Gemini AI đã cân bằng tỷ lệ đường & béo tối ưu cho 500ml.')),
+                        const SnackBar(content: Text('Gemini AI has balanced the optimal sweetness and fat ratio for 500ml.')),
                       );
                     },
                     icon: const Icon(Icons.bolt_rounded, size: 16),

@@ -55,7 +55,7 @@ class RegisterPage extends StatelessWidget {
                   ),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Đăng ký tài khoản R&D thành công!')),
+                      const SnackBar(content: Text('R&D staff account registered successfully.')),
                     );
                     Navigator.pop(context);
                   },

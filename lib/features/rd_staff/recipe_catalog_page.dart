@@ -149,7 +149,7 @@ class _RecipeCatalogPageState extends State<RecipeCatalogPage> {
                       Icon(Icons.coffee_maker_outlined, size: 48, color: NomadKit.sandDark),
                       SizedBox(height: 12),
                       Text(
-                        'Chưa có công thức nào phù hợp',
+                        'No matching formulas found.',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: NomadKit.ink),
                       ),
                     ],

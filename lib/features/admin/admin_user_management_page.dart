@@ -66,7 +66,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         icon: const Icon(Icons.person_add_alt_1_rounded, color: NomadKit.sandDark),
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Mở form tạo tài khoản nhân sự mới cho chi nhánh.')),
+            const SnackBar(content: Text('Opening branch staff creation form.')),
           );
         },
       ),
@@ -136,7 +136,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         onChanged: (val) {
                           setState(() => user['active'] = val);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${val ? "Đã kích hoạt" : "Đã tạm khóa"} tài khoản ${user["name"]}')),
+                            SnackBar(content: Text('Account ${user["name"]} ${val ? "activated" : "deactivated"}.')),
                           );
                         },
                       ),

@@ -66,7 +66,7 @@ class _AdminAuditLogsPageState extends State<AdminAuditLogsPage> {
         icon: const Icon(Icons.download_rounded, color: NomadKit.sandDark),
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đã xuất file Audit_Report_Oct2026.csv bảo mật toàn hệ thống.')),
+            const SnackBar(content: Text('System audit report exported as Audit_Report_Oct2026.csv.')),
           );
         },
       ),

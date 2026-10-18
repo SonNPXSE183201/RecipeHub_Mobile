@@ -34,7 +34,7 @@ class IngredientCreatePage extends StatelessWidget {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã thêm nguyên liệu mới vào danh mục chuỗi thành công!')),
+                    const SnackBar(content: Text('New ingredient added to chain catalog successfully.')),
                   );
                   Navigator.pop(context);
                 },

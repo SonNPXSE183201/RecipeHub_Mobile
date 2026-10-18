@@ -94,7 +94,7 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                               icon: const Icon(Icons.share_outlined, size: 18, color: NomadKit.sandDark),
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Đang chia sẻ tệp ${item['title']}...')),
+                                  SnackBar(content: Text('Sharing document: ${item['title']}...')),
                                 );
                               },
                             ),
@@ -102,7 +102,7 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                               icon: const Icon(Icons.download_rounded, size: 20, color: NomadKit.sandDark),
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Đang tải lại tệp ${item['title']}...')),
+                                  SnackBar(content: Text('Re-downloading document: ${item['title']}...')),
                                 );
                               },
                             ),

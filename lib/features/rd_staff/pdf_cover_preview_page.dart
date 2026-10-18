@@ -78,7 +78,7 @@ class PdfCoverPreviewPage extends StatelessWidget {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✓ Đã tải tệp PDF SOP Master Book về máy thành công!')),
+                    const SnackBar(content: Text('✓ SOP Master Book PDF downloaded successfully!')),
                   );
                 },
                 icon: const Icon(Icons.download_rounded, size: 18),

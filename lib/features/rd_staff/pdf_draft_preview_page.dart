@@ -130,7 +130,7 @@ class PdfDraftPreviewPage extends StatelessWidget {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✓ Đã tải bản PDF nháp kèm Watermark về máy!')),
+                    const SnackBar(content: Text('✓ Draft PDF with watermark downloaded successfully!')),
                   );
                 },
                 icon: const Icon(Icons.download_rounded, size: 18),

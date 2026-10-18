@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/utils/navigation.dart';
+import '../../core/network/error_handler.dart';
 import '../rd_staff/main_nav_shell.dart';
 import '../barista/viewer_home_page.dart';
 import '../admin/admin_console_page.dart';
@@ -22,6 +23,16 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin() {
     final email = _emailCtrl.text.trim().toLowerCase();
+    final pass = _passCtrl.text.trim();
+    if (email.isEmpty) {
+      ErrorHandler.showErrorSnackBar(context, 'Please enter your email address.');
+      return;
+    }
+    if (pass.isEmpty) {
+      ErrorHandler.showErrorSnackBar(context, 'Please enter your account password.');
+      return;
+    }
+
     if (email.contains('barista')) {
       go(context, const ViewerHomePage());
     } else if (email.contains('admin')) {

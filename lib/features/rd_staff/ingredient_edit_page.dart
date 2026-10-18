@@ -102,7 +102,7 @@ class _IngredientEditPageState extends State<IngredientEditPage> {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã cập nhật thông tin nguyên liệu thành công!')),
+                    const SnackBar(content: Text('Ingredient details updated successfully.')),
                   );
                   Navigator.pop(context);
                 },

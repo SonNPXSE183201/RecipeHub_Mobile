@@ -87,7 +87,7 @@ class RecipeReviewPage extends StatelessWidget {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✓ Đã chốt và khóa thành công phiên bản v2! Sẵn sàng xuất bản.')),
+                    const SnackBar(content: Text('✓ Version v2 successfully locked and approved! Ready for publication.')),
                   );
                   Navigator.pop(context);
                 },
