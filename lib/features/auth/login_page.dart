@@ -14,33 +14,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  int _selectedRoleIndex = 0; // 0: R&D, 1: Barista, 2: Admin
   bool _obscurePassword = true;
   bool _rememberMe = true;
 
   final _emailCtrl = TextEditingController(text: 'rnd@recipehub.vn');
   final _passCtrl = TextEditingController(text: '••••••••');
 
-  void _onRoleChanged(int index) {
-    setState(() {
-      _selectedRoleIndex = index;
-      if (index == 0) {
-        _emailCtrl.text = 'rnd@recipehub.vn';
-      } else if (index == 1) {
-        _emailCtrl.text = 'barista@recipehub.vn';
-      } else {
-        _emailCtrl.text = 'admin@recipehub.vn';
-      }
-    });
-  }
-
   void _handleLogin() {
-    if (_selectedRoleIndex == 0) {
-      go(context, const MainNavShell(initialTab: 0));
-    } else if (_selectedRoleIndex == 1) {
+    final email = _emailCtrl.text.trim().toLowerCase();
+    if (email.contains('barista')) {
       go(context, const ViewerHomePage());
-    } else {
+    } else if (email.contains('admin')) {
       go(context, const AdminConsolePage());
+    } else {
+      go(context, const MainNavShell(initialTab: 0));
     }
   }
 
@@ -90,25 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                 'Biến thử nghiệm thành quy trình chuẩn.',
                 style: TextStyle(fontSize: 14, color: NomadKit.secondary),
               ),
-              const SizedBox(height: 28),
-
-              // Role Segmented Selector (Clean Production UI)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: NomadKit.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: NomadKit.border),
-                ),
-                child: Row(
-                  children: [
-                    _roleSegmentItem('R&D Lead', 0),
-                    _roleSegmentItem('Barista', 1),
-                    _roleSegmentItem('Quản trị', 2),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
               // Email Field
               const Text(
@@ -233,32 +202,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _roleSegmentItem(String label, int index) {
-    final isSelected = _selectedRoleIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _onRoleChanged(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? NomadKit.sand : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              color: isSelected ? Colors.white : NomadKit.secondary,
-            ),
           ),
         ),
       ),
