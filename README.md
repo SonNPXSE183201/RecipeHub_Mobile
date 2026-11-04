@@ -1,10 +1,10 @@
 # recipehub_mobile
 
-A new Flutter project.
+Ứng dụng Flutter RecipeHub dùng NomadKit; gồm giao diện R&D, Viewer và Admin. Xem [design](DESIGN.md) và [handoff](flutter-handoff.md).
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Mã nguồn hiện kết hợp API Recipe/Content với màn hình demo. `LoginPage` chỉ điều hướng theo email, chưa xác thực Identity; Ping trong cấu hình AI gọi Gateway health và có nhánh giả lập thành công khi lỗi, không chứng minh Gemini hoạt động. Không dùng các màn hình này làm bằng chứng nghiệm thu backend hoặc phân quyền.
 
 A few resources to get you started if this is your first Flutter project:
 

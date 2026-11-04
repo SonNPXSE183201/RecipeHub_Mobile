@@ -4,7 +4,7 @@
 
 ## 1. Tổng Quan Hệ Thống Thiết Kế (Overview)
 
-NomadKit là hệ thống thiết kế tinh gọn, ấm áp và hướng đến sự bền bỉ trong môi trường làm việc thực tế của ngành F&B (chuỗi quán cà phê và trà sữa 45 chi nhánh). Hệ thống kết hợp bề mặt nền cát kem ấm áp (`#FFFDF7`), thẻ trắng tinh khôi (`#FFFFFF`), các điểm nhấn Vàng cát (`#D4A373`), Xanh đại dương (`#0891B2`) và Xanh rừng (`#166534`).
+NomadKit là hệ thống thiết kế tinh gọn, ấm áp và hướng đến môi trường F&B. Source `lib/core/theme/nomad_kit.dart` dùng nền cát kem `#FFFDF7`, thẻ trắng `#FFFFFF`, Vàng cát `#C49A6C`, Xanh đại dương `#0891B2` và Xanh rừng `#166534`. Các luồng nghiệp vụ bên dưới là phạm vi thiết kế/prototype; không xác nhận đã nối đầy đủ API hay xác thực.
 
 Đối với ứng dụng **RecipeHub Mobile**, NomadKit hỗ trợ 3 luồng thao tác người dùng (3-Row Flow Architecture):
 1. **Nhân viên R&D (Staff Flow)**: Soạn thảo công thức, định lượng nguyên liệu chính xác, hỗ trợ AI có kiểm soát và khóa phiên bản bất biến.
@@ -17,20 +17,20 @@ NomadKit là hệ thống thiết kế tinh gọn, ấm áp và hướng đến 
 
 | Token Name | Hex Code | Ý Nghĩa Sử Dụng & Độ Tương Phản |
 | :--- | :--- | :--- |
-| **Primary Sand** | `#D4A373` | Nút hành động chính (CTA), icon logo nhận diện thương hiệu |
+| **Primary Sand** | `#C49A6C` | `NomadKit.sand`: nút chính, icon logo |
 | **Sand Dark** | `#A07040` | Nhãn tiêu đề mục, hiệu ứng khi nhấn nút |
 | **Sand Light** | `#FAF6F0` | Nền thẻ nổi bật, viền hộp thoại |
 | **Secondary Ocean**| `#0891B2` | Nút Ping Test kiểm tra API AI, liên kết, badge hỗ trợ AI |
-| **Ocean Light** | `#E0F2FE` | Nền thông báo AI, chỉ số trạng thái |
+| **Ocean Light** | `#F0F9FF` | `NomadKit.oceanLight`: nền thông báo AI, chỉ số trạng thái |
 | **Tertiary Forest**| `#166534` | Trạng thái Đã duyệt (Approved), thông báo thành công |
 | **Forest Light** | `#DCFCE7` | Nền chip Approved, viền card thành công |
 | **Background** | `#FFFDF7` | Màu nền toàn bộ ứng dụng, chống chói lóa dưới ánh sáng quầy bar |
 | **Surface Default**| `#FFFFFF` | Nền thẻ card, trang sách SOP, hộp thoại modal |
-| **Surface Muted** | `#F6F1E8` | Nền input vô hiệu hóa, thanh trượt trang |
+| **Surface Muted** | `#F6F1E8` | Token thiết kế đề xuất; chưa có hằng tương ứng trong `NomadKit` |
 | **Text Primary** | `#292524` | Chữ chính tiêu đề và nội dung (Tương phản 12.8:1 đạt chuẩn WCAG AAA) |
 | **Text Secondary**| `#78716C` | Chữ phụ, nhãn đơn vị đo lường, Watermark "BẢN NHÁP" |
 | **Border Default** | `#E7E0D5` | Viền thẻ card 1dp tinh tế |
-| **Warning** | `#854D0E` | Chữ nhãn Bản nháp (Draft), cảnh báo tồn kho |
+| **Warning** | `#CA8A04` | `NomadKit.warning`: màu cảnh báo trong source |
 | **Warning Light** | `#FEF9C3` | Nền chip Bản nháp (Draft) |
 | **Error** | `#DC2626` | Thông báo lỗi kết nối, cảnh báo nhập liệu sai |
 
@@ -64,14 +64,14 @@ NomadKit là hệ thống thiết kế tinh gọn, ấm áp và hướng đến 
 ## 5. Quy Chuẩn Thành Phần Giao Diện (Components)
 
 ### Logo Tách Cà Phê (Squircle Coffee Cup Logo)
-- Khối hình vuông bo góc tròn (squircle) màu vàng cát `#D4A373`.
+- Khối hình vuông bo góc tròn (squircle) màu vàng cát `NomadKit.sand` (`#C49A6C`).
 - Icon tách cà phê trắng nằm chính tâm (`Icons.coffee_rounded`).
 - Xuất hiện đồng bộ trên AppBar của mọi màn hình, Banner Admin, Header chi nhánh và Bìa Sách SOP.
 
 ### Nút Bấm (Buttons)
 - Chiều cao cố định: **52 dp** (bảo đảm vượt chuẩn tiếp cận ngón tay cái quầy bar >= 48dp).
 - Bo góc: **16 dp**.
-- Nút Chính (Primary Sand): Nền `#D4A373`, chữ trắng hoặc than đá.
+- Nút Chính (Primary Sand): Nền `#C49A6C`, chữ theo component; đối chiếu tiêu chuẩn tương phản trước khi nghiệm thu.
 - Nút Kiểm Tra (Ping Test / Ocean): Nền `#0891B2`, chữ trắng, icon tia chớp.
 - Nút Sách SOP: Nền `#A07040` (Sand Dark), chữ trắng, icon cuốn sách.
 

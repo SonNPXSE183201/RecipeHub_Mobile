@@ -2,6 +2,8 @@
 
 Tài liệu này cung cấp toàn bộ thông số kỹ thuật chi tiết để lập trình viên Flutter có thể hiện thực hóa 100% thiết kế giao diện từ Figma sang mã nguồn Flutter mà không cần phỏng đoán, tuân thủ chặt chẽ **SRS Phạm vi nhỏ (v0.1)** và hướng dẫn đánh giá **PRM323 Lab 2**.
 
+> **Phạm vi tài liệu:** đặc tả giao diện/prototype, không phải bằng chứng mọi nghiệp vụ đã tích hợp production. `LoginPage` hiện điều hướng theo email, chưa xác thực Identity. `AdminAiConfigPage` gọi Gateway `/health/live`, có nhánh giả lập thành công khi lỗi; số 138ms, chi nhánh, SHA-256 và hạn ngạch trong demo không chứng minh dữ liệu backend thật. Tên widget trong sơ đồ mã nguồn mục 3.2 là tên file hiện tại; các mã SCR là nhãn thiết kế.
+
 🔗 **Figma Design URL**: [https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub?node-id=0-1&p=f&t=CCMYGJ1nhqFSWdS1-0](https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub?node-id=0-1&p=f&t=CCMYGJ1nhqFSWdS1-0) (Key: `FycUpbP0PtH6Q4sg6IvZr6`)
 
 ---
@@ -10,20 +12,20 @@ Tài liệu này cung cấp toàn bộ thông số kỹ thuật chi tiết để
 
 | NomadKit Token | Giá trị Hex / CSS | Thuộc tính Flutter ThemeData / Code | Ghi chú kỹ thuật |
 | :--- | :--- | :--- | :--- |
-| `color.primarySand` | `#D4A373` | `NomadKit.sand` / `Color(0xFFD4A373)` | Màu Vàng cát chủ đạo cho nút CTA chính và icon logo |
+| `color.primarySand` | `#C49A6C` | `NomadKit.sand` / `Color(0xFFC49A6C)` | Màu Vàng cát trong source hiện tại |
 | `color.sandDark` | `#A07040` | `NomadKit.sandDark` / `Color(0xFFA07040)` | Màu nhấn đậm khi hover/press, nhãn mục |
 | `color.sandLight` | `#FAF6F0` | `NomadKit.sandLight` / `Color(0xFFFAF6F0)` | Màu nền highlight, viền thẻ |
 | `color.secondaryOcean`| `#0891B2` | `NomadKit.ocean` / `Color(0xFF0891B2)` | Màu Xanh đại dương cho nút Ping Test, link, badge AI |
-| `color.oceanLight` | `#E0F2FE` | `NomadKit.oceanLight` / `Color(0xFFE0F2FE)` | Nền badge AI, thông báo phụ |
+| `color.oceanLight` | `#F0F9FF` | `NomadKit.oceanLight` / `Color(0xFFF0F9FF)` | Nền badge AI, thông báo phụ |
 | `color.tertiaryForest`| `#166534` | `NomadKit.forest` / `Color(0xFF166534)` | Màu Xanh rừng cho trạng thái Đã duyệt (Approved) |
 | `color.forestLight` | `#DCFCE7` | `NomadKit.forestLight` / `Color(0xFFDCFCE7)` | Nền chip Approved, icon thành công |
 | `color.background` | `#FFFDF7` | `NomadKit.canvas` / `Color(0xFFFFFDF7)` | Nền canvas ấm chống chói quầy bar |
 | `color.surface` | `#FFFFFF` | `NomadKit.surface` / `Color(0xFFFFFFFF)` | Nền thẻ card, modal sheet, dialog |
-| `color.surfaceMuted` | `#F6F1E8` | `NomadKit.surfaceMuted` / `Color(0xFFF6F1E8)` | Nền input vô hiệu hóa, skeleton loader |
+| `color.surfaceMuted` | `#F6F1E8` | `Color(0xFFF6F1E8)` | Token thiết kế đề xuất; chưa có hằng `NomadKit.surfaceMuted` |
 | `color.textPrimary` | `#292524` | `NomadKit.ink` / `Color(0xFF292524)` | Màu than đá cho tiêu đề & body (Contrast 12.8:1) |
 | `color.textSecondary`| `#78716C` | `NomadKit.secondary` / `Color(0xFF78716C)` | Màu xám ấm cho metadata, nhãn phụ |
 | `color.border` | `#E7E0D5` | `NomadKit.border` / `Color(0xFFE7E0D5)` | Viền thẻ 1dp tinh gọn |
-| `color.warning` | `#854D0E` | `NomadKit.warning` / `Color(0xFF854D0E)` | Chữ chip Bản nháp (Draft), cảnh báo |
+| `color.warning` | `#CA8A04` | `NomadKit.warning` / `Color(0xFFCA8A04)` | Màu cảnh báo trong source hiện tại |
 | `color.warningLight` | `#FEF9C3` | `NomadKit.warningLight` / `Color(0xFFFEF9C3)` | Nền chip Bản nháp (Draft) |
 | `color.error` | `#DC2626` | `NomadKit.error` / `Color(0xFFDC2626)` | Màu đỏ báo lỗi kết nối, validation |
 | `radius.sm` | `4 dp` | `BorderRadius.circular(4)` | Bo góc badge nhỏ |
@@ -39,7 +41,7 @@ Tài liệu này cung cấp toàn bộ thông số kỹ thuật chi tiết để
 
 Toàn bộ các màn hình trong ứng dụng phải tuân thủ nghiêm ngặt 3 quy chuẩn hiển thị thống nhất với màn hình Đăng nhập và Dashboard trên Figma:
 1. **Logo Tách Hạt Cà Phê (Squircle Coffee Cup Logo)**:
-   - Sử dụng khối bo góc tròn màu vàng cát (`NomadKit.sand` / `#D4A373`), kích thước chuẩn `36×36 dp` (trên AppBar) hoặc `64×64 dp` (trên Splash/Login).
+   - Sử dụng khối bo góc tròn màu vàng cát (`NomadKit.sand` / `#C49A6C`); kích thước tùy vị trí, `LoginPage` hiện dùng `56×56 dp`.
    - Icon tách cà phê trắng nằm chính tâm (`Icons.coffee_rounded`, màu `Colors.white`), bo góc chuẩn `10–12 dp`.
    - Xuất hiện đồng bộ trên: AppBar của tất cả các màn hình con (`ScreenFrame`), Banner Quản trị hệ thống chuỗi (`AdminConsolePage`), Header chi nhánh Landmark 81 (`ViewerHomePage`), và Trang bìa Sách SOP (`BookletReaderPage`).
 2. **Kích Thước Vùng Chạm & Bo Góc Nút Bấm (Button Specifications)**:
@@ -110,11 +112,11 @@ lib/
 └── main.dart                           # Điểm khởi chạy ứng dụng tinh gọn & Điều hướng (~200 dòng)
 ```
 
-### 3.3. Chi Tiết Các Màn Hình Mới Bổ Sung & Chuẩn Production
+### 3.3. Chi Tiết Màn Hình & Phạm Vi Prototype
 
-#### SCR-01: Đăng Nhập Chuẩn Chuỗi Production (`LoginPage`)
+#### SCR-01: Đăng Nhập Demo (`LoginPage`)
 - **Loại Bỏ Hoàn Toàn Tạp Dư Dev**: Xóa bỏ hoàn toàn 3 khối card phím tắt dev thô sơ, các dòng log BE và thanh trạng thái giả lập iOS `9:41`.
-- **Thanh Chọn Vai Trò Chuẩn Production**: Tích hợp thanh trượt vai trò theo chuẩn thiết kế Figma: `[ R&D Lead | Barista | Quản trị ]`, cho phép kiểm thử chuyển đổi phân hệ nhanh chóng nhưng giữ nguyên giao diện người dùng cao cấp, sạch sẽ.
+- **Điều Hướng Vai Trò Demo:** `LoginPage` hiện chọn Viewer nếu email chứa `barista`, Admin nếu chứa `admin`, còn lại mở R&D; chưa gọi Identity và không có thanh chọn vai trò. Đây không phải cơ chế phân quyền production.
 - **Bảo Toàn Mock Data Thực Tế**: Dữ liệu công thức, nguyên liệu và thông tin chuỗi được giữ nguyên độ phong phú để giao diện chân thực nhất.
 
 #### SCR-16a: Trang Chủ Viewer Quầy Bar (`ViewerHomePage`)
@@ -155,7 +157,7 @@ lib/
 #### SCR-18b: Cấu Hình API Gemini & AI Engine (`AdminAiConfigPage`)
 - Dropdown chọn mô hình: Gemini 1.5 Pro (Độ chính xác cao) / Gemini 1.5 Flash (Tốc độ cao).
 - Trường nhập API Key với nút ẩn/hiện mật khẩu.
-- Nút bấm `Kiểm tra kết nối API (Ping Test)`: Chạy kiểm tra độ trễ mạng thực tế, hiển thị kết quả "✓ Kết nối API thành công! Độ trễ: 138 ms · Trạng thái: HTTP 200 OK".
+- Nút `Kiểm tra kết nối API (Ping Test)`: hiện gọi Gateway `/health/live`, không gọi trực tiếp Gemini. Nhánh demo có thể hiện "138 ms · HTTP 200 OK" kể cả khi request lỗi; không dùng kết quả này để xác nhận AI provider sẵn sàng.
 - Thanh trượt độ chặt chẽ (Temperature) 0.0 – 1.0 (Khuyến nghị 0.2 cho chuẩn F&B).
 - System Prompt và thanh tiến độ hạn ngạch token trong tháng.
 
@@ -195,7 +197,7 @@ lib/
    - Tạo Frame có kích thước chuẩn **Android Compact / Large (412 × 915 dp)**.
    - Dán ảnh chụp màn hình native vào Frame, căn chỉnh vừa khít khung nhìn.
 3. **Tái hiện Component Nút Bấm & Thẻ (Component Extraction)**:
-   - Dùng công cụ Rectangle của Figma vẽ đè lên vị trí nút bấm mobile: Chiều cao `52 dp`, `Corner Radius = 16 dp`, Fill `#D4A373` (Primary Sand) hoặc `#0891B2` (Ocean).
+   - Dùng công cụ Rectangle của Figma vẽ đè lên vị trí nút bấm mobile: Chiều cao `52 dp`, `Corner Radius = 16 dp`, Fill `#C49A6C` (Primary Sand hiện tại) hoặc `#0891B2` (Ocean).
    - Đặt Text `Inter 14sp Bold` và chèn Icon vector tương ứng.
    - Bấm `Ctrl + Alt + K` để biến thành Figma Component Master (ví dụ: `Button/Primary_52dp`, `Button/PingTest_52dp`, `Card/RecipeTile_16dp`).
    - Tạo các biến thể Component (Variants): `Default`, `Hover/Pressed`, `Disabled`.
@@ -223,4 +225,4 @@ Có 2 phương pháp demo hoàn toàn trên môi trường di động thực t�
      flutter run -d emulator-5554
      ```
    - Trình chiếu trực tiếp cửa sổ Android Emulator Pixel 5 trong buổi báo cáo.
-   - Thao tác cuộn vuốt, bấm kiểm tra kết nối API Gemini (Ping Test), lật mở 8 trang Sách SOP và chuyển đổi 3 luồng người dùng một cách trực quan, mượt mà và chân thực nhất.
+   - Trình diễn Ping Gateway health, sách SOP và điều hướng 3 vai trò demo. Kết quả Ping giả lập không xác nhận kết nối Gemini; đăng nhập và dữ liệu nghiệp vụ phải tích hợp Identity/API thật trước khi nghiệm thu production.
