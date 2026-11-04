@@ -2,6 +2,8 @@
 
 Tài liệu này ghi lại các quyết định thiết kế quan trọng (Accept, Modify, Reject) trong quá trình phát triển hệ thống **RecipeHub Mobile**, đối chiếu với 10 nguyên lý Nielsen Heuristics, các tiêu chuẩn tiếp cận WCAG 2.1 AA và nguyên tắc thiết kế **NomadKit**.
 
+> Tài liệu quyết định UI/prototype. Các số chi nhánh, tài khoản, hạn ngạch, SHA-256 là dữ liệu/tiêu chí demo, không xác nhận contract backend. `AdminAiConfigPage` hiện kiểm tra Gateway health và có nhánh giả lập thành công khi lỗi; “Live Ping 138ms” không phải phép đo Gemini. Các kết quả trợ năng bên dưới là ghi nhận thiết kế cũ, chưa được tái kiểm chứng trong đợt đối chiếu tài liệu này.
+
 🔗 **Figma Design URL**: [https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub?node-id=0-1&p=f&t=CCMYGJ1nhqFSWdS1-0](https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub?node-id=0-1&p=f&t=CCMYGJ1nhqFSWdS1-0) (Key: `FycUpbP0PtH6Q4sg6IvZr6`)
 
 ---

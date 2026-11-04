@@ -4,6 +4,8 @@
 > **Figma File Key**: `FycUpbP0PtH6Q4sg6IvZr6`  
 > **Phiên bản chuẩn hóa**: 2.0 (Đồng bộ 100% Mobile Flutter, 3 Luồng nghiệp vụ theo hàng, Sổ tay SOP E-Booklet Reader & Phân hệ Admin)
 
+> **Phạm vi:** luồng thiết kế/prototype mobile, không thay thế phân quyền/API backend. Login hiện điều hướng theo email, chưa xác thực Identity; Ping gọi Gateway health và có nhánh giả lập thành công khi lỗi. Các số chi nhánh/tài khoản/138ms, nhật ký SHA-256 và sách chứa công thức nháp là tình huống demo, không mô tả quyền Viewer hoặc dữ liệu production.
+
 ---
 
 ## 1. Kiến Trúc Thông Tin (Information Architecture - IA)
@@ -102,29 +104,29 @@ graph TD
 
 ---
 
-## 3. Danh Mục Màn Hình & Trạng Thái Ứng Dụng (23 Màn hình / Phân hệ)
+## 3. Danh Mục Màn Hình & Trạng Thái Ứng Dụng (25 mục thiết kế)
 
 | Mã | Tên màn hình / Phân hệ | Cấp bậc | Luồng (Row) | Flutter Widget tương ứng |
 | :--- | :--- | :--- | :--- | :--- |
-| **SCR-01** | Đăng nhập & Chọn vai trò 3 luồng | Cấp 1 | Chung | `LoginFigmaPage` |
-| **SCR-02** | Đăng ký tài khoản chuyên viên mới | Cấp 1 | Row 1 | `RegisterFigmaPage` |
-| **SCR-03** | Bảng điều khiển Dashboard R&D | Cấp 1 (Tab 1) | Row 1 | `DashboardFigmaPage` |
-| **SCR-04** | Thư viện & Tìm kiếm công thức | Cấp 1 (Tab 2) | Row 1 | `LibraryFigmaPage` |
-| **SCR-05** | Chi tiết công thức & Khóa bất biến | Cấp 2 | Row 1 | `RecipeDetailFigmaPage` |
+| **SCR-01** | Đăng nhập & Điều hướng 3 luồng demo | Cấp 1 | Chung | `LoginPage` |
+| **SCR-02** | Đăng ký tài khoản chuyên viên mới | Cấp 1 | Row 1 | `RegisterPage` |
+| **SCR-03** | Bảng điều khiển Dashboard R&D | Cấp 1 (Tab 1) | Row 1 | `DashboardPage` |
+| **SCR-04** | Thư viện & Tìm kiếm công thức | Cấp 1 (Tab 2) | Row 1 | `RecipeCatalogPage` |
+| **SCR-05** | Chi tiết công thức & Khóa bất biến | Cấp 2 | Row 1 | `RecipeDetailPage` |
 | **SCR-06** | Soạn thảo công thức & Gemini AI | Cấp 2 | Row 1 | `RecipeEditorPage` |
 | **SCR-07** | Xem lại & Phê duyệt chốt phiên bản | Cấp 3 | Row 1 | `RecipeReviewPage` |
-| **SCR-08** | Danh mục nguyên liệu chuẩn chuỗi | Cấp 1 (Tab 3) | Row 1 | `IngredientsFigmaPage` |
-| **SCR-09** | Thêm nguyên liệu mới vào kho R&D | Cấp 2 | Row 1 | `IngredientFormPage` |
-| **SCR-10** | Cập nhật nguyên liệu & Ngừng dùng | Cấp 2 | Row 1 | `EditIngredientDialog` |
+| **SCR-08** | Danh mục nguyên liệu chuẩn chuỗi | Cấp 1 (Tab 3) | Row 1 | `IngredientsCatalogPage` |
+| **SCR-09** | Thêm nguyên liệu mới vào kho R&D | Cấp 2 | Row 1 | `IngredientCreatePage` |
+| **SCR-10** | Cập nhật nguyên liệu & Ngừng dùng | Cấp 2 | Row 1 | `IngredientEditPage` |
 | **SCR-11** | Chọn nhiều công thức gom PDF Master | Cấp 2 | Row 1 | `BatchExportPage` |
 | **SCR-12** | Xem trước PDF Master có Trang bìa & Mục lục | Cấp 3 | Row 1 | `PdfCoverPreviewPage` |
-| **SCR-13** | Xem trước PDF nháp có Watermark | Cấp 3 | Row 1 | `PdfDraftWatermarkPreviewPage` |
+| **SCR-13** | Xem trước PDF nháp có Watermark | Cấp 3 | Row 1 | `PdfDraftPreviewPage` |
 | **SCR-14** | Kho lưu trữ & Lịch sử xuất bản PDF | Cấp 1 (Tab 4) | Row 1 | `ExportHistoryPage` |
-| **SCR-15** | Hướng dẫn pha chế từng bước & Timer | Cấp 2 | Row 2 | `StepByStepCookingPage` |
+| **SCR-15** | Hướng dẫn pha chế từng bước & Timer | Cấp 2 | Row 2 | `BrewingTimerPage` |
 | **SCR-16a** | **Trang chủ Store Barista (Viewer Home)** | Cấp 1 | Row 2 | `ViewerHomePage` |
 | **SCR-16b** | **Chế độ Barista Viewer (Checklist)** | Cấp 2 | Row 2 | `BaristaViewerPage` |
 | **SCR-17a** | **Sổ tay SOP E-Booklet Reader (8 Trang)** | Cấp 2 | Row 2 | `BookletReaderPage` |
-| **SCR-17b** | Hồ sơ tài khoản & Lối tắt hệ thống | Cấp 1 (Tab 5) | Chung | `AccountFigmaPage` |
+| **SCR-17b** | Hồ sơ tài khoản & Lối tắt hệ thống | Cấp 1 (Tab 5) | Chung | `AccountSettingsPage` |
 | **SCR-18** | **Bảng điều khiển Admin Console** | Cấp 1 | Row 3 | `AdminConsolePage` |
 | **SCR-18a** | **Phân quyền tài khoản 45 chi nhánh** | Cấp 2 | Row 3 | `AdminUserManagementPage` |
 | **SCR-18b** | **Cấu hình Gemini API & Live Ping Test** | Cấp 2 | Row 3 | `AdminAiConfigPage` |
@@ -155,9 +157,9 @@ graph TD
 * **Phương án 1 (Figma Mirror Native App)**:
   - Cài đặt ứng dụng **Figma Mirror** (hoặc Figma Mobile App) trên máy ảo Android Pixel 5 hoặc điện thoại thật.
   - Chọn file Figma `FycUpbP0PtH6Q4sg6IvZr6`, ứng dụng sẽ phản chiếu trực tiếp giao diện mobile 100% tỷ lệ thật, hỗ trợ cảm ứng ngón tay, vuốt lật trang tự nhiên mà không thông qua trình duyệt web.
-* **Phương án 2 (Ứng dụng Flutter Mobile Chạy Native 60 FPS)**:
+* **Phương án 2 (Ứng dụng Flutter Mobile Chạy Native)**:
   - Chạy trực tiếp mã nguồn ứng dụng trên máy ảo Android Pixel 5 (`emulator-5554`):
     ```powershell
     flutter run -d emulator-5554
     ```
-  - Trải nghiệm toàn bộ tương tác thực: Thử nghiệm Ping Test API Gemini có phản hồi thời gian thực, lật trang sách SOP mượt mà 60fps, bấm giờ Timer pha chế và chuyển đổi qua lại giữa 3 vai trò.
+  - Trình diễn UI: lật sách SOP, Timer và điều hướng ba vai trò. Ping chỉ kiểm tra Gateway health khi request thành công; kết quả 138ms giả lập không xác nhận Gemini. Chưa có phép đo hiệu năng 60fps trong đợt đối chiếu này.
