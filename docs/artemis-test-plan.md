@@ -5,7 +5,7 @@
 - **Firebase:** project `recipehub-mobile`
 - **Bản build:** debug APK, `--dart-define=API_BASE_URL=http://127.0.0.1:5000 --dart-define=GOOGLE_SERVER_CLIENT_ID=<web client id>`
 - **Cách chạy:** runner Python điều khiển máy qua `adb` (chạm, nhập, chụp màn hình, đọc logcat), gọi Storage API và Firebase CLI. Mỗi ca chỉ ĐẠT khi **giá trị quan sát được** đúng: event Analytics và tham số trong log `FA-SVC`, object mới trên Storage, mã món được mở, màn hình hiện tại (so vùng ảnh với ảnh tham chiếu). Runner và log nằm ngoài repo (thư mục scratchpad của phiên làm việc); ảnh và log chính được trích vào báo cáo.
-- **Test Flutter:** 15 ca trong `test/artemis_e2e_test.dart` (TC-01 → TC-13) bổ trợ cho bộ này, không thay thế.
+- **Test Flutter:** 15 ca trong `test/artemis_e2e_test.dart` (TC-01 → TC-13) và 8 ca trong `test/admin_link_test.dart` (TC-14 → TC-22) bổ trợ cho bộ này, không thay thế.
 
 Luồng Lab 2: **Flow 1** tra cứu tại quầy (đăng nhập → danh sách → chi tiết), **Flow 2** tự luyện (bấm giờ → lịch sử → PDF), **Flow 3** phản hồi và tài khoản.
 
@@ -57,6 +57,46 @@ Lượt 1–3: bản build trước khi sửa lỗi deep link. Lượt 4–6: b�
 **ART-10 trên bản cuối:** 5/6 đạt. Các ca khác chạy lại trên bản cuối: ART-01 ×6 đạt (lượt 19–24, kèm đăng xuất), ART-09 đạt ở lượt 7–10 (bản đã sửa deep link). ART-07 chưa chạy lại trên bản cuối (thay đổi cuối không đụng tới luồng phản hồi).
 
 **Sự cố khi chạy:** ở lượt 11, runner thoát ra màn hình chính và chạm vào Dialer, Chrome trước khi bị dừng. Chốt an toàn hiện chỉ cho phép chạm khi cửa sổ focus là RecipeHub, picker hệ thống, hộp chọn tài khoản Google hoặc khay thông báo.
+
+## Mở rộng: web Admin ↔ app (ART-11 → ART-16, 05/11/2026)
+
+Bản build: APK debug (món từ Firestore, `RECIPE_SOURCE` mặc định) + web Admin `https://recipehub-mobile.web.app` + Cloud Functions `asia-southeast1`. Điều khiển: `adb` cho Redmi 7, chuột/bàn phím Windows cho Edge (script PowerShell). Mỗi ca chạy 1 lượt có ảnh chụp cả hai phía; kết quả lặp lại được kiểm bằng test Flutter (TC-14 → TC-22, W-01 → W-11) và test Functions trên Emulator (F01 → F10, R01 → R18).
+
+| Mã | Ca | Bước | Kết quả quan sát | Kết quả |
+| :-- | :-- | :-- | :-- | :-- |
+| ART-11a | Push "Tất cả", app chạy nền | Web: tiêu đề + nội dung + mở CF-MUOI → Gửi | Thông báo trong khay sau **8 s**; chạm → `view_recipe.recipe_code=CF-MUOI`; lịch sử web 1 ✓ 0 ✗ | Đạt |
+| ART-11b | Push "Một người dùng", app đang mở | Người dùng → Gửi thông báo riêng → Gửi | Tin vào hộp thư app (chưa đọc, "Vừa xong"); lịch sử web ghi người nhận | Đạt |
+| ART-12 | Nút Gây crash | Tài khoản → Kiểm thử sự cố → Gây crash | App crash (`FirebaseCrashlyticsTestCrash`); web hiện banner đỏ + âm báo + badge **≈ 1 s** sau (ghi nhận 12:05:33, xảy ra 12:05:31); đủ email, Redmi 7, Android 10, stack; Admin ghi chú + Đã xử lý → badge về 0 | Đạt |
+| ART-13 | Khóa / mở khóa | Web khóa user đang dùng app → thử đăng nhập lại → mở khóa → đăng nhập | App đăng xuất (event `logout`) ≤ 8 s (gồm độ trễ vòng đo); đăng nhập khi bị khóa → "Tài khoản đã bị Admin khóa"; sau mở khóa đăng nhập được | Đạt sau sửa E-24, E-25 |
+| ART-14 | Web chặn non-admin | Hạ user xuống Barista → đăng nhập web bằng user đó | Màn "Không có quyền truy cập"; đăng xuất được | Đạt |
+| ART-15 | Đổi vai trò real-time | Web: Barista → Admin khi app đang mở | App đổi badge VIEWER → ADMIN, tab "Đào tạo" xuất hiện, không cần đăng nhập lại | Đạt |
+| ART-16 | Quản lý món | Web ẩn CF-BACXIU → mở lại app; bật lại | App không còn Bạc Xỉu; bật lại thì hiện | Đạt |
+
+Lỗi tìm được khi chạy (đã sửa, có test hồi quy): E-22 sự cố trùng sau nút demo (TC-19), **E-23 `ConcurrentModificationError` khi đăng xuất rồi đăng nhập lại** – chính hệ thống sự cố mới bắt được: app tự báo 2 lần + Crashlytics alert tạo issue, stack trỏ `notification_viewmodel.dart:203` (TC-22), E-24 cache offline đăng xuất nhầm, E-25 không báo lý do bị khóa (TC-15), E-26/E-27 hiển thị web. Chi tiết: `docs/exploratory-testing-log.md`.
+
+Ảnh: `web-*.png` (Edge) và `m-*.png` (Redmi 7) trong thư mục evidence/e2e của phiên làm việc; ảnh có email/thông báo cá nhân của người khác đã xóa hoặc cắt.
+
+## Kiểm thử E2E trải nghiệm người dùng (05/11/2026, bản sau review)
+
+Redmi 7 (Android 10, debug APK) + web Admin trên Edge. Ảnh trong `evidence/e2e2/u-*.png`; ảnh shade có thông báo cá nhân đã cắt/xóa.
+
+| Luồng | Kết quả | Bằng chứng |
+|---|---|---|
+| Tra cứu không dấu ("bac xiu"), lọc nhóm, chi tiết, video, tự luyện + lịch sử bền sau restart, xuất PDF | Đạt | `u-01`…`u-09` |
+| Admin thấy chấm tại quầy; Thư viện SOP / chi tiết SOP | Đạt sau sửa E-29 | `u-10`, `u-11`, `u-12`, `u-21` |
+| Push 1 người, app chạy nền → chạm → đúng món, `view_recipe.source=notification` | Đạt | `u-17`, `u-18` |
+| Push tất cả, app đang mở → SnackBar "Xem" → đúng món | Đạt sau sửa E-31 | `u-20`, `u-26`, `u-28` |
+| Push khi app đã tắt → chạm → mở đúng món, tin "đã đọc" | Đạt sau sửa E-39 | `u-29`, `u-30`, `u-44`, `u-45` |
+| Kênh thông báo `recipehub_updates` (importance 4) | Đạt sau sửa E-35 | `dumpsys notification` |
+| Web: reset deep link sau gửi, nhãn "chưa có thiết bị" | Đạt sau sửa E-33/E-34 | `u-25`, `u-27` |
+| Web sửa món (dụng cụ, lưu ý an toàn) → app hiện v2.0 + đủ trường | Đạt | `u-22`, `u-23`, `u-24` |
+| Demo non-fatal / crash → web cảnh báo realtime; mở lại không sinh sự cố trùng | Đạt | `u-32`, `u-33`, `u-34` |
+| Đăng xuất khi mất mạng | Đạt (~4–5 s) | `u-35`, `u-36` |
+| Đăng nhập khách khi mất mạng → thông điệp rõ | Đạt | `u-37` |
+| Gửi phản hồi: chặn rỗng, gửi thành công, event không PII | Đạt (lưu cục bộ, E-40) | `u-40`, `u-41` |
+| Đổi vai trò trên web khi app đang ở trang Thông báo → back | Đạt sau sửa E-32 | `u-42`, `u-43`, `u-46` |
+
+Test hồi quy: `test/e2e_regression_test.dart` (E2E-01…06), web W-07. Mobile 67 test, độ phủ 73,5%; web 34 test, 88,5%.
 
 ## Bằng chứng
 

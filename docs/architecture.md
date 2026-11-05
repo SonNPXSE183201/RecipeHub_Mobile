@@ -17,7 +17,7 @@ View (features/*)  →  ViewModel (core/viewmodels/*, ChangeNotifier)  →  Serv
 | Dịch vụ | Interface | Điểm dùng |
 | :--- | :--- | :--- |
 | Authentication | `IAuthService` | Google Sign-In, Anonymous; `AuthViewModel` |
-| Cloud Storage | `IStorageService` | `feedback/{uid}/…` ảnh, `reports/{uid}/…` PDF; `StorageViewModel`; rules ở `firebase/storage.rules` |
+| Cloud Storage | `IStorageService` | `feedback/{uid}/…` ảnh, `reports/{uid}/…` PDF; `StorageViewModel`; rules ở `src/firebase/storage.rules` |
 | Cloud Messaging | `INotificationService` | Foreground/background/terminated, deep link `data.type` + `data.target_id`; `NotificationViewModel` |
 | Analytics | `IAnalyticsService` | 7 sự kiện, xem `docs/analytics-plan.md` |
 | Crashlytics | `ICrashReporter` | `FlutterError.onError`, `PlatformDispatcher.onError`, non-fatal, user id, custom keys; crash demo ẩn (Admin, nhấn giữ "CÀI ĐẶT ỨNG DỤNG") |
@@ -27,14 +27,43 @@ Bảo mật: `google-services.json`, `GoogleService-Info.plist`, `firebase_optio
 
 ## Cấu hình Firebase phía server
 
-`firebase.json` + `.firebaserc` (project `recipehub-mobile`) dùng để deploy:
+Cấu hình Firebase dùng chung cho mobile, web Admin và Cloud Functions nằm ở `src/firebase/` (`firebase.json`, `.firebaserc`, project `recipehub-mobile`). Deploy chạy trong thư mục đó:
 
 ```
-npx firebase-tools deploy --only storage        # firebase/storage.rules
-npx firebase-tools deploy --only remoteconfig   # firebase/remoteconfig.template.json
+cd src/firebase
+npx -y firebase-tools@13.29.1 deploy --only storage        # storage.rules
+npx -y firebase-tools@13.29.1 deploy --only remoteconfig   # remoteconfig.template.json
 ```
+
+Chi tiết: `src/firebase/README.md`.
+
+## Nối với web Admin (Firebase)
+
+App và web Admin (`src/admin_web`) dùng chung project Firebase; "code server" là Cloud Functions trong `src/firebase/functions`.
+
+| Service mới (interface → Firebase / Mock) | Việc làm | Dữ liệu |
+| :-- | :-- | :-- |
+| `IUserProfileService` → `FirebaseUserProfileService` | Gọi callable `ensureProfile` sau đăng nhập; đọc vai trò từ custom claim `role`; nghe `users/{uid}` (bị khóa → đăng xuất, `claimsUpdatedAt` đổi → làm mới token) | `users/{uid}` |
+| `IDeviceRegistry` → `FirestoreDeviceRegistry` | Lưu FCM token khi đăng nhập / `onTokenRefresh`; xóa trước khi đăng xuất | `users/{uid}/devices/{sha256(token)}` |
+| `IIncidentReporter` → `FirestoreIncidentReporter` | Báo sự cố cho web Admin (song song Crashlytics): nút Gây crash, lỗi fatal trong handler, crash lần chạy trước | `incidents/` |
+| `IRecipeSource` → `FirestoreRecipeSource` (mặc định) / `GatewayRecipeSource` | Món do Admin quản lý trên web; chọn bằng `--dart-define=RECIPE_SOURCE=gateway` để quay về API .NET | `recipes/{code}` |
+
+Luồng chính:
+
+```
+Đăng nhập → ensureProfile (Function) → claim role → AuthViewModel.role
+          → NotificationViewModel.start(uid) → getToken → devices/{id} + subscribe all_staff
+Web "Gửi" → sendNotification (Function, Admin SDK) → FCM → onMessage / khay → DeepLinkRouter
+Nút "Gây crash" → incidents.add (await) → markCrashAlreadyReported → Crashlytics.crash()
+          → web nghe incidents (real-time) → banner + âm báo; Crashlytics Console sau vài phút
+Admin khóa → setUserDisabled (Auth disabled + users.disabled) → app nghe users/{uid} → đăng xuất
+```
+
+Vai trò không còn chọn tự do ở màn đăng nhập: claim do server cấp quyết định; Admin vẫn chuyển sang "xem như Barista" ở màn Tài khoản. Snapshot từ cache offline bị bỏ qua để không đăng xuất nhầm.
 
 ## Chạy trên máy thật với Gateway local
+
+Chỉ cần khi `RECIPE_SOURCE=gateway`; mặc định món lấy từ Firestore.
 
 ```
 adb reverse tcp:5000 tcp:5000

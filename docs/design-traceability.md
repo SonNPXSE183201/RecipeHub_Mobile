@@ -38,6 +38,20 @@ Mã ca kiểm thử: `TC-xx` = test Flutter trong `test/artemis_e2e_test.dart`; 
 | Crashlytics | `firebase_bootstrap.dart` + `ICrashReporter` | Non-fatal `demo_non_fatal` (custom key), crash thật (report `6AEBAA1D…`) |
 | Remote Config | `AppConfigViewModel` | ART-10: đổi `max_lookup_results` trên server, danh sách đổi real-time |
 
+## Web Admin + Cloud Functions (plan 261105-admin-web-firebase)
+
+| Yêu cầu | Web (View → ViewModel) | Function / dữ liệu | Mobile | Kiểm thử |
+| :-- | :-- | :-- | :-- | :-- |
+| FR-01 Admin đăng nhập, non-admin bị chặn | `login_page`, `forbidden_page` → `AdminAuthViewModel` | `ensureProfile`, claim `role` | – | W-01..03, ART-14 |
+| FR-02/03 Danh sách user, đổi vai trò | `users_page` → `UsersViewModel` | `setUserRole`, `users/` | `AuthViewModel` nghe `claimsUpdatedAt` | W-08, F04, TC-14/17, ART-15 |
+| FR-04 Khóa / mở khóa | `users_page` | `setUserDisabled` | `AuthViewModel` nghe `disabled` | F05, TC-15, ART-13 |
+| FR-05..07 Gửi thông báo, lịch sử | `notifications_page` → `NotificationsViewModel` | `sendNotification`, `notifications/`, `devices/` | `NotificationViewModel` + `IDeviceRegistry` | W-07, F06/07, TC-16, ART-11 |
+| FR-08 Nút Gây crash | – | – | `account_profile_page` + `IIncidentReporter` | TC-18/20, ART-12 |
+| FR-09..11 Sự cố real-time, xử lý, thống kê | `incidents_page`, `dashboard_page` → `IncidentsViewModel`, `DashboardViewModel` | `incidents/`, `onIncidentCreated/Updated`, `onCrashlyticsNewFatal`, `stats/` | `FirestoreIncidentReporter` | W-05/06/09, F08/09, R07..14, ART-12 |
+| FR-12 Quản lý món | `recipes_page`, `recipe_form_dialog` → `RecipesViewModel` | `recipes/`, `seedRecipes` | `FirestoreRecipeSource` | W-10/11, F10, TC-21, R16/17, ART-16 |
+| FR-13 Crash thật báo bù | – | – | `FirebaseBootstrap.attachIncidentReporter` | TC-19 |
+| FR-14 Không theo dõi thao tác user cho Admin | Web không có màn hành vi | – | Analytics chỉ ở Console | rà code |
+
 ## Lệch thiết kế đã biết
 
 - `create_feedback_page.dart` gọi `services.analytics.logSubmitFeedback` trực tiếp từ View (không qua ViewModel). Không gọi Firebase SDK trực tiếp, vẫn qua interface.

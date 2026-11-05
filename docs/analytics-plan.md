@@ -1,4 +1,4 @@
-# Analytics plan – 7 sự kiện chuẩn (Firebase Analytics)
+# Analytics plan – 7 sự kiện chuẩn + 1 sự kiện kiểm thử (Firebase Analytics)
 
 Quy ước: tên `snake_case` (≤ 40 ký tự); không PII (email, tên, SĐT, ảnh). `AnalyticsEvent.sanitize` lọc key PII và giá trị chứa `@` hoặc ≥ 9 chữ số.
 User ID = Firebase `uid` (chuỗi ngẫu nhiên, không phải email). User property: `user_role`, `auth_mode`, `store_code`.
@@ -19,6 +19,12 @@ Luồng Lab 2 được gắn:
 | 5 | `complete_brew_timer` | Dừng đồng hồ và lưu phiên tự luyện | `recipe_code`: string, `size`: string, `actual_seconds`: int, `deviation_seconds`: int, `within_tolerance`: bool | Barista có pha kịp thời gian chuẩn không? Món nào hay bị lệch giờ? | Flow 2 |
 | 6 | `submit_feedback` | Gửi phản hồi thành công (M-11), sau khi upload ảnh (nếu có) | `feedback_type`: string (tên loại phản hồi), `target_type`: string (`recipe`/`sop`), `target_code`: string, `has_attachment`: bool | Công thức nào bị báo lỗi nhiều nhất? Bao nhiêu phản hồi có kèm ảnh? | Flow 3 |
 | 7 | `export_report_pdf` | Upload PDF báo cáo lên `reports/{uid}/` thành công (M-15) | `report_type`: string (`practice_history`), `record_count`: int, `file_size_kb`: int | Quản lý có dùng báo cáo tự luyện không? File PDF có quá lớn không? | Flow 2 |
+| 8 | `trigger_test_crash` | Bấm "Gây crash" / "Ghi non-fatal" ở ô Kiểm thử sự cố (màn Tài khoản, bật bằng Remote Config `show_crash_demo`) | `kind`: string (`fatal`, `non_fatal`) | Demo sự cố được kích hoạt bao nhiêu lần, có lẫn vào số liệu crash thật không? | Kiểm thử Lab 3 |
+
+## Phân vai dữ liệu
+
+- **Team dev** xem hành vi người dùng (8 event trên) ở Firebase Console → Analytics / DebugView.
+- **Admin** xem trên web `https://recipehub-mobile.web.app`: chỉ sự cố (`incidents/`), người dùng, thông báo, món. Web **không** hiển thị thao tác đọc / sửa / học bài của user (theo yêu cầu thầy). Email / uid nằm trong Firestore có rules (chỉ admin đọc), không đưa vào Analytics.
 
 ## Kiểm chứng
 
