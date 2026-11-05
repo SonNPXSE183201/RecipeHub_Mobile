@@ -1,0 +1,16 @@
+{
+  "parameters": {
+    "enable_ai_assist": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "max_lookup_results": {
+      "defaultValue": {
+        "value": "50"
+      },
+      "valueType": "NUMBER"
+    }
+  }
+}

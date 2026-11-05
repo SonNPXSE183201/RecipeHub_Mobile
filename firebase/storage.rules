@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// RecipeHub mobile – Cloud Storage rules
+// - Chỉ người dùng đã đăng nhập (kể cả Anonymous) được ghi.
+// - Cô lập theo uid: chỉ chủ sở hữu đọc/ghi thư mục của mình.
+// - feedback/: ảnh (image/*) tối đa 5 MB.
+// - reports/: chỉ PDF tối đa 5 MB.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /feedback/{uid}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    match /reports/{uid}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType == 'application/pdf';
+    }
+
+    // Tài liệu SOP: mọi người dùng đăng nhập được đọc, không ai ghi từ app.
+    match /sop/{file} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
