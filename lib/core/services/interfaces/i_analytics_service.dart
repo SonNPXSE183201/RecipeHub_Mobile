@@ -49,4 +49,7 @@ abstract class IAnalyticsService {
     required int recordCount,
     required int fileSizeKb,
   });
+
+  /// 8. `trigger_test_crash` – bấm nút kiểm thử sự cố ({kind: fatal | non_fatal}).
+  Future<void> logTriggerTestCrash({required String kind});
 }

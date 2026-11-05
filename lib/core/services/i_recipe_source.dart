@@ -7,6 +7,16 @@ abstract class IRecipeSource {
   Future<RecipeDetailResponse> getRecipe(String id);
 }
 
+/// Nguồn đọc được trọn chi tiết món trong một lần (Firestore) – tránh đọc lại từng món (N+1).
+abstract class IBulkRecipeSource {
+  Future<List<RecipeDetailResponse>> loadPublishedDetails({int limit = 50});
+}
+
+/// Không có mạng và chưa có dữ liệu đệm (thay vì báo nhầm "chưa có món").
+class RecipeOfflineException implements Exception {
+  const RecipeOfflineException();
+}
+
 class GatewayRecipeSource implements IRecipeSource {
   GatewayRecipeSource([RecipeService? service]) : _service = service ?? RecipeService.instance;
   final RecipeService _service;

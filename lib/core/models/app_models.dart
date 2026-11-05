@@ -123,6 +123,12 @@ class RecipeItem {
     required this.steps,
     required this.videoUrl,
   });
+
+  @override
+  bool operator ==(Object other) => other is RecipeItem && other.id == id && other.code == code;
+
+  @override
+  int get hashCode => Object.hash(id, code);
 }
 
 /// Bước trong SOP
@@ -271,6 +277,28 @@ class SelfPracticeRecord {
     required this.practicedAt,
     this.targetSeconds = 0,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'recipeName': recipeName,
+        'recipeCode': recipeCode,
+        'size': size,
+        'durationSeconds': durationSeconds,
+        'notes': notes,
+        'practicedAt': practicedAt,
+        'targetSeconds': targetSeconds,
+      };
+
+  factory SelfPracticeRecord.fromJson(Map<String, dynamic> j) => SelfPracticeRecord(
+        id: j['id'] as String? ?? '',
+        recipeName: j['recipeName'] as String? ?? '',
+        recipeCode: j['recipeCode'] as String? ?? '',
+        size: j['size'] as String? ?? '',
+        durationSeconds: (j['durationSeconds'] as num?)?.toInt() ?? 0,
+        notes: j['notes'] as String? ?? '',
+        practicedAt: j['practicedAt'] as String? ?? '',
+        targetSeconds: (j['targetSeconds'] as num?)?.toInt() ?? 0,
+      );
 }
 
 /// Câu hỏi Quiz

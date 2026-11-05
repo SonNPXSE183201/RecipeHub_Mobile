@@ -124,7 +124,8 @@ class MainAppShellState extends State<MainAppShell> {
                     context,
                     MaterialPageRoute(builder: (_) => const NotificationsPage()),
                   );
-                  setState(() {});
+                  // Shell có thể đã bị gỡ (đăng xuất/bị khóa khi đang ở trang Thông báo).
+                  if (mounted) setState(() {});
                 },
               ),
               if (unreadNotifs > 0)

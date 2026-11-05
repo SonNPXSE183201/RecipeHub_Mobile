@@ -1,23 +1,36 @@
 import '../services/device/image_picker_media_service.dart';
+import '../services/device/prefs_practice_history_store.dart';
 import '../services/firebase/firebase_analytics_service.dart';
 import '../services/firebase/firebase_auth_service.dart';
 import '../services/firebase/firebase_crash_reporter.dart';
 import '../services/firebase/firebase_notification_service.dart';
 import '../services/firebase/firebase_remote_config_service.dart';
 import '../services/firebase/firebase_storage_service.dart';
+import '../services/firebase/firebase_user_profile_service.dart';
+import '../services/firebase/firestore_device_registry.dart';
+import '../services/firebase/firestore_incident_reporter.dart';
+import '../services/firebase/firestore_recipe_source.dart';
 import '../services/i_recipe_source.dart';
 import '../services/interfaces/i_analytics_service.dart';
 import '../services/interfaces/i_auth_service.dart';
 import '../services/interfaces/i_crash_reporter.dart';
+import '../services/interfaces/i_device_registry.dart';
+import '../services/interfaces/i_incident_reporter.dart';
+import '../services/interfaces/i_user_profile_service.dart';
 import '../services/interfaces/i_media_picker_service.dart';
 import '../services/interfaces/i_notification_service.dart';
+import '../services/interfaces/i_practice_history_store.dart';
 import '../services/interfaces/i_remote_config_service.dart';
 import '../services/interfaces/i_storage_service.dart';
 import '../services/mock/mock_analytics_service.dart';
 import '../services/mock/mock_auth_service.dart';
 import '../services/mock/mock_crash_reporter.dart';
+import '../services/mock/mock_device_registry.dart';
+import '../services/mock/mock_incident_reporter.dart';
+import '../services/mock/mock_user_profile_service.dart';
 import '../services/mock/mock_media_picker_service.dart';
 import '../services/mock/mock_notification_service.dart';
+import '../services/mock/mock_practice_history_store.dart';
 import '../services/mock/mock_remote_config_service.dart';
 import '../services/mock/mock_storage_service.dart';
 
@@ -32,6 +45,10 @@ class AppServices {
     required this.remoteConfig,
     required this.mediaPicker,
     required this.recipes,
+    required this.profile,
+    required this.devices,
+    required this.incidents,
+    required this.practice,
     this.usesFirebase = false,
   });
 
@@ -44,10 +61,25 @@ class AppServices {
   final IMediaPickerService mediaPicker;
   final IRecipeSource recipes;
 
+  /// Vai trò (custom claim) + trạng thái khóa từ server.
+  final IUserProfileService profile;
+
+  /// FCM token của máy lên Firestore để server gửi thông báo đúng người.
+  final IDeviceRegistry devices;
+
+  /// Sự cố → Firestore `incidents/` cho web Admin.
+  final IIncidentReporter incidents;
+
+  /// Lịch sử tự luyện lưu trên máy theo uid.
+  final IPracticeHistoryStore practice;
+
   /// `true` khi chạy 6 dịch vụ Firebase thật.
   final bool usesFirebase;
 
-  /// Production: 6 Firebase services + image_picker + Gateway thật cho công thức.
+  /// Nguồn công thức: `firestore` (mặc định, Admin quản lý trên web) hoặc `gateway` (API .NET).
+  static const String recipeSourceName = String.fromEnvironment('RECIPE_SOURCE', defaultValue: 'firestore');
+
+  /// Production: Firebase services + image_picker; công thức từ Firestore hoặc Gateway (RECIPE_SOURCE).
   factory AppServices.firebase() => AppServices(
         auth: FirebaseAuthService(),
         storage: FirebaseStorageService(),
@@ -56,7 +88,11 @@ class AppServices {
         crash: FirebaseCrashReporter(),
         remoteConfig: FirebaseRemoteConfigService(),
         mediaPicker: ImagePickerMediaService(),
-        recipes: GatewayRecipeSource(),
+        recipes: recipeSourceName == 'gateway' ? GatewayRecipeSource() : FirestoreRecipeSource(),
+        profile: FirebaseUserProfileService(),
+        devices: FirestoreDeviceRegistry(),
+        incidents: FirestoreIncidentReporter(),
+        practice: PrefsPracticeHistoryStore(),
         usesFirebase: true,
       );
 
@@ -71,6 +107,10 @@ class AppServices {
     ICrashReporter? crash,
     IRemoteConfigService? remoteConfig,
     IMediaPickerService? mediaPicker,
+    IUserProfileService? profile,
+    IDeviceRegistry? devices,
+    IIncidentReporter? incidents,
+    IPracticeHistoryStore? practice,
   }) =>
       AppServices(
         auth: auth ?? MockAuthService(),
@@ -81,5 +121,9 @@ class AppServices {
         remoteConfig: remoteConfig ?? MockRemoteConfigService(),
         mediaPicker: mediaPicker ?? MockMediaPickerService(),
         recipes: recipes,
+        profile: profile ?? MockUserProfileService(),
+        devices: devices ?? MockDeviceRegistry(),
+        incidents: incidents ?? MockIncidentReporter(),
+        practice: practice ?? MockPracticeHistoryStore(),
       );
 }

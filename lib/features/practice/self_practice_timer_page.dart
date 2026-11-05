@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/nomad_kit.dart';
+import '../../core/viewmodels/practice_history_viewmodel.dart';
 import '../../core/models/app_models.dart';
 import '../../core/di/app_services.dart';
 import '../../core/navigation/app_keys.dart';
@@ -98,11 +100,11 @@ class _SelfPracticeTimerPageState extends State<SelfPracticeTimerPage> {
       size: 'Khẩu phần chuẩn (500ml)',
       durationSeconds: _secondsElapsed,
       notes: _notesCtrl.text.trim().isEmpty ? 'Tự luyện hoàn thành tốt.' : _notesCtrl.text.trim(),
-      practicedAt: 'Vừa xong',
+      practicedAt: DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now()),
       targetSeconds: _targetSeconds,
     );
 
-    MockDataService.instance.addPracticeRecord(newRecord);
+    context.read<PracticeHistoryViewModel>().add(newRecord);
     context.read<AppServices>().analytics.logCompleteBrewTimer(
           recipeCode: newRecord.recipeCode,
           size: _selectedSizeCode,

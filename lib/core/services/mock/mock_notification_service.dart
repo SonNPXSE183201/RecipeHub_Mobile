@@ -15,7 +15,8 @@ class MockNotificationService implements INotificationService {
   bool grantOnRequest;
   AppNotification? initialNotification;
   final List<String> topics = [];
-  List<AppNotification> _history = [];
+  /// Lịch sử theo phạm vi (uid) như bản thật.
+  final Map<String, List<AppNotification>> histories = {};
   bool initialized = false;
 
   final StreamController<AppNotification> _foreground = StreamController<AppNotification>.broadcast();
@@ -39,6 +40,11 @@ class MockNotificationService implements INotificationService {
   @override
   Future<String?> getToken() async => 'mock-fcm-token-RH-0001';
 
+  final StreamController<String> tokenRefreshes = StreamController<String>.broadcast();
+
+  @override
+  Stream<String> get onTokenRefresh => tokenRefreshes.stream;
+
   @override
   Stream<AppNotification> get onForegroundMessage => _foreground.stream;
 
@@ -53,10 +59,10 @@ class MockNotificationService implements INotificationService {
   }
 
   @override
-  Future<List<AppNotification>> loadHistory() async => List.of(_history);
+  Future<List<AppNotification>> loadHistory(String scope) async => List.of(histories[scope] ?? const []);
 
   @override
-  Future<void> saveHistory(List<AppNotification> items) async => _history = List.of(items);
+  Future<void> saveHistory(String scope, List<AppNotification> items) async => histories[scope] = List.of(items);
 
   @override
   Future<void> subscribeToTopic(String topic) async {

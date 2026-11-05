@@ -6,6 +6,8 @@ import '../../core/services/mock_data_service.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/di/app_services.dart';
 import '../../core/navigation/app_keys.dart';
+import '../../core/models/incident_report.dart';
+import '../../core/viewmodels/app_config_viewmodel.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/notification_viewmodel.dart';
 import '../learning/personal_progress_page.dart';
@@ -52,30 +54,59 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
     );
   }
 
-  /// Ẩn: nhấn giữ tiêu đề "CÀI ĐẶT ỨNG DỤNG" (chỉ Admin) → kiểm thử Crashlytics.
+  /// Kiểm thử sự cố (Lab 3): ghi sự cố lên Firestore để web Admin thấy ngay, đồng thời gửi Crashlytics.
+  /// Hiện khi Remote Config `show_crash_demo = true`.
   void _crashDemo() {
-    final crash = context.read<AppServices>().crash;
+    final services = context.read<AppServices>();
+    final crash = services.crash;
+    final incidents = services.incidents;
+    final analytics = services.analytics;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Kiểm thử Crashlytics'),
-        content: const Text('Chỉ dùng khi demo Lab 3. "Gây crash" sẽ đóng ứng dụng.'),
+        title: const Text('Kiểm thử sự cố'),
+        content: const Text(
+          'Sự cố được gửi tới web Admin ngay và tới Crashlytics. "Gây crash" sẽ đóng ứng dụng.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           TextButton(
             key: AppKeys.recordNonFatal,
             onPressed: () async {
               Navigator.pop(ctx);
-              await crash.recordError(StateError('demo_non_fatal'), StackTrace.current, reason: 'manual_demo');
+              final error = StateError('demo_non_fatal: kiểm thử lỗi không làm dừng app');
+              final stack = StackTrace.current;
+              await analytics.logTriggerTestCrash(kind: 'non_fatal');
+              await crash.recordError(error, stack, reason: 'manual_demo');
+              final sent = await incidents.report(IncidentReport.fromError(
+                error,
+                stack,
+                kind: IncidentKind.nonFatal,
+                source: IncidentSource.nonFatalReport,
+                screen: 'account',
+              ));
               if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã ghi lỗi non-fatal.')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(sent ? 'Đã gửi lỗi non-fatal tới Admin và Crashlytics.' : 'Đã ghi Crashlytics; chưa gửi được tới Admin.'),
+              ));
             },
             child: const Text('Ghi non-fatal'),
           ),
           TextButton(
             key: AppKeys.testCrash,
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
+              final error = StateError('demo_fatal: nút Gây crash');
+              await analytics.logTriggerTestCrash(kind: 'fatal');
+              // Ghi Firestore TRƯỚC khi crash để web Admin thấy ngay; Crashlytics gửi báo cáo ở lần mở sau.
+              await incidents.report(IncidentReport.fromError(
+                error,
+                StackTrace.current,
+                kind: IncidentKind.fatal,
+                source: IncidentSource.demoButton,
+                screen: 'account',
+              ));
+              await incidents.markCrashAlreadyReported();
               crash.testCrash();
             },
             child: const Text('Gây crash', style: TextStyle(color: NomadKit.error)),
@@ -252,11 +283,20 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
               ],
 
               const SizedBox(height: 14),
-              GestureDetector(
-                onLongPress: isRoleAdmin ? _crashDemo : null,
-                child: const Text('CÀI ĐẶT ỨNG DỤNG', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7)),
-              ),
+              const Text('CÀI ĐẶT ỨNG DỤNG', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7)),
               const SizedBox(height: 8),
+
+              if (context.watch<AppConfigViewModel>().showCrashDemo)
+                KeyedSubtree(
+                  key: AppKeys.crashDemoTile,
+                  child: _menuTile(
+                    title: 'Kiểm thử sự cố',
+                    subtitle: 'Gây crash hoặc ghi lỗi để kiểm tra báo cáo tới Admin',
+                    icon: Icons.bug_report_outlined,
+                    color: NomadKit.error,
+                    onTap: _crashDemo,
+                  ),
+                ),
 
               _menuTile(
                 title: 'Đổi mật khẩu tài khoản',

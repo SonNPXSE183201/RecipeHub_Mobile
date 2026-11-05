@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +13,7 @@ import '../../core/theme/nomad_kit.dart';
 import '../../core/viewmodels/app_config_viewmodel.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/notification_viewmodel.dart';
+import '../../core/viewmodels/practice_history_viewmodel.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/viewmodels/storage_viewmodel.dart';
 import '../shell/main_app_shell.dart';
@@ -43,6 +46,8 @@ class _AuthGateState extends State<AuthGate> {
     _auth.addListener(_onAuthChanged);
     _notif.addListener(_onNotificationChanged);
     _config.addListener(_onConfigChanged);
+    // Xóa FCM token trên server khi còn quyền ghi (trước khi Firebase Auth đăng xuất).
+    _auth.addBeforeSignOut(_notif.unregisterDevice);
     WidgetsBinding.instance.addPostFrameCallback((_) => _onAuthChanged());
   }
 
@@ -70,19 +75,32 @@ class _AuthGateState extends State<AuthGate> {
 
   void _onAuthChanged() {
     if (!mounted) return;
-    if (_auth.status == AuthStatus.authenticated) _syncSession();
+    if (_auth.status == AuthStatus.authenticated) {
+      _syncSession();
+      unawaited(_notif.updateRole(_auth.roleCode));
+    }
+    final notice = _auth.notice;
+    if (notice != null) {
+      _auth.clearNotice();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(notice)));
+      });
+    }
     final status = _auth.status;
     if (status == _handled) return;
     final previous = _handled;
     _handled = status;
     if (status == AuthStatus.authenticated) {
       context.read<RecipeViewModel>().load(limit: context.read<AppConfigViewModel>().maxLookupResults);
-      _notif.start(roleCode: _auth.roleCode, storeCode: AppConfig.storeCode);
+      _notif.start(roleCode: _auth.roleCode, storeCode: AppConfig.storeCode, uid: _auth.user?.uid);
+      final uid = _auth.user?.uid;
+      if (uid != null) context.read<PracticeHistoryViewModel>().load(uid);
     } else if (status == AuthStatus.unauthenticated && previous == AuthStatus.authenticated) {
       rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
       MockDataService.instance.recipes = [];
       _notif.reset();
       context.read<StorageViewModel>().reset();
+      context.read<PracticeHistoryViewModel>().clear();
     }
   }
 
@@ -95,6 +113,13 @@ class _AuthGateState extends State<AuthGate> {
         ..showSnackBar(SnackBar(
           content: Text('${banner.title}\n${banner.body}'),
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
+          // Thông báo khi app đang mở cũng phải mở được nội dung đính kèm (món/SOP/nhiệm vụ).
+          action: SnackBarAction(
+            key: AppKeys.bannerOpen,
+            label: 'Xem',
+            onPressed: () => _notif.open(banner),
+          ),
         ));
     }
     final link = _notif.takePendingDeepLink();
@@ -131,6 +156,7 @@ class _AuthGateState extends State<AuthGate> {
           ),
         );
         _primerOpen = false;
+        if (!_notif.isStarted) return; // đã đăng xuất trong lúc hộp thoại mở
         if (allow == true) {
           await _notif.requestPermission();
         } else {

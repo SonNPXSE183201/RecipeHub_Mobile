@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/app_models.dart';
+import '../models/recipe_models.dart';
 import '../models/session_models.dart';
 import '../services/i_recipe_source.dart';
 import '../services/interfaces/i_crash_reporter.dart';
@@ -34,9 +35,8 @@ class RecipeViewModel extends ChangeNotifier {
       _notify();
     }
     try {
-      final page = await _source.searchApproved(pageSize: limit);
+      final details = await _loadDetails(limit);
       _loadedLimit = limit;
-      final details = await Future.wait(page.items.map((s) => _source.getRecipe(s.id)));
       _items = details.map(RecipeMapper.fromDetail).toList();
       MockDataService.instance.recipes = List.of(_items);
       _state = _items.isEmpty ? ViewState.empty : ViewState.ready;
@@ -49,6 +49,26 @@ class RecipeViewModel extends ChangeNotifier {
       await _crash.recordError(e, s, reason: silent ? 'recipe_reload_limit' : 'recipe_load');
     }
     _notify();
+  }
+
+  /// Firestore: một truy vấn ra đủ chi tiết. Gateway: danh sách + chi tiết từng món; món lỗi (vừa bị ẩn,
+  /// 404…) bị bỏ qua thay vì làm hỏng cả lần tải – chỉ báo lỗi khi KHÔNG món nào tải được.
+  Future<List<RecipeDetailResponse>> _loadDetails(int limit) async {
+    final src = _source;
+    if (src is IBulkRecipeSource) return (src as IBulkRecipeSource).loadPublishedDetails(limit: limit);
+    final page = await src.searchApproved(pageSize: limit);
+    Object? firstError;
+    final details = await Future.wait(page.items.map((s) async {
+      try {
+        return await src.getRecipe(s.id);
+      } catch (e) {
+        firstError ??= e;
+        return null;
+      }
+    }));
+    final ok = details.whereType<RecipeDetailResponse>().toList();
+    if (ok.isEmpty && firstError != null) throw firstError!;
+    return ok;
   }
 
   /// Remote Config đổi `max_lookup_results`. Giảm: View tự cắt bằng `take`.
@@ -71,6 +91,15 @@ class RecipeViewModel extends ChangeNotifier {
     for (final r in _items) {
       if (r.id == idOrCode || r.code == idOrCode) return r;
     }
+    // Firestore: id document = mã món → đọc thẳng (tìm theo từ khóa có thể trượt khi nhiều món cùng tiền tố).
+    if (_source is IBulkRecipeSource) {
+      try {
+        return RecipeMapper.fromDetail(await _source.getRecipe(idOrCode));
+      } catch (e, s) {
+        await _crash.recordError(e, s, reason: 'deeplink_recipe_lookup');
+        return null;
+      }
+    }
     try {
       final page = await _source.searchApproved(query: idOrCode, pageSize: 5);
       for (final s in page.items) {
@@ -85,6 +114,9 @@ class RecipeViewModel extends ChangeNotifier {
   }
 
   static String _message(Object e) {
+    if (e is RecipeOfflineException) {
+      return 'Không có kết nối mạng và chưa có dữ liệu công thức lưu sẵn. Bật Wi-Fi rồi thử lại.';
+    }
     if (e is DioException) {
       switch (e.type) {
         case DioExceptionType.connectionError:

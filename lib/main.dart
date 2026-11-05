@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   final firebaseReady = await FirebaseBootstrap.initialize();
   // Firebase chưa cấu hình (desktop/test) → services mock, công thức vẫn lấy từ Gateway thật.
   final services = firebaseReady ? AppServices.firebase() : AppServices.mock(recipes: GatewayRecipeSource());
+  if (firebaseReady) unawaited(FirebaseBootstrap.attachIncidentReporter(services.incidents));
   if (kDebugMode && !kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
     startAutomationServer();
   }

@@ -16,6 +16,7 @@ class AppConfigViewModel extends ChangeNotifier {
   RemoteConfigSnapshot get snapshot => _service.snapshot;
   bool get enableAiAssist => _service.enableAiAssist;
   int get maxLookupResults => _service.maxLookupResults;
+  bool get showCrashDemo => _service.showCrashDemo;
 
   Future<void> init() async {
     await _service.initialize();

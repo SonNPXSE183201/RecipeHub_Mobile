@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
@@ -33,11 +34,7 @@ class SopDetailPage extends StatelessWidget {
             onPressed: () {
               go(
                 context,
-                CreateFeedbackPage(
-                  initialSopCode: sop.code,
-                  initialSopTitle: sop.title,
-                  initialVersion: sop.version,
-                ),
+                CreateFeedbackPage(initialSopCode: sop.code, initialSopTitle: sop.title, initialVersion: sop.version),
               );
             },
           ),
@@ -54,10 +51,7 @@ class SopDetailPage extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: NomadKit.oceanLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: BoxDecoration(color: NomadKit.oceanLight, borderRadius: BorderRadius.circular(8)),
                     child: Text(
                       sop.code,
                       style: const TextStyle(
@@ -71,20 +65,14 @@ class SopDetailPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: NomadKit.forestLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: BoxDecoration(color: NomadKit.forestLight, borderRadius: BorderRadius.circular(8)),
                     child: Text(
                       'Ban hành · ${sop.version}',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.forest),
                     ),
                   ),
                   const Spacer(),
-                  Text(
-                    'Ngày: ${sop.publishedDate}',
-                    style: const TextStyle(fontSize: 12, color: NomadKit.secondary),
-                  ),
+                  Text('Ngày: ${sop.publishedDate}', style: const TextStyle(fontSize: 12, color: NomadKit.secondary)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -115,10 +103,7 @@ class SopDetailPage extends StatelessWidget {
                     const Icon(Icons.info_outline_rounded, size: 20, color: NomadKit.sandDark),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        sop.summary,
-                        style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4),
-                      ),
+                      child: Text(sop.summary, style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4)),
                     ),
                   ],
                 ),
@@ -128,7 +113,12 @@ class SopDetailPage extends StatelessWidget {
               // Steps
               const Text(
                 'CÁC BƯỚC THỰC HIỆN TIÊU CHUẨN',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: NomadKit.sandDark,
+                  letterSpacing: 0.7,
+                ),
               ),
               const SizedBox(height: 10),
 
@@ -140,9 +130,7 @@ class SopDetailPage extends StatelessWidget {
                     color: NomadKit.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: NomadKit.border),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
-                    ],
+                    boxShadow: const [BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2))],
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,10 +138,7 @@ class SopDetailPage extends StatelessWidget {
                       Container(
                         width: 36,
                         height: 36,
-                        decoration: BoxDecoration(
-                          color: NomadKit.oceanLight,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        decoration: BoxDecoration(color: NomadKit.oceanLight, borderRadius: BorderRadius.circular(12)),
                         child: Center(
                           child: Icon(st.icon ?? Icons.check_circle_outline_rounded, color: NomadKit.ocean, size: 20),
                         ),
@@ -168,10 +153,7 @@ class SopDetailPage extends StatelessWidget {
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: NomadKit.ink),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              st.content,
-                              style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4),
-                            ),
+                            Text(st.content, style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4)),
                             if (st.note != null) ...[
                               const SizedBox(height: 8),
                               Container(
@@ -189,13 +171,19 @@ class SopDetailPage extends StatelessWidget {
                                       width: 16,
                                       height: 16,
                                       filterQuality: FilterQuality.medium,
-                                      errorBuilder: (ctx, err, stack) => const Icon(Icons.warning_amber_rounded, size: 15, color: Color(0xFF92400E)),
+                                      errorBuilder: (ctx, err, stack) =>
+                                          const Icon(Icons.warning_amber_rounded, size: 15, color: Color(0xFF92400E)),
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         'Lưu ý: ${st.note!}',
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E), height: 1.3),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF92400E),
+                                          height: 1.3,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -214,33 +202,43 @@ class SopDetailPage extends StatelessWidget {
               // Referenced Recipes Section
               const Text(
                 'CÔNG THỨC ÁP DỤNG QUY TRÌNH NÀY',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: NomadKit.sandDark,
+                  letterSpacing: 0.7,
+                ),
               ),
               const SizedBox(height: 8),
 
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: sop.linkedRecipeCodes.map((code) {
-                  final recipe = MockDataService.instance.recipes.firstWhere(
-                    (r) => r.code == code,
-                    orElse: () => MockDataService.instance.recipes.first,
-                  );
-                  return ActionChip(
-                    avatar: Image.asset(
-                      'assets/icons/icon_recipe_book.png',
-                      width: 18,
-                      height: 18,
-                      filterQuality: FilterQuality.medium,
-                      errorBuilder: (ctx, err, stack) => const Icon(Icons.coffee_rounded, size: 16, color: NomadKit.sandDark),
-                    ),
-                    label: Text('${recipe.name} (${recipe.code})', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.ink)),
-                    backgroundColor: NomadKit.surface,
-                    side: const BorderSide(color: NomadKit.border),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    onPressed: () => go(context, RecipeDetailSizePage(recipe: recipe)),
-                  );
-                }).toList(),
+                // Mã SOP liên kết không có trong danh sách món hiện tại → không hiện (trước đây rơi về món đầu tiên).
+                children: sop.linkedRecipeCodes
+                    .map((code) => MockDataService.instance.recipes.where((r) => r.code == code).firstOrNull)
+                    .whereType<RecipeItem>()
+                    .map((recipe) {
+                      return ActionChip(
+                        avatar: Image.asset(
+                          'assets/icons/icon_recipe_book.png',
+                          width: 18,
+                          height: 18,
+                          filterQuality: FilterQuality.medium,
+                          errorBuilder: (ctx, err, stack) =>
+                              const Icon(Icons.coffee_rounded, size: 16, color: NomadKit.sandDark),
+                        ),
+                        label: Text(
+                          '${recipe.name} (${recipe.code})',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.ink),
+                        ),
+                        backgroundColor: NomadKit.surface,
+                        side: const BorderSide(color: NomadKit.border),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        onPressed: () => go(context, RecipeDetailSizePage(recipe: recipe, source: 'sop')),
+                      );
+                    })
+                    .toList(),
               ),
               const SizedBox(height: 24),
 
@@ -276,4 +274,3 @@ class SopDetailPage extends StatelessWidget {
     );
   }
 }
-

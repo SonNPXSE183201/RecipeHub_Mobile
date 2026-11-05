@@ -10,6 +10,7 @@ class AppKeys {
   static const permissionPrimer = Key('permission_primer_dialog');
   static const permissionAllow = Key('permission_allow');
   static const permissionLater = Key('permission_later');
+  static const bannerOpen = Key('notification_banner_open');
 
   // M-01 Login
   static const googleSignIn = Key('login_google');
@@ -44,6 +45,7 @@ class AppKeys {
   // M-13 Account
   static const logout = Key('account_logout');
   static const testCrash = Key('account_test_crash');
+  static const crashDemoTile = Key('account_crash_demo_tile');
   static const recordNonFatal = Key('account_record_non_fatal');
 
   // M-15 Report

@@ -13,6 +13,9 @@ abstract class INotificationService {
   /// FCM registration token (ghi log để gửi test message từ Console).
   Future<String?> getToken();
 
+  /// FCM cấp token mới (cài lại app, xóa dữ liệu, token hết hạn) → cần gửi lại lên server.
+  Stream<String> get onTokenRefresh;
+
   /// Tin đến khi app đang mở (FirebaseMessaging.onMessage).
   Stream<AppNotification> get onForegroundMessage;
 
@@ -23,9 +26,9 @@ abstract class INotificationService {
   Future<AppNotification?> getInitialNotification();
 
   /// Lịch sử thông báo đã lưu cục bộ (bao gồm tin nhận lúc chạy nền).
-  Future<List<AppNotification>> loadHistory();
+  Future<List<AppNotification>> loadHistory(String scope);
 
-  Future<void> saveHistory(List<AppNotification> items);
+  Future<void> saveHistory(String scope, List<AppNotification> items);
 
   /// Subscribe topic theo chi nhánh / vai trò (vd `store_lm81`, `role_viewer`).
   Future<void> subscribeToTopic(String topic);

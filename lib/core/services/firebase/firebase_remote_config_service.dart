@@ -65,6 +65,11 @@ class FirebaseRemoteConfigService implements IRemoteConfigService {
       : IRemoteConfigService.defaults[IRemoteConfigService.keyEnableAiAssist] as bool;
 
   @override
+  bool get showCrashDemo => _ready
+      ? _rc.getBool(IRemoteConfigService.keyShowCrashDemo)
+      : IRemoteConfigService.defaults[IRemoteConfigService.keyShowCrashDemo] as bool;
+
+  @override
   int get maxLookupResults {
     final raw = _ready
         ? _rc.getInt(IRemoteConfigService.keyMaxLookupResults)

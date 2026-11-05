@@ -28,11 +28,32 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Firebase Cloud Messaging – 3 trạng thái: foreground / background / terminated.
 class FirebaseNotificationService implements INotificationService {
   FirebaseNotificationService({FirebaseMessaging? messaging})
-      : _messaging = messaging ?? FirebaseMessaging.instance;
+      : _messaging = messaging ?? FirebaseMessaging.instance {
+    // Nghe "chạm thông báo khi app chạy nền" NGAY từ lúc khởi động (kể cả khi đang ở màn đăng nhập);
+    // giữ lại tới khi NotificationViewModel nghe sau đăng nhập, không để mất deep link.
+    _openedController = StreamController<AppNotification>.broadcast(onListen: _flushPendingOpened);
+    _subs.add(FirebaseMessaging.onMessageOpenedApp.listen((m) {
+      final n = toAppNotification(m, NotificationOrigin.background);
+      if (_openedController.hasListener) {
+        _openedController.add(n);
+      } else {
+        _pendingOpened.add(n);
+      }
+    }));
+  }
 
   final FirebaseMessaging _messaging;
   final StreamController<AppNotification> _foreground = StreamController<AppNotification>.broadcast();
-  final StreamController<AppNotification> _opened = StreamController<AppNotification>.broadcast();
+  late final StreamController<AppNotification> _openedController;
+  final List<AppNotification> _pendingOpened = [];
+
+  void _flushPendingOpened() {
+    final pending = List.of(_pendingOpened);
+    _pendingOpened.clear();
+    for (final n in pending) {
+      scheduleMicrotask(() => _openedController.add(n));
+    }
+  }
   final List<StreamSubscription<dynamic>> _subs = [];
   bool _initialized = false;
 
@@ -62,10 +83,6 @@ class FirebaseNotificationService implements INotificationService {
     _subs.add(FirebaseMessaging.onMessage.listen(
       (m) => _foreground.add(toAppNotification(m, NotificationOrigin.foreground)),
     ));
-    _subs.add(FirebaseMessaging.onMessageOpenedApp.listen(
-      (m) => _opened.add(toAppNotification(m, NotificationOrigin.background)),
-    ));
-    _subs.add(_messaging.onTokenRefresh.listen((t) => debugPrint('[FCM] Token refreshed: $t')));
   }
 
   @override
@@ -84,7 +101,8 @@ class FirebaseNotificationService implements INotificationService {
   Future<String?> getToken() async {
     try {
       final token = await _messaging.getToken();
-      debugPrint('FCM Device Token: $token');
+      // Không in cả token ra log: chỉ 8 ký tự đầu để đối chiếu với Firestore khi debug.
+      if (kDebugMode && token != null) debugPrint('[FCM] token ${token.substring(0, 8)}…');
       return token;
     } catch (e) {
       debugPrint('[FCM] getToken failed: $e');
@@ -93,10 +111,13 @@ class FirebaseNotificationService implements INotificationService {
   }
 
   @override
+  Stream<String> get onTokenRefresh => _messaging.onTokenRefresh;
+
+  @override
   Stream<AppNotification> get onForegroundMessage => _foreground.stream;
 
   @override
-  Stream<AppNotification> get onNotificationOpened => _opened.stream;
+  Stream<AppNotification> get onNotificationOpened => _openedController.stream;
 
   @override
   Future<AppNotification?> getInitialNotification() async {
@@ -105,10 +126,11 @@ class FirebaseNotificationService implements INotificationService {
   }
 
   @override
-  Future<List<AppNotification>> loadHistory() async {
+  Future<List<AppNotification>> loadHistory(String scope) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload(); // nhận dữ liệu do background isolate ghi
-    final history = (prefs.getStringList(_kHistoryKey) ?? const <String>[])
+    // Lịch sử tách theo người dùng: máy dùng chung không lộ thông báo riêng của người trước.
+    final history = (prefs.getStringList('${_kHistoryKey}_$scope') ?? const <String>[])
         .map((s) => AppNotification.fromJson(jsonDecode(s) as Map<String, dynamic>))
         .toList();
     final pending = (prefs.getStringList(_kPendingKey) ?? const <String>[])
@@ -121,10 +143,10 @@ class FirebaseNotificationService implements INotificationService {
   }
 
   @override
-  Future<void> saveHistory(List<AppNotification> items) async {
+  Future<void> saveHistory(String scope, List<AppNotification> items) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
-      _kHistoryKey,
+      '${_kHistoryKey}_$scope',
       items.take(100).map((n) => jsonEncode(n.toJson())).toList(),
     );
   }

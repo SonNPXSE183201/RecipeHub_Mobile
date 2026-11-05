@@ -15,10 +15,14 @@ class RecipeDetailSizePage extends StatefulWidget {
     super.key,
     required this.recipe,
     this.initialSizeCode,
+    this.source = 'lookup',
   });
 
   final RecipeItem recipe;
   final String? initialSizeCode;
+
+  /// Nơi mở màn: `lookup` (danh sách tra cứu) hoặc `notification` (chạm thông báo / deep link).
+  final String source;
 
   @override
   State<RecipeDetailSizePage> createState() => _RecipeDetailSizePageState();
@@ -44,7 +48,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
             recipeCode: widget.recipe.code,
             category: widget.recipe.category,
             size: widget.recipe.sizes[_selectedSizeIndex].sizeCode,
-            source: 'lookup',
+            source: widget.source,
           );
     });
   }
@@ -194,7 +198,8 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               ),
               const SizedBox(height: 20),
 
-              // Standard Serving Yield Note (Không dùng Size)
+              // Standard Serving Yield Note (Không dùng Size) — ẩn khi chưa có quy cách
+              if (currentSize.servingNotes.trim().isNotEmpty) ...[
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -222,6 +227,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                 ),
               ),
               const SizedBox(height: 20),
+              ],
 
               // Ingredients Portion Table
               Row(

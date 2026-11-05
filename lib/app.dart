@@ -6,6 +6,7 @@ import 'core/theme/nomad_kit.dart';
 import 'core/viewmodels/app_config_viewmodel.dart';
 import 'core/viewmodels/auth_viewmodel.dart';
 import 'core/viewmodels/notification_viewmodel.dart';
+import 'core/viewmodels/practice_history_viewmodel.dart';
 import 'core/viewmodels/recipe_viewmodel.dart';
 import 'core/viewmodels/storage_viewmodel.dart';
 import 'features/auth/auth_gate.dart';
@@ -29,10 +30,17 @@ class RecipeHubApp extends StatelessWidget {
       providers: [
         Provider<AppServices>.value(value: s),
         ChangeNotifierProvider(
-          create: (_) => AuthViewModel(auth: s.auth, analytics: s.analytics, crash: s.crash)..start(),
+          create: (_) => AuthViewModel(
+            auth: s.auth,
+            analytics: s.analytics,
+            crash: s.crash,
+            profile: s.usesFirebase ? s.profile : null,
+            incidents: s.incidents,
+          )..start(),
         ),
         ChangeNotifierProvider(create: (_) => AppConfigViewModel(service: s.remoteConfig)..init()),
         ChangeNotifierProvider(create: (_) => RecipeViewModel(source: s.recipes, crash: s.crash)),
+        ChangeNotifierProvider(create: (_) => PracticeHistoryViewModel(store: s.practice, crash: s.crash)),
         ChangeNotifierProvider(
           create: (_) => StorageViewModel(
             storage: s.storage,
@@ -42,7 +50,9 @@ class RecipeHubApp extends StatelessWidget {
             crash: s.crash,
           ),
         ),
-        ChangeNotifierProvider(create: (_) => NotificationViewModel(service: s.notifications, crash: s.crash)),
+        ChangeNotifierProvider(
+          create: (_) => NotificationViewModel(service: s.notifications, crash: s.crash, devices: s.devices),
+        ),
       ],
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,

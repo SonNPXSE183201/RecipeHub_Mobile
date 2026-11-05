@@ -47,6 +47,12 @@ class MockRemoteConfigService implements IRemoteConfigService {
   @override
   bool get enableAiAssist => _ai;
 
+  /// Test đặt trực tiếp.
+  bool crashDemo = true;
+
+  @override
+  bool get showCrashDemo => crashDemo;
+
   @override
   int get maxLookupResults => _max;
 

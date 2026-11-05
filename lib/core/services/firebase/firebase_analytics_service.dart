@@ -88,4 +88,7 @@ class FirebaseAnalyticsService implements IAnalyticsService {
     required int fileSizeKb,
   }) =>
       _log('export_report_pdf', {'report_type': reportType, 'record_count': recordCount, 'file_size_kb': fileSizeKb});
+
+  @override
+  Future<void> logTriggerTestCrash({required String kind}) => _log('trigger_test_crash', {'kind': kind});
 }

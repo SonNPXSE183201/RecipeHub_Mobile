@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/services/mock_data_service.dart';
 import '../../core/utils/navigation.dart';
@@ -15,11 +16,7 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _selectedCategory = 'Tất cả';
 
-  final List<String> _categories = [
-    'Tất cả',
-    'Kỹ thuật pha chế',
-    'Vệ sinh máy móc',
-  ];
+  final List<String> _categories = ['Tất cả', 'Kỹ thuật pha chế', 'Vệ sinh máy móc'];
 
   @override
   void dispose() {
@@ -34,9 +31,8 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
 
     final filtered = sops.where((s) {
       final matchesCat = _selectedCategory == 'Tất cả' || s.category == _selectedCategory;
-      final matchesQuery = query.isEmpty ||
-          s.title.toLowerCase().contains(query) ||
-          s.code.toLowerCase().contains(query);
+      final matchesQuery =
+          query.isEmpty || s.title.toLowerCase().contains(query) || s.code.toLowerCase().contains(query);
       return matchesCat && matchesQuery;
     }).toList();
 
@@ -83,7 +79,8 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                             width: 22,
                             height: 22,
                             filterQuality: FilterQuality.medium,
-                            errorBuilder: (ctx, err, stack) => const Icon(Icons.search_rounded, color: NomadKit.ocean, size: 22),
+                            errorBuilder: (ctx, err, stack) =>
+                                const Icon(Icons.search_rounded, color: NomadKit.ocean, size: 22),
                           ),
                         ),
                         suffixIcon: _searchCtrl.text.isNotEmpty
@@ -149,7 +146,8 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                             width: 130,
                             height: 130,
                             fit: BoxFit.contain,
-                            errorBuilder: (ctx, err, stack) => const Icon(Icons.search_off_rounded, size: 70, color: NomadKit.secondary),
+                            errorBuilder: (ctx, err, stack) =>
+                                const Icon(Icons.search_off_rounded, size: 70, color: NomadKit.secondary),
                           ),
                           const SizedBox(height: 12),
                           const Text(
@@ -193,9 +191,11 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                           width: 22,
                                           height: 22,
                                           filterQuality: FilterQuality.medium,
-                                          errorBuilder: (ctx, err, stack) => const Icon(Icons.description_outlined, size: 18, color: NomadKit.ocean),
+                                          errorBuilder: (ctx, err, stack) =>
+                                              const Icon(Icons.description_outlined, size: 18, color: NomadKit.ocean),
                                         ),
                                         const SizedBox(width: 8),
+                                        // Mã SOP là mã nghiệp vụ dùng để tra cứu → luôn hiển thị đủ, không co.
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
@@ -213,22 +213,36 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                           ),
                                         ),
                                         const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: NomadKit.canvas,
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: NomadKit.border),
-                                          ),
-                                          child: Text(
-                                            'Phiên bản ${sop.version}',
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: NomadKit.secondary),
+                                        Flexible(
+                                          flex: 3,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: NomadKit.canvas,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: NomadKit.border),
+                                            ),
+                                            child: Text(
+                                              'Phiên bản ${sop.version}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: NomadKit.secondary,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        const Spacer(),
-                                        Text(
-                                          sop.category,
-                                          style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            sop.category,
+                                            textAlign: TextAlign.end,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -237,7 +251,11 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                     // Title
                                     Text(
                                       sop.title,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: NomadKit.ink),
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: NomadKit.ink,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
@@ -253,12 +271,24 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                       children: [
                                         const Icon(Icons.link_rounded, size: 16, color: NomadKit.sandDark),
                                         const SizedBox(width: 6),
-                                        Text(
-                                          'Áp dụng: ${sop.linkedRecipeCodes.join(', ')}',
-                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: NomadKit.sandDark),
+                                        Expanded(
+                                          child: Text(
+                                            'Áp dụng: ${sop.linkedRecipeCodes.join(', ')}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              color: NomadKit.sandDark,
+                                            ),
+                                          ),
                                         ),
-                                        const Spacer(),
-                                        const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: NomadKit.secondary),
+                                        const SizedBox(width: 6),
+                                        const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 12,
+                                          color: NomadKit.secondary,
+                                        ),
                                       ],
                                     ),
                                   ],

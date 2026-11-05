@@ -53,7 +53,7 @@ class RecipeMapper {
       id: d.id,
       code: d.code,
       name: d.name,
-      category: categoryOf(d.name),
+      category: categoryOf(d.name, code: d.code),
       version: 'v${d.versionNumber}.0',
       status: d.versionStatus.toLowerCase() == 'published' ? 'Ban hành' : d.versionStatus,
       publishedDate:
@@ -76,9 +76,14 @@ class RecipeMapper {
     );
   }
 
-  /// Backend chưa có danh mục đồ uống → suy ra nhóm từ tên để khớp bộ lọc UI.
-  static String categoryOf(String name) {
+  /// Backend chưa có danh mục đồ uống → suy ra nhóm, ưu tiên tiền tố mã (CF-, TS-, TT-), sau đó tới tên.
+  static String categoryOf(String name, {String? code}) {
+    final prefix = (code ?? '').toUpperCase();
+    if (prefix.startsWith('CF-')) return 'Cà phê & Cold Brew';
+    if (prefix.startsWith('TS-')) return 'Trà Sữa & Kem Mây';
+    if (prefix.startsWith('TT-')) return 'Trà Trái Cây';
     final n = name.toLowerCase();
+    if (n.contains('xỉu') || n.contains('xiu')) return 'Cà phê & Cold Brew';
     if (n.contains('cà phê') || n.contains('cafe') || n.contains('coffee') || n.contains('cold brew') || n.contains('espresso')) {
       return 'Cà phê & Cold Brew';
     }

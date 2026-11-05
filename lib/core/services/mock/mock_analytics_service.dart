@@ -79,4 +79,7 @@ class MockAnalyticsService implements IAnalyticsService {
     required int fileSizeKb,
   }) async =>
       _log('export_report_pdf', {'report_type': reportType, 'record_count': recordCount, 'file_size_kb': fileSizeKb});
+
+  @override
+  Future<void> logTriggerTestCrash({required String kind}) async => _log('trigger_test_crash', {'kind': kind});
 }

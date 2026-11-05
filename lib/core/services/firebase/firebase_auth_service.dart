@@ -69,6 +69,9 @@ class FirebaseAuthService implements IAuthService {
       if (e.code == 'network-request-failed') {
         throw AuthFailure(AuthFailureCode.network, e.message);
       }
+      if (e.code == 'user-disabled') {
+        throw AuthFailure(AuthFailureCode.disabled, e.message);
+      }
       throw AuthFailure(AuthFailureCode.unknown, '${e.code}: ${e.message}');
     } on AuthFailure {
       rethrow;
@@ -86,6 +89,9 @@ class FirebaseAuthService implements IAuthService {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'network-request-failed') {
         throw AuthFailure(AuthFailureCode.network, e.message);
+      }
+      if (e.code == 'user-disabled') {
+        throw AuthFailure(AuthFailureCode.disabled, e.message);
       }
       if (e.code == 'operation-not-allowed' || e.code == 'admin-restricted-operation') {
         throw AuthFailure(AuthFailureCode.configuration, 'Bật Anonymous provider trong Firebase Console');

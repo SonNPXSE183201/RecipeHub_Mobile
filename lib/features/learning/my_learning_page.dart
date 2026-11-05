@@ -231,7 +231,7 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                   context,
                   MaterialPageRoute(builder: (_) => LearningTaskDetailPage(task: task)),
                 );
-                setState(() {});
+                if (mounted) setState(() {});
               },
               child: Padding(
                 padding: const EdgeInsets.all(16),

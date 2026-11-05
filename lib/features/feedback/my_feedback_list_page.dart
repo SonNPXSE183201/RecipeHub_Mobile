@@ -59,7 +59,7 @@ class _MyFeedbackListPageState extends State<MyFeedbackListPage> {
                             context,
                             MaterialPageRoute(builder: (_) => const CreateFeedbackPage()),
                           );
-                          setState(() {});
+                          if (mounted) setState(() {});
                         },
                         icon: Image.asset(
                           'assets/icons/icon_feedback_pencil.png',

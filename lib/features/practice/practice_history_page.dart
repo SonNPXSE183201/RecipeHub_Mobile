@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/session_models.dart';
 import '../../core/navigation/app_keys.dart';
-import '../../core/services/mock_data_service.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
+import '../../core/viewmodels/practice_history_viewmodel.dart';
 import '../../core/viewmodels/storage_viewmodel.dart';
 
 class PracticeHistoryPage extends StatelessWidget {
@@ -12,12 +12,11 @@ class PracticeHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final records = MockDataService.instance.practiceRecords;
-
-    final totalSessions = records.length;
-    final avgSeconds = totalSessions > 0
-        ? (records.fold<int>(0, (sum, r) => sum + r.durationSeconds) / totalSessions).round()
-        : 0;
+    final practice = context.watch<PracticeHistoryViewModel>();
+    final records = practice.records;
+    final totalSessions = practice.totalSessions;
+    final avgSeconds = practice.averageSeconds;
+    final within = practice.withinTolerancePercent;
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
@@ -95,10 +94,12 @@ class PracticeHistoryPage extends StatelessWidget {
                     ),
                     Container(width: 1, height: 32, color: NomadKit.border),
                     Column(
-                      children: const [
-                        Text('100%', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: NomadKit.forest)),
-                        SizedBox(height: 2),
-                        Text('Tuân thủ định lượng', style: TextStyle(fontSize: 11, color: NomadKit.secondary)),
+                      children: [
+                        Text(within == null ? '—' : '$within%',
+                            key: const Key('practice_within_percent'),
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: NomadKit.forest)),
+                        const SizedBox(height: 2),
+                        const Text('Đạt thời gian chuẩn', style: TextStyle(fontSize: 11, color: NomadKit.secondary)),
                       ],
                     ),
                   ],

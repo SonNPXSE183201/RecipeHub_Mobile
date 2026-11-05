@@ -37,7 +37,7 @@ class AppUser {
 }
 
 /// Lỗi xác thực đã được chuẩn hóa để View hiển thị thân thiện.
-enum AuthFailureCode { cancelled, network, configuration, unknown }
+enum AuthFailureCode { cancelled, network, configuration, disabled, unknown }
 
 class AuthFailure implements Exception {
   const AuthFailure(this.code, [this.message]);
@@ -53,6 +53,8 @@ class AuthFailure implements Exception {
         return 'Mất kết nối mạng. Kiểm tra Wi-Fi quầy rồi thử lại.';
       case AuthFailureCode.configuration:
         return 'Cấu hình Google Sign-In chưa đúng (SHA-1 / google-services.json).';
+      case AuthFailureCode.disabled:
+        return 'Tài khoản đã bị Admin khóa. Liên hệ quản lý cửa hàng để mở lại.';
       case AuthFailureCode.unknown:
         return 'Không thể đăng nhập lúc này. Vui lòng thử lại.';
     }

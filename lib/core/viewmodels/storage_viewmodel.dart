@@ -57,7 +57,7 @@ class StorageViewModel extends ChangeNotifier {
         _setAttachmentError(const StorageFailure(StorageFailureCode.invalidType).userMessage);
         return;
       }
-      if (media.sizeBytes > IStorageService.maxImageBytes) {
+      if (media.sizeBytes >= IStorageService.maxImageBytes) {
         _setAttachmentError(const StorageFailure(StorageFailureCode.tooLarge).userMessage);
         return;
       }

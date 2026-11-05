@@ -6,6 +6,7 @@ import '../../core/models/app_models.dart';
 import '../../core/navigation/app_keys.dart';
 import '../../core/services/mock_data_service.dart';
 import '../../core/viewmodels/app_config_viewmodel.dart';
+import '../../core/services/firebase/firestore_recipe_source.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/utils/navigation.dart';
 import '../sop/sop_catalog_page.dart';
@@ -40,12 +41,14 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
         .items
         .take(context.watch<AppConfigViewModel>().maxLookupResults)
         .toList();
-    final query = _searchCtrl.text.trim().toLowerCase();
+    // Không phân biệt dấu: "bac xiu" tìm được "Bạc Xỉu".
+    final query = FirestoreRecipeSource.normalize(_searchCtrl.text.trim());
 
     final filtered = allRecipes.where((r) {
       final matchesCategory = _selectedCategory == 'Tất cả' || r.category == _selectedCategory;
-      final matchesQuery =
-          query.isEmpty || r.name.toLowerCase().contains(query) || r.code.toLowerCase().contains(query);
+      final matchesQuery = query.isEmpty ||
+          FirestoreRecipeSource.normalize(r.name).contains(query) ||
+          r.code.toLowerCase().contains(query);
       return matchesCategory && matchesQuery;
     }).toList();
 
