@@ -31,7 +31,7 @@ Hiện `NomadKit` chưa có `ThemeData` tập trung; màu và kích thước đ�
 ```
 lib/main.dart                       Khởi chạy; máy chủ automation cổng 8888 (dev) để chụp màn hình theo ?name=
 lib/core/models/app_models.dart     UserRole {viewer, admin}, recipe, SOP, task, feedback, practice, quiz
-lib/core/services/mock_data_service.dart   Dữ liệu mock trong bộ nhớ (singleton)
+lib/core/services/mock_data_service.dart   Dữ liệu mẫu (SOP, việc học, phản hồi) + bộ đệm công thức từ Gateway
 lib/core/theme/nomad_kit.dart       Token màu
 lib/core/widgets/                   recipe_hub_logo.dart, screen_frame.dart
 lib/features/

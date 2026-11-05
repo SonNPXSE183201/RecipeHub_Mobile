@@ -7,7 +7,7 @@ Thiết kế Figma: https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHu
 ## Phạm vi
 - 2 vai trò: **Barista (Viewer)** và **Quản lý cửa hàng (Admin)**. Soạn công thức, duyệt, xuất PDF, quản lý người dùng nằm ở web (R&D), không có trên mobile.
 - 20 màn hình: `M-01` đến `M-17`, `AdminStoreTrainingPage` (tab Đào tạo của Admin) và 2 màn hình hệ thống (Loading, Error recovery). Chi tiết: `ux/user-flow.md`.
-- Dữ liệu hiện là mock trong bộ nhớ (`lib/core/services/mock_data_service.dart`), chưa gọi API backend.
+- Công thức lấy từ Gateway thật (`/api/v1/recipes`, chỉ bản `published`); SOP, việc học, phản hồi còn là dữ liệu mẫu trong `lib/core/services/mock_data_service.dart`.
 
 ## Cấu trúc
 ```
@@ -28,16 +28,17 @@ DESIGN.md, design-decisions.md, flutter-handoff.md
 **Đã cấu hình trên Console:** project `recipehub-mobile` (Blaze); app Android `com.recipehub.mobile` với SHA-1 và SHA-256; Authentication bật Google Sign-In và Anonymous; Cloud Storage đã publish `storage.rules` (giới hạn 5 MB, kiểm MIME ảnh); FCM API (V1) bật; Remote Config có `enable_ai_assist` (bool, mặc định `false`) và `max_lookup_results` (số, mặc định `50`).
 **Trong repo (đã tích hợp):** `google-services.json` được `.gitignore` (không commit); plugin Gradle `google-services` + Crashlytics; `provider` và 6 gói `firebase_*` trong `pubspec.yaml`; kiến trúc MVVM (`lib/core/viewmodels`, `lib/core/services/{interfaces,firebase,mock}`, `lib/core/di/app_services.dart`); `firebase/storage.rules`; `docs/analytics-plan.md`, `docs/architecture.md`.
 **Dữ liệu:** công thức lấy từ Gateway thật (không còn mock fallback); phần chưa có API backend nằm trong `docs/mobile-backend-api-gaps.md`.
-**Test:** `test/artemis_e2e_test.dart` (10 ca) và `test/widget_test.dart`.
+**Test:** `test/artemis_e2e_test.dart` (TC-01 → TC-13) và `test/widget_test.dart`.
 
 ## Chạy
 ```
 flutter pub get
 flutter analyze
 flutter test
-flutter run --dart-define=API_BASE_URL=http://<ip-may-chay-Gateway>:5000   # bỏ define khi dùng Android emulator (tự dùng 10.0.2.2:5000)
+adb reverse tcp:5000 tcp:5000      # máy thật gọi Gateway trên máy tính
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:5000 --dart-define=GOOGLE_SERVER_CLIENT_ID=<web-client-id>.apps.googleusercontent.com
 ```
-Cần chạy backend (Gateway `:5000`) và có ít nhất một công thức ở trạng thái Approved.
+Cần chạy backend (Gateway `:5000`) và có ít nhất một công thức ở trạng thái `published`. `GOOGLE_SERVER_CLIENT_ID` là OAuth client Web (`client_type: 3`) trong `google-services.json`; không ghi vào file.
 
 ## Tài liệu
 - `DESIGN.md`: token và thành phần NomadKit.
