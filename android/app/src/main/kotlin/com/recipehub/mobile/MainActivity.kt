@@ -1,5 +1,6 @@
-package com.sonnpxse183201.recipehub_mobile
+package com.recipehub.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+

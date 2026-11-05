@@ -7,7 +7,15 @@ class AppConfig {
   /// Default Gateway port for RecipeHub YARP Reverse Proxy
   static const int defaultGatewayPort = 5000;
 
-  /// Custom Base URL override (e.g. for testing on physical WiFi device)
+  /// Chi nhánh demo (không phải PII). Dùng làm user property / nhãn báo cáo.
+  static const String storeBranch = 'RecipeHub Coffee - Chi nhánh Quận 1';
+  static const String storeCode = 'hcm01';
+
+  /// Override qua `--dart-define=API_BASE_URL=http://192.168.1.15:5000`
+  /// (máy thật cùng Wi-Fi với máy chạy Gateway).
+  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+
+  /// Custom Base URL override (runtime)
   static String? customBaseUrl;
 
   /// Determines the proper Gateway Base URL based on platform:
@@ -18,6 +26,7 @@ class AppConfig {
     if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
       return customBaseUrl!;
     }
+    if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
 
     if (kIsWeb) {
       return 'http://localhost:$defaultGatewayPort';
@@ -33,6 +42,7 @@ class AppConfig {
     }
   }
 
-  /// Active mock fallback mode when backend is unreachable
-  static bool enableOfflineMockFallback = true;
+  /// Dữ liệu công thức luôn lấy từ Gateway thật. Không còn mock fallback:
+  /// lỗi mạng được ném ra để ViewModel hiển thị trạng thái error + retry.
+  static const bool enableOfflineMockFallback = false;
 }

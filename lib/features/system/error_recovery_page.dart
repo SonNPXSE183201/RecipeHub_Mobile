@@ -22,10 +22,18 @@ class ErrorRecoveryPage extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: NomadKit.warning.withValues(alpha: 0.3), width: 2),
                   ),
-                  child: const Icon(
-                    Icons.wifi_off_rounded,
-                    color: NomadKit.warning,
-                    size: 38,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/illustrations/offline_recovery_2k.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.cloud_off_rounded,
+                        color: NomadKit.warning,
+                        size: 40,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

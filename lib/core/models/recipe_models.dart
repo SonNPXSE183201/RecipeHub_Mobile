@@ -64,7 +64,7 @@ class RecipeSummaryResponse {
 }
 
 class RecipeIngredientResponse {
-  final int id;
+  final String id;
   final String ingredientId;
   final String ingredientCode;
   final String ingredientName;
@@ -92,7 +92,7 @@ class RecipeIngredientResponse {
 
   factory RecipeIngredientResponse.fromJson(Map<String, dynamic> json) {
     return RecipeIngredientResponse(
-      id: json['id'] as int? ?? 0,
+      id: json['id']?.toString() ?? '',
       ingredientId: json['ingredientId'] as String? ?? '',
       ingredientCode: json['ingredientCode'] as String? ?? '',
       ingredientName: json['ingredientName'] as String? ?? '',
@@ -134,7 +134,7 @@ class RecipeStepMediaResponse {
 }
 
 class RecipeStepResponse {
-  final int id;
+  final String id;
   final String publicId;
   final int sortOrder;
   final String title;
@@ -161,12 +161,12 @@ class RecipeStepResponse {
   factory RecipeStepResponse.fromJson(Map<String, dynamic> json) {
     final rawMedia = json['media'] as List<dynamic>? ?? [];
     return RecipeStepResponse(
-      id: json['id'] as int? ?? 0,
-      publicId: json['publicId'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      publicId: json['publicId']?.toString() ?? json['id']?.toString() ?? '',
       sortOrder: json['sortOrder'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      durationSeconds: json['durationSeconds'] as int?,
+      durationSeconds: (json['durationSeconds'] as num?)?.toInt(),
       temperatureCelsius:
           (json['temperatureCelsius'] as num?)?.toDouble(),
       equipment: json['equipment'] as String?,
