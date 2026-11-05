@@ -1,0 +1,116 @@
+rules_version = '2';
+
+// RecipeHub – Firestore security rules.
+// Vai trò nằm trong custom claim `role` của ID token (do Cloud Functions đặt), client không tự đặt được.
+// Claim trong token còn hiệu lực ~1 giờ sau khi Admin hạ quyền / khóa, nên quyền admin và quyền ghi
+// còn đối chiếu hồ sơ users/{uid} hiện tại.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function notDisabled() { return signedIn() && (!hasProfile() || profile().get('disabled', false) != true); }
+    function isAdmin() {
+      return signedIn() && request.auth.token.role == 'admin'
+        && hasProfile() && profile().role == 'admin' && profile().get('disabled', false) != true;
+    }
+    function isSelf(uid) { return signedIn() && request.auth.uid == uid; }
+    function changedOnly(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+    function isShortString(v, max) { return v is string && v.size() <= max; }
+    function isOptString(data, key, max) {
+      return !(key in data) || data[key] == null || isShortString(data[key], max);
+    }
+
+    // ---------- users ----------
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      // Client chỉ được cập nhật thời điểm hoạt động; role/disabled do Function ghi.
+      allow update: if isSelf(uid) && notDisabled()
+        && changedOnly(['lastSeenAt'])
+        && request.resource.data.lastSeenAt == request.time;
+      allow create, delete: if false;
+
+      match /devices/{deviceId} {
+        allow read: if isSelf(uid) || isAdmin();
+        allow create, update: if isSelf(uid) && notDisabled()
+          && request.resource.data.keys().hasOnly(
+               ['token', 'platform', 'model', 'osVersion', 'appVersion', 'createdAt', 'updatedAt'])
+          && request.resource.data.token is string
+          && request.resource.data.token.size() > 0 && request.resource.data.token.size() < 4096
+          && request.resource.data.platform in ['android', 'ios', 'web']
+          && request.resource.data.updatedAt == request.time
+          && isOptString(request.resource.data, 'model', 120)
+          && isOptString(request.resource.data, 'osVersion', 120)
+          && isOptString(request.resource.data, 'appVersion', 40);
+        allow delete: if isSelf(uid) || isAdmin();
+      }
+    }
+
+    // ---------- incidents ----------
+    match /incidents/{id} {
+      function validNewIncident(d) {
+        return d.keys().hasAll(['kind', 'source', 'message', 'reportedAt', 'status'])
+          && d.keys().hasOnly(['uid', 'email', 'kind', 'source', 'errorType', 'message', 'stackTop', 'screen',
+                               'appVersion', 'buildNumber', 'deviceModel', 'osVersion', 'occurredAt',
+                               'reportedAt', 'status'])
+          && d.kind in ['fatal', 'non_fatal']
+          && d.source in ['demo_button', 'flutter_error', 'platform_error', 'previous_crash', 'non_fatal_report']
+          && d.status == 'open'
+          && d.reportedAt == request.time
+          && (!('occurredAt' in d) || d.occurredAt is timestamp)
+          && isShortString(d.message, 500)
+          && isOptString(d, 'errorType', 120)
+          && isOptString(d, 'stackTop', 2000)
+          && isOptString(d, 'screen', 80)
+          && isOptString(d, 'email', 200)
+          && isOptString(d, 'appVersion', 40)
+          && isOptString(d, 'buildNumber', 20)
+          && isOptString(d, 'deviceModel', 120)
+          && isOptString(d, 'osVersion', 120);
+      }
+      function noUid(d) { return !('uid' in d) || d.uid == null; }
+      function noEmail(d) { return !('email' in d) || d.email == null; }
+
+      // Phải đăng nhập (kể cả khách) để không bị spam ẩn danh. uid null (crash trước khi biết người dùng)
+      // vẫn được, nhưng khi có uid thì phải là chính mình và email đúng email trong token.
+      allow create: if notDisabled() && validNewIncident(request.resource.data)
+        && (noUid(request.resource.data)
+              ? noEmail(request.resource.data)
+              : (isSelf(request.resource.data.uid)
+                 && (noEmail(request.resource.data) || request.resource.data.email == request.auth.token.email)));
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && changedOnly(['status', 'note', 'handledBy', 'handledAt'])
+        && request.resource.data.status in ['open', 'acknowledged', 'resolved', 'dismissed']
+        && isOptString(request.resource.data, 'note', 500)
+        && request.resource.data.handledBy == request.auth.token.email
+        && request.resource.data.handledAt == request.time;
+      allow delete: if false;
+    }
+
+    // ---------- chỉ Function ghi ----------
+    match /notifications/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /stats/{doc=**} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- recipes ----------
+    match /recipes/{code} {
+      allow read: if isAdmin() || (signedIn() && resource.data.status == 'published');
+      allow create, update: if isAdmin()
+        && request.resource.data.code == code
+        && isShortString(request.resource.data.name, 120)
+        && request.resource.data.name.size() > 0
+        && request.resource.data.status in ['published', 'hidden']
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+  }
+}

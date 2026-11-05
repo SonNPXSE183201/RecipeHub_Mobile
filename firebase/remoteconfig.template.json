@@ -11,6 +11,13 @@
         "value": "50"
       },
       "valueType": "NUMBER"
+    },
+    "show_crash_demo": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN",
+      "description": "Hiện ô Kiểm thử sự cố (nút Gây crash) ở màn Tài khoản"
     }
   }
 }

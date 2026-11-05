@@ -1,0 +1,16 @@
+# Firebase CLI
+.firebase/
+*-debug.log
+firebase-export-*/
+
+# Functions
+functions/node_modules/
+functions/lib/
+functions/.env
+functions/.env.*
+!functions/.env.example
+
+# Bản build web Admin (flutter build web -o ../firebase/hosting)
+hosting/
+coverage/
+.nyc_output/
