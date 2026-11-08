@@ -318,6 +318,8 @@ class AdminTrainingViewModel extends ChangeNotifier {
   final ITrainingRepository _repo;
   final ICrashReporter _crash;
   final List<StreamSubscription<dynamic>> _subs = [];
+  final Map<String, StreamSubscription<Map<String, TaskProgress>>>
+  _progressSubs = {};
   bool _disposed = false;
   bool _started = false;
   int _generation = 0;
@@ -413,6 +415,10 @@ class AdminTrainingViewModel extends ChangeNotifier {
       s.cancel();
     }
     _subs.clear();
+    for (final s in _progressSubs.values) {
+      s.cancel();
+    }
+    _progressSubs.clear();
   }
 
   bool _isCurrent(int generation) =>
@@ -426,10 +432,11 @@ class AdminTrainingViewModel extends ChangeNotifier {
     _notify();
     _subs.add(
       _repo.watchStaff().listen((v) {
+        if (!_isCurrent(generation)) return;
         _staff = v;
+        _syncProgress(generation);
         _state = LoadState.ready;
         _notify();
-        _loadProgress(generation);
       }, onError: _fail),
     );
     _subs.add(
@@ -452,19 +459,29 @@ class AdminTrainingViewModel extends ChangeNotifier {
     );
   }
 
-  Future<void> _loadProgress(int generation) async {
-    for (final m in _staff) {
-      if (!_isCurrent(generation)) return;
-      try {
-        final progress = await _repo.progressOf(m.uid);
-        if (!_isCurrent(generation)) return;
-        _progress[m.uid] = progress;
-      } catch (e, s) {
-        if (!_isCurrent(generation)) return;
-        await _crash.recordError(e, s, reason: 'admin_staff_progress');
-      }
+  void _syncProgress(int generation) {
+    final uids = _staff.map((m) => m.uid).toSet();
+    for (final uid in _progressSubs.keys.toList()) {
+      if (uids.contains(uid)) continue;
+      _progressSubs.remove(uid)?.cancel();
     }
-    if (_isCurrent(generation)) _notify();
+    _progress.removeWhere((uid, _) => !uids.contains(uid));
+    for (final uid in uids) {
+      if (_progressSubs.containsKey(uid)) continue;
+      _progressSubs[uid] = _repo
+          .watchProgress(uid)
+          .listen(
+            (progress) {
+              if (!_isCurrent(generation)) return;
+              _progress[uid] = progress;
+              _notify();
+            },
+            onError: (Object e, StackTrace s) {
+              if (!_isCurrent(generation)) return;
+              _crash.recordError(e, s, reason: 'admin_staff_progress');
+            },
+          );
+    }
   }
 
   /// Lưu phiếu chấm; trả về thông điệp lỗi hoặc null.

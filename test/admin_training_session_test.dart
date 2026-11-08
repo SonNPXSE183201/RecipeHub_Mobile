@@ -39,7 +39,8 @@ class _TrainingRepository extends MockTrainingRepository {
   final evaluationStream =
       StreamController<List<PracticalEvaluationRecord>>.broadcast();
   final criteriaStream = StreamController<List<CriteriaTemplate>>.broadcast();
-  final pendingProgress = <Completer<Map<String, TaskProgress>>>[];
+  final progressStreams =
+      <String, List<StreamController<Map<String, TaskProgress>>>>{};
   bool delayProgress = false;
   int starts = 0;
 
@@ -62,11 +63,11 @@ class _TrainingRepository extends MockTrainingRepository {
       criteriaStream.stream;
 
   @override
-  Future<Map<String, TaskProgress>> progressOf(String uid) {
-    if (!delayProgress) return Future.value({'task-doc-1': _completed});
-    final pending = Completer<Map<String, TaskProgress>>();
-    pendingProgress.add(pending);
-    return pending.future;
+  Stream<Map<String, TaskProgress>> watchProgress(String uid) {
+    final controller = StreamController<Map<String, TaskProgress>>();
+    (progressStreams[uid] ??= []).add(controller);
+    if (!delayProgress) controller.add({'task-doc-1': _completed});
+    return controller.stream;
   }
 
   void emitData() {
@@ -99,6 +100,11 @@ class _TrainingRepository extends MockTrainingRepository {
     expect(taskStream.hasListener, isFalse);
     expect(evaluationStream.hasListener, isFalse);
     expect(criteriaStream.hasListener, isFalse);
+    for (final streams in progressStreams.values) {
+      for (final stream in streams) {
+        expect(stream.hasListener, isFalse);
+      }
+    }
   }
 
   Future<void> close() async {
@@ -107,6 +113,8 @@ class _TrainingRepository extends MockTrainingRepository {
       taskStream.close(),
       evaluationStream.close(),
       criteriaStream.close(),
+      for (final streams in progressStreams.values)
+        for (final stream in streams) stream.close(),
     ]);
   }
 }
@@ -195,9 +203,9 @@ void main() {
       expect(vm.state, LoadState.ready);
       repo.taskStream.add([testTask()]);
       await _flush();
-      // Old progress must also be gone while the new request is pending.
+      // Old progress must also be gone before the new progress stream emits.
       expect(vm.summaries.single.readingPercent, 0);
-      repo.pendingProgress.single.complete({});
+      repo.progressStreams[_member.uid]!.last.add({});
       await _flush();
     });
 
@@ -212,7 +220,9 @@ void main() {
         var notifications = 0;
         vm.addListener(() => notifications++);
 
-        repo.pendingProgress.single.complete({'task-doc-1': _completed});
+        repo.progressStreams[_member.uid]!.single.add({
+          'task-doc-1': _completed,
+        });
         await _flush();
         expect(vm.staff, isEmpty);
         expect(vm.summaries, isEmpty);
@@ -236,22 +246,22 @@ void main() {
           ),
         ]);
         await _flush();
-        final oldProgress = repo.pendingProgress.single;
+        final oldProgress = repo.progressStreams[_member.uid]!.single;
         vm.clear();
         vm.start();
         repo.emitData();
         await _flush();
-        repo.pendingProgress.last.complete({});
+        repo.progressStreams[_member.uid]!.last.add({});
         await _flush();
         expect(vm.summaries.single.readingPercent, 0);
 
-        oldProgress.complete({'task-doc-1': _completed});
+        oldProgress.add({'task-doc-1': _completed});
         await _flush();
         expect(vm.summaries.single.readingPercent, 0);
         expect(
-          repo.pendingProgress,
+          repo.progressStreams[_member.uid],
           hasLength(2),
-          reason: 'Do not fetch the next staff member from an expired session',
+          reason: 'Restart creates a fresh progress subscription',
         );
       },
     );
@@ -262,6 +272,112 @@ void main() {
       expect(repo.starts, 0);
       repo.expectStopped();
     });
+
+    test('progress updates summaries without another staff event', () async {
+      repo.delayProgress = true;
+      vm.start();
+      repo.emitData();
+      await _flush();
+      final progress = repo.progressStreams[_member.uid]!.single;
+      var notifications = 0;
+      vm.addListener(() => notifications++);
+
+      progress.add({
+        'task-doc-1': const TaskProgress(
+          taskId: 'task-doc-1',
+          completedSections: [0],
+          totalSections: 2,
+        ),
+      });
+      await _flush();
+      expect(vm.summaries.single.readingPercent, 50);
+      progress.add({'task-doc-1': _completed});
+      await _flush();
+      expect(vm.summaries.single.readingPercent, 100);
+      progress.add({});
+      await _flush();
+      expect(vm.summaries.single.readingPercent, 0);
+      expect(notifications, 3);
+    });
+
+    test(
+      'staff changes retain, add and cancel progress subscriptions',
+      () async {
+        const other = StaffMember(
+          uid: 'other',
+          displayName: 'Other',
+          email: 'other@test.vn',
+        );
+        vm.start();
+        repo.emitData();
+        await _flush();
+        final original = repo.progressStreams[_member.uid]!.single;
+        repo.staffStream.add([other, _member]);
+        await _flush();
+        expect(repo.progressStreams[_member.uid], hasLength(1));
+        expect(original.hasListener, isTrue);
+        expect(repo.progressStreams[other.uid]!.single.hasListener, isTrue);
+
+        repo.staffStream.add([other]);
+        await _flush();
+        expect(original.hasListener, isFalse);
+        original.add({'task-doc-1': _completed});
+        repo.delayProgress = true;
+        repo.staffStream.add([_member, other]);
+        await _flush();
+        expect(vm.summaries.first.readingPercent, 0);
+        expect(repo.progressStreams[_member.uid], hasLength(2));
+        repo.staffStream.add([]);
+        await _flush();
+        expect(vm.summaries, isEmpty);
+        for (final streams in repo.progressStreams.values) {
+          expect(streams.last.hasListener, isFalse);
+        }
+      },
+    );
+
+    test('retry replaces progress streams and dispose cancels them', () async {
+      vm.start();
+      repo.emitData();
+      await _flush();
+      final old = repo.progressStreams[_member.uid]!.single;
+      vm.retry();
+      expect(old.hasListener, isFalse);
+      repo.emitData();
+      await _flush();
+      expect(repo.progressStreams[_member.uid], hasLength(2));
+      // Use a separate instance so tearDown still owns the original VM.
+      vm.clear();
+      final disposable = AdminTrainingViewModel(
+        repo: repo,
+        crash: MockCrashReporter(),
+      );
+      disposable.start();
+      repo.emitData();
+      await _flush();
+      disposable.dispose();
+      repo.expectStopped();
+    });
+
+    test(
+      'progress errors are reported and subsequent updates still arrive',
+      () async {
+        final crash = MockCrashReporter();
+        vm.dispose();
+        vm = AdminTrainingViewModel(repo: repo, crash: crash);
+        vm.start();
+        repo.emitData();
+        await _flush();
+        final progress = repo.progressStreams[_member.uid]!.single;
+        const failure = TrainingFailure('Progress unavailable');
+        progress.addError(failure, StackTrace.current);
+        await _flush();
+        expect(crash.recordedErrors, contains(failure));
+        progress.add({});
+        await _flush();
+        expect(vm.summaries.single.readingPercent, 0);
+      },
+    );
   });
 
   for (final signOut in [true, false]) {
