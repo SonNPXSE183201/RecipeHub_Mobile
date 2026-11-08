@@ -1,0 +1,364 @@
+[
+  {
+    "group": "Trà sữa",
+    "recipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLSUAN",
+      "TS-OLNHAID",
+      "TS-OLNHAIN",
+      "TS-MATNHAND",
+      "TS-MATNHANN",
+      "TS-TAMD",
+      "TS-TAMN",
+      "TS-KHOID",
+      "TS-KHOIN",
+      "TS-PHONGLAND",
+      "TS-PHONGLANN"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng định lượng theo size",
+        "standardRequirement": "Bột sữa, HHSD, đường nước, cốt trà đong đúng theo bảng định lượng size Phê hoặc La và độ ngọt khách chọn.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Xả vòi và kiểm tra áp suất",
+        "standardRequirement": "Xả vòi trước mỗi lần sục, vòi ra đủ 4 tia, áp suất máy >= 1.4.",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Thao tác sục đúng kỹ thuật",
+        "standardRequirement": "Nghiêng cốc 45°, trà ngập 1/3 đầu vòi, tạo xoáy đến 30°C, đi tay 5-7 vòng; dừng ở 50-60°C (sục lần 2 của trà sữa nóng dừng ở 60-65°C).",
+        "isCrucial": true
+      },
+      {
+        "id": "c4",
+        "name": "Khuấy kiểm tra và vệ sinh vòi",
+        "standardRequirement": "Khuấy từ đáy lên kiểm tra dị vật, bột sữa sót; vệ sinh vòi sau khi sục.",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Mức đá đúng chuẩn",
+        "standardRequirement": "Đá đầy đến miệng ly (cách miệng 0.5cm nếu có topping); trà sữa nóng đong đá bằng cốc định lượng 200ml.",
+        "isCrucial": false
+      },
+      {
+        "id": "c6",
+        "name": "Hương vị đạt",
+        "standardRequirement": "Hương thơm, độ béo, độ đậm, độ hòa quyện đạt; không lên đường, không cháy trà.",
+        "isCrucial": true
+      },
+      {
+        "id": "c7",
+        "name": "Cảm quan sản phẩm",
+        "standardRequirement": "Cốc sạch, đá đầy ly, không còn bột sữa.",
+        "isCrucial": false
+      }
+    ]
+  },
+  {
+    "group": "Trà trái cây",
+    "recipeCodes": [
+      "TT-GAM",
+      "TT-OLDAOHONG",
+      "TS-LUADAO",
+      "TT-TRAVOCF",
+      "TT-LANGBIANG",
+      "TT-SIMO",
+      "TT-BONGBUOI"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng định lượng nguyên liệu",
+        "standardRequirement": "Đường nước, cốt chanh, syrup, trà và topping đong đúng bảng định lượng theo size và độ ngọt.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Đong syrup bằng zic đúng cách",
+        "standardRequirement": "Gõ zic đong vào thành shaker để lấy hết hoàn toàn định lượng syrup (Gấm, Ô Long Đào Hồng, Trà Vỏ Cà Phê, Si Mơ).",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Chuẩn bị nguyên liệu trước khi pha",
+        "standardRequirement": "Lắc can trà ít nhất 10 nhịp, lắc đều cốt chanh/syrup trước khi dùng; lọc hạt và loại bỏ vỏ chanh, tép cam khi quy định.",
+        "isCrucial": false
+      },
+      {
+        "id": "c4",
+        "name": "Thao tác shake đúng nhịp",
+        "standardRequirement": "Cho 1/2 xúc đá và shake đúng số nhịp theo từng món (15-20, 10-12 hoặc 20 nhịp).",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Mức đá đúng chuẩn",
+        "standardRequirement": "Đá đầy theo mức quy định của từng món (ngang miệng, cách 0.5cm hoặc 1cm); lắc nhẹ ly để lấp đầy khoảng trống.",
+        "isCrucial": false
+      },
+      {
+        "id": "c6",
+        "name": "Decor đúng vị trí",
+        "standardRequirement": "Topping và lát chanh/cam decor đúng số lượng, đặt đối diện logo thương hiệu khi quy định.",
+        "isCrucial": false
+      }
+    ]
+  },
+  {
+    "group": "Cà phê phin và pha lạnh",
+    "recipeCodes": [
+      "CF-PHEDEN",
+      "CF-PHENAU",
+      "CF-XIUVANI",
+      "CF-OLBUOICAM",
+      "CF-OLBUOICHANH",
+      "CF-DALAT"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng hạn sử dụng cà phê",
+        "standardRequirement": "Dùng cà phê phin HSD 12h đầu (Phê Đen, Phê Nâu), 48h (Phê Xỉu Vani), cốt cà phê Chanh/Cam HSD 24h.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Đúng định lượng",
+        "standardRequirement": "Cà phê, sữa đặc, đường nước, sữa tươi, sốt vani và topping đong đúng bảng định lượng theo độ ngọt.",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Lắc đều nguyên liệu",
+        "standardRequirement": "Lắc đều chai cà phê, sữa tươi Meiji, whipping và lắc can trà ít nhất 10 nhịp trước khi sử dụng.",
+        "isCrucial": false
+      },
+      {
+        "id": "c4",
+        "name": "Shake đúng thao tác",
+        "standardRequirement": "Cho 1/2 xúc đá và shake mạnh 10-12 nhịp; đơn giao hàng loại bỏ toàn bộ đá bằng nắp shaker.",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Mức đá đúng chuẩn",
+        "standardRequirement": "Đá cách miệng ly 1cm (Phê Đen, Phê Nâu) hoặc 1.5cm (Xỉu Vani, Phê Ô Long Bưởi, Đà Lạt).",
+        "isCrucial": false
+      },
+      {
+        "id": "c6",
+        "name": "Đà Lạt: hòa tan và làm mát espresso",
+        "standardRequirement": "Khuấy tan hoàn toàn sữa đặc và whipping; làm mát espresso bằng 2 viên đá trước khi rót vào hỗn hợp.",
+        "isCrucial": true
+      }
+    ]
+  },
+  {
+    "group": "Cà phê máy Espresso",
+    "recipeCodes": [
+      "CF-ESPRESSO",
+      "CF-AMERICANON",
+      "CF-AMERICANOD",
+      "CF-CAPUCHINON",
+      "CF-CAPUCHINOD",
+      "CF-LATTEN",
+      "CF-LATTED",
+      "CF-PHELANN",
+      "CF-PHELAND"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng định lượng cà phê bột",
+        "standardRequirement": "Cân đủ 18g cà phê bột (shot đôi), sai lệch cần đôi trong ± 0.5g.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Đúng thời gian chiết",
+        "standardRequirement": "Espresso 1 chiết 22-28 giây (1:2) hoặc 18-25 giây (1:1,5); Espresso 2 chiết 26-32 giây (1:2) hoặc 22-28 giây (1:1,5).",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Đúng thành phẩm chiết",
+        "standardRequirement": "Cân nước cà phê thành phẩm: 36g cho tỷ lệ 1:2, 25g cho tỷ lệ 1:1,5, sai lệch ± 1g.",
+        "isCrucial": true
+      },
+      {
+        "id": "c4",
+        "name": "Nhiệt độ sữa nóng",
+        "standardRequirement": "Đánh nóng sữa tươi Meiji ở 58-62°C, rảo đều và tạo hình.",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Đúng thứ tự cho vào ly",
+        "standardRequirement": "Ly nhựa: đá, sữa, rồi cà phê Espresso (Americano đá: đá, nước lọc, rồi Espresso).",
+        "isCrucial": false
+      }
+    ]
+  },
+  {
+    "group": "Đá xay và Matcha",
+    "recipeCodes": [
+      "DX-MATCHACOCO",
+      "DX-MATCHAPXP850",
+      "DX-MATCHAPXP855",
+      "DX-SCBONGBUOI850",
+      "DX-SCBONGBUOI855",
+      "DX-PHINDACSAN850",
+      "DX-PHINDACSAN855"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng thứ tự và định lượng cho vào cối",
+        "standardRequirement": "Đong theo thứ tự quy định và đúng định lượng 1 ly hoặc 2-3 ly; lắc cối trước khi xay.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Đúng chương trình xay",
+        "standardRequirement": "Pulse phá đá và xay đúng nút, đúng thời gian theo máy HBH 850 hoặc 855 và số ly.",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Kiểm tra đá dăm",
+        "standardRequirement": "Khuấy từ trục ra kiểm tra đá dăm; còn đá dăm thì Pulse thêm 5-10 giây.",
+        "isCrucial": false
+      },
+      {
+        "id": "c4",
+        "name": "Khối lượng chóp đúng chuẩn",
+        "standardRequirement": "Đổ vào ly tạo chóp đúng khối lượng (Matcha 350g/ly, Phin Đặc Sản 355g/ly, Sữa Chua Bòng Bưởi 440g/ly); làm gộp phải cân thành phẩm.",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Decor đúng thứ tự",
+        "standardRequirement": "Rót Kem Mây/cà phê theo vòng tròn, thạch đặt quanh viền cốc (không cho vào chóp), topping cuối cùng.",
+        "isCrucial": false
+      },
+      {
+        "id": "c6",
+        "name": "Điều kiện làm gộp và nguyên liệu",
+        "standardRequirement": "Chỉ làm gộp khi cùng độ ngọt (và cùng lượng cốt chanh); lắc đều nguyên liệu; không fill chồng Kem Mây.",
+        "isCrucial": true
+      }
+    ]
+  },
+  {
+    "group": "Đóng lon và chai",
+    "recipeCodes": [
+      "TS-PLUSOLSUA",
+      "TS-PLUSOLNHAI",
+      "TS-PLUSMATNHAN",
+      "TS-PLUSTAM",
+      "TS-PLUSPHONGLAN",
+      "TS-PLUSKHOI",
+      "TS-PLUSLUADAO",
+      "DX-PLUSMATCHA",
+      "CF-PLUSDALAT",
+      "TT-PLUSCBOLONG"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng định lượng lon/chai",
+        "standardRequirement": "Nguyên liệu đong đúng bảng định lượng sản phẩm Plus theo độ ngọt 100% hoặc 50%.",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Sục và làm mát đúng quy trình",
+        "standardRequirement": "Sục hỗn hợp ở 50-60°C, cho đá làm mát, hớt bỏ phần bọt và khuấy tan hết đá (với sản phẩm có sục).",
+        "isCrucial": false
+      },
+      {
+        "id": "c3",
+        "name": "Dán tem trước khi rót",
+        "standardRequirement": "Dán tem sản phẩm vào lon/chai trước, sau đó rót hỗn hợp và đóng nắp.",
+        "isCrucial": true
+      },
+      {
+        "id": "c4",
+        "name": "Chất lượng trà Cold Brew Ô Long",
+        "standardRequirement": "Trà màu vàng trong, tươi mát, thanh khiết, ngọt hậu, không kết tủa.",
+        "isCrucial": false
+      },
+      {
+        "id": "c5",
+        "name": "Đóng gói đúng quy cách",
+        "standardRequirement": "Đơn mang về/giao hàng: túi nilon, túi giữ nhiệt, card cảm ơn; đơn đi xa: thùng xốp phủ đá; kèm 2 ống hút nhỏ.",
+        "isCrucial": true
+      },
+      {
+        "id": "c6",
+        "name": "Chỉ bán mang về và giao hàng",
+        "standardRequirement": "Không bán sản phẩm Plus cho khách dùng tại chỗ.",
+        "isCrucial": false
+      }
+    ]
+  },
+  {
+    "group": "Bán thành phẩm",
+    "recipeCodes": [
+      "DX-THACHTRAVO",
+      "DX-THACHOLMATCHA",
+      "DX-THACHCHANH",
+      "DX-THACHDAOHONG",
+      "DX-THACHXIUVANI",
+      "DX-KEMMATCHA",
+      "DX-HHSD",
+      "DX-PHIN200",
+      "DX-PHIN100",
+      "DX-TRANCHAU"
+    ],
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Đúng định lượng và thành phẩm",
+        "standardRequirement": "Nguyên liệu đong đúng định lượng; thành phẩm đạt khối lượng chuẩn (thạch sai lệch ± 25g, cà phê phin sai lệch ± 10g).",
+        "isCrucial": true
+      },
+      {
+        "id": "c2",
+        "name": "Đúng nhiệt độ và thời gian nấu/ủ",
+        "standardRequirement": "Thạch nấu 5-6 phút ở 90-95°C; cà phê phin ủ nước sôi 95°C đủ 3 lần; trân châu khuấy đúng 5 phút (6 phút cho mẻ 500g) và ủ 40°C.",
+        "isCrucial": true
+      },
+      {
+        "id": "c3",
+        "name": "Xử lý bọt và bề mặt",
+        "standardRequirement": "Vợt hết bọt trên bề mặt thạch để tránh rỗ; khuấy tan bột, không vón cục.",
+        "isCrucial": false
+      },
+      {
+        "id": "c4",
+        "name": "Làm nguội và bảo quản lạnh",
+        "standardRequirement": "Thạch để nguội tự nhiên 30 phút rồi bảo quản 2-5°C; cà phê phin làm lạnh về 2-5°C trước khi vào tủ lạnh.",
+        "isCrucial": true
+      },
+      {
+        "id": "c5",
+        "name": "Dán tem HSD đúng",
+        "standardRequirement": "Dán tem ghi giờ sử dụng và giờ hết HSD (thạch 72 giờ, HHSD 72 giờ, Kem Mây 30 giờ, trân châu 5 giờ, cà phê phin theo từng sản phẩm).",
+        "isCrucial": true
+      },
+      {
+        "id": "c6",
+        "name": "Không fill chồng",
+        "standardRequirement": "Vệ sinh chai/bình sạch và lau khô trước khi fill mới, không fill chồng dù cùng date.",
+        "isCrucial": false
+      }
+    ]
+  }
+]

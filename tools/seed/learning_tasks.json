@@ -1,0 +1,125 @@
+[
+  {
+    "id": "LT-01",
+    "title": "Nắm quy trình re-fill nguyên vật liệu trong ca",
+    "type": "sop",
+    "targetCode": "SOP-REFILL",
+    "version": "v1.0",
+    "sections": [
+      "Đọc khung giờ bắt buộc và mức fill 2cm",
+      "Ghi nhớ mức Min - Max của khoang chứa",
+      "Làm quiz QZ-REFILL"
+    ],
+    "dueInDays": 3,
+    "quizId": "QZ-REFILL"
+  },
+  {
+    "id": "LT-02",
+    "title": "Quy trình sục trà cơ bản",
+    "type": "sop",
+    "targetCode": "SOP-SUCTRA",
+    "version": "v1.0",
+    "sections": [
+      "Đọc 5 bước sục trà",
+      "Luyện thao tác đi tay 5-7 vòng",
+      "Làm quiz QZ-SUCTRA"
+    ],
+    "dueInDays": 5,
+    "quizId": "QZ-SUCTRA"
+  },
+  {
+    "id": "LT-03",
+    "title": "Quy trình trà sữa nóng",
+    "type": "sop",
+    "targetCode": "SOP-TSNONG",
+    "version": "v1.0",
+    "sections": [
+      "Đọc định lượng bột sữa, HHSD theo size",
+      "Ghi nhớ nhiệt độ dừng sục 50-60°C và 60-65°C",
+      "Làm quiz QZ-TRASUA"
+    ],
+    "dueInDays": 7,
+    "quizId": "QZ-TRASUA"
+  },
+  {
+    "id": "LT-04",
+    "title": "Công thức Ô Long Sữa Phê La (Lạnh)",
+    "type": "recipe",
+    "targetCode": "TS-OLSUAD",
+    "version": "v1.0",
+    "sections": [
+      "Đọc bảng nguyên liệu size Phê và La",
+      "Ghi nhớ bảng độ ngọt theo HHSD",
+      "Thực hành pha tại quầy"
+    ],
+    "dueInDays": 7
+  },
+  {
+    "id": "LT-05",
+    "title": "Nhận, sơ chế và bảo quản trái cây",
+    "type": "sop",
+    "targetCode": "SOP-TRAICAY",
+    "version": "v1.0",
+    "sections": [
+      "Đọc tiêu chuẩn cam vàng, chanh vàng, chanh xanh",
+      "Ghi nhớ quy định không rửa nước khi bảo quản",
+      "Làm quiz QZ-TRAICAY"
+    ],
+    "dueInDays": 10,
+    "quizId": "QZ-TRAICAY"
+  },
+  {
+    "id": "LT-06",
+    "title": "Công thức Gấm",
+    "type": "recipe",
+    "targetCode": "TT-GAM",
+    "version": "v1.0",
+    "sections": [
+      "Đọc nguyên liệu và thao tác gõ zic lấy hết syrup",
+      "Ghi nhớ bảng độ ngọt",
+      "Thực hành pha tại quầy"
+    ],
+    "dueInDays": 10
+  },
+  {
+    "id": "LT-07",
+    "title": "Thông số chiết xuất Espresso",
+    "type": "sop",
+    "targetCode": "SOP-ESPRESSO",
+    "version": "v1.0",
+    "sections": [
+      "Đọc tỷ lệ 1:2 và 1:1,5",
+      "Ghi nhớ thời gian chiết hai loại hạt",
+      "Làm quiz QZ-ESPRESSO"
+    ],
+    "dueInDays": 12,
+    "quizId": "QZ-ESPRESSO"
+  },
+  {
+    "id": "LT-08",
+    "title": "Công thức Đà Lạt",
+    "type": "recipe",
+    "targetCode": "CF-DALAT",
+    "version": "v1.0",
+    "sections": [
+      "Đọc nguyên liệu và thứ tự pha",
+      "Ghi nhớ bảng độ ngọt theo sữa đặc",
+      "Thực hành pha tại quầy"
+    ],
+    "dueInDays": 14
+  },
+  {
+    "id": "LT-09",
+    "title": "Làm lạnh cấp tốc và cắt thạch",
+    "type": "sop",
+    "targetCode": "SOP-LAMLANH",
+    "version": "v1.0",
+    "sections": [
+      "Đọc 3 bước làm lạnh cấp tốc",
+      "Đọc quy trình nấu thạch Trà Vỏ",
+      "Làm quiz QZ-THACH"
+    ],
+    "dueInDays": 14,
+    "quizId": "QZ-THACH"
+  }
+]
