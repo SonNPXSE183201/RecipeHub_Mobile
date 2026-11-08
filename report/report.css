@@ -32,8 +32,8 @@
 
 body {
   font-family: 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  font-size: 10pt;
-  line-height: 1.55;
+  font-size: 10.5pt;
+  line-height: 1.45;
   color: var(--text-ink);
   background-color: #FFFFFF;
   margin: 0;
@@ -65,12 +65,13 @@ h1 {
 }
 
 h2 {
-  font-size: 13.5pt;
+  font-size: 13pt;
   border-bottom: 1pt solid var(--border-color);
-  padding-bottom: 4px;
-  margin-top: 1.6em;
-  page-break-before: always;
-  break-before: page;
+  padding-bottom: 3px;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  page-break-after: avoid;
+  break-after: avoid;
 }
 
 /* H2 đầu tiên hoặc ngay sau cover không ngắt trang */
@@ -201,8 +202,8 @@ li {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1em 0 1.2em 0;
-  font-size: 8.8pt;
+  margin: 0.7em 0 0.9em 0;
+  font-size: 9pt;
   page-break-inside: auto;
 }
 
@@ -304,6 +305,23 @@ img {
   font-style: italic;
   margin-top: -0.4em;
   margin-bottom: 0.8em;
+}
+
+/* Bố cục hàng ảnh */
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0.6em 0;
+  page-break-inside: avoid;
+}
+
+.row img {
+  max-height: 300px;
+  width: auto;
+  margin: 0 auto;
 }
 
 /* Mermaid Diagrams */
