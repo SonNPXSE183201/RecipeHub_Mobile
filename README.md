@@ -15,9 +15,9 @@ Thiết kế Figma (Lab 2): https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/
 | `firebase/storage.rules`, `firebase/remote-config-defaults.json` | `firebase/` (+ `firestore.rules`, `firestore.indexes.json`, `remoteconfig.template.json`) | Có |
 | `e2e_test/` (ARTEMIS pytest) | `e2e_test/` | Đã có suite; chưa chạy ARTEMIS |
 | `docs/design-traceability.md`, `architecture.md`, `analytics-plan.md` | `docs/` | Có |
-| `docs/test-plan.md`, `docs/code-review.md` | `docs/` | `test-plan.md` đã có (ARTEMIS chưa chạy); `code-review.md` chưa có. `artemis-test-plan.md` là runner adb cũ |
+| `docs/test-plan.md`, `docs/code-review.md` | `docs/` | `test-plan.md` đã có (ARTEMIS chưa chạy); `code-review.md` đã có (17 phát hiện, 13 đã sửa) và `coderabbit-followup.md` cho PR #3–#6. `artemis-test-plan.md` là runner adb cũ |
 | `evidence/` | `evidence/lab3/` | Có (ảnh Redmi 7, xem `evidence/README.md`) |
-| `report/Lab03_SE183201.pdf`, `slides/Lab03_SE183201_slides.pdf` | `report/`, `slides/` | Đã có nguồn Markdown/HTML và PDF; nguồn đã sửa trong follow-up, PDF chưa tái xuất; TODO ARTEMIS |
+| `report/Lab03_SE183201.pdf`, `slides/Lab03_SE183201_slides.pdf` | `report/`, `slides/` | Đã có nguồn Markdown/HTML và PDF (xuất lại sau follow-up); còn TODO kết quả ARTEMIS |
 | Video demo | mục cuối | **Đang làm** |
 | Đặc tả Lab 2 | `docs/lab2/` (`DESIGN.md`, `flutter-handoff.md`, `ux/`) | Có |
 
