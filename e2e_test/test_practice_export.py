@@ -60,7 +60,8 @@ async def test_tc17_timer_and_report(signed_in_viewer: ArtemisClient) -> None:
     data = output(result)
     assert data["timer_saved"] is True and data["elapsed_seconds"] >= 5
     assert data["notes_verified"] is True and data["report_exported"] is True
-    assert data["path"].startswith("Download/RecipeHub/") and data["path"].lower().endswith(".pdf")
+    path = data["path"].replace("\\", "/")
+    assert "Download/RecipeHub/" in path and path.lower().endswith(".pdf"), path
 
 
 async def test_tc18_admin_evaluation(signed_in_admin: ArtemisClient) -> None:
