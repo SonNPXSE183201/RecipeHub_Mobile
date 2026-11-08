@@ -1,5 +1,9 @@
 # Mobile ↔ Backend: API đang dùng và khoảng trống
 
+> [!WARNING]
+> **TÀI LIỆU ĐÃ LỖI THỜI (LƯU VẾT LỊCH SỬ)**  
+> Ứng dụng RecipeHub Mobile hiện tại đã chuyển toàn bộ nguồn dữ liệu sang **Cloud Firestore (real-time)** và **Firebase Storage** (do backend .NET chưa deploy và yêu cầu Final cấm server riêng). Toàn bộ dữ liệu công thức, SOP, nhiệm vụ học, quiz, chấm thực hành, phản hồi và sự cố đều hoạt động trực tiếp qua Firestore (`AppServices.firebase()`). Nội dung phân tích Gateway .NET bên dưới được lưu lại để phục vụ truy vết lịch sử giai đoạn trước.
+
 Mobile gọi Gateway YARP `http://<host>:5000` (Android emulator: `10.0.2.2`; máy thật: `--dart-define=API_BASE_URL=http://<ip>:5000`).
 Không sửa `src/backend/`; mục thiếu ghi lại ở đây để nhóm backend bổ sung.
 
