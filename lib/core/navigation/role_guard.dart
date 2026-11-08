@@ -23,7 +23,10 @@ class AdminGuard extends StatelessWidget {
             children: [
               Icon(Icons.lock_outline_rounded, size: 40),
               SizedBox(height: 12),
-              Text('Chỉ dành cho Store Admin', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                'Chỉ dành cho Store Admin',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: 8),
               Text(
                 'Tài khoản hiện tại có quyền Barista. Đổi vai trò trong Tài khoản nếu bạn là quản lý chi nhánh.',

@@ -57,8 +57,48 @@ class RecipeSummaryResponse {
       versionNumber: json['versionNumber'] as int? ?? 1,
       versionStatus: json['versionStatus'] as String? ?? 'Draft',
       name: json['name'] as String? ?? '',
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
           DateTime.now(),
+    );
+  }
+}
+
+/// Định lượng một size (Firestore `recipes/{code}.sizes[]`).
+class RecipeSizeResponse {
+  const RecipeSizeResponse({
+    required this.code,
+    required this.label,
+    required this.ingredients,
+    this.note,
+  });
+  final String code;
+  final String label;
+  final List<RecipeIngredientResponse> ingredients;
+  final String? note;
+
+  factory RecipeSizeResponse.fromJson(Map<String, dynamic> j) {
+    final raw = (j['ingredients'] as List<dynamic>? ?? const []);
+    return RecipeSizeResponse(
+      code: '${j['code'] ?? 'M'}',
+      label: '${j['label'] ?? j['code'] ?? ''}',
+      note: j['note'] as String?,
+      ingredients: [
+        for (var i = 0; i < raw.length; i++)
+          RecipeIngredientResponse.fromJson({
+            'id': 'sz$i',
+            'ingredientId': 'sz$i',
+            'ingredientCode': '',
+            'ingredientName': (raw[i] as Map)['name'] ?? '',
+            'quantity': ((raw[i] as Map)['quantity'] as num?)?.toDouble() ?? 0,
+            'unitId': (raw[i] as Map)['unit'] ?? '',
+            'unitCode': (raw[i] as Map)['unit'] ?? '',
+            'sortOrder': i + 1,
+            'stageName': (raw[i] as Map)['stage'],
+            'note': (raw[i] as Map)['note'],
+            'warning': (raw[i] as Map)['warning'],
+          }),
+      ],
     );
   }
 }
@@ -167,12 +207,13 @@ class RecipeStepResponse {
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       durationSeconds: (json['durationSeconds'] as num?)?.toInt(),
-      temperatureCelsius:
-          (json['temperatureCelsius'] as num?)?.toDouble(),
+      temperatureCelsius: (json['temperatureCelsius'] as num?)?.toDouble(),
       equipment: json['equipment'] as String?,
       safetyNote: json['safetyNote'] as String?,
       media: rawMedia
-          .map((m) => RecipeStepMediaResponse.fromJson(m as Map<String, dynamic>))
+          .map(
+            (m) => RecipeStepMediaResponse.fromJson(m as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -189,6 +230,7 @@ class RecipeDetailResponse {
   final String? description;
   final int rowVersion;
   final String? primaryMediaAssetRef;
+  final String? videoUrl;
   final List<RecipeIngredientResponse> ingredients;
   final List<RecipeStepResponse> steps;
   final DateTime createdAt;
@@ -205,11 +247,26 @@ class RecipeDetailResponse {
     this.description,
     required this.rowVersion,
     this.primaryMediaAssetRef,
+    this.videoUrl,
     required this.ingredients,
     required this.steps,
     required this.createdAt,
     required this.updatedAt,
+    this.category,
+    this.sizes = const [],
+    this.servingNotes = const [],
+    this.specialRequests = const [],
+    this.sopCodes = const [],
   });
+
+  /// Firestore: nhóm món (vd "Trà sữa"); null với Gateway.
+  final String? category;
+
+  /// Firestore: định lượng theo size (Phê M / La L...). Rỗng → dùng [ingredients].
+  final List<RecipeSizeResponse> sizes;
+  final List<String> servingNotes;
+  final List<String> specialRequests;
+  final List<String> sopCodes;
 
   factory RecipeDetailResponse.fromJson(Map<String, dynamic> json) {
     final rawIngr = json['ingredients'] as List<dynamic>? ?? [];
@@ -226,16 +283,38 @@ class RecipeDetailResponse {
       description: json['description'] as String?,
       rowVersion: json['rowVersion'] as int? ?? 0,
       primaryMediaAssetRef: json['primaryMediaAssetRef'] as String?,
+      videoUrl: json['videoUrl'] as String?,
       ingredients: rawIngr
-          .map((i) => RecipeIngredientResponse.fromJson(i as Map<String, dynamic>))
+          .map(
+            (i) => RecipeIngredientResponse.fromJson(i as Map<String, dynamic>),
+          )
           .toList(),
       steps: rawSteps
           .map((s) => RecipeStepResponse.fromJson(s as Map<String, dynamic>))
           .toList(),
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
           DateTime.now(),
+      category: json['category'] as String?,
+      sizes: (json['sizes'] as List<dynamic>? ?? const [])
+          .map(
+            (s) => RecipeSizeResponse.fromJson(
+              Map<String, dynamic>.from(s as Map),
+            ),
+          )
+          .toList(),
+      servingNotes: (json['servingNotes'] as List<dynamic>? ?? const [])
+          .map((e) => '$e')
+          .toList(),
+      specialRequests: (json['specialRequests'] as List<dynamic>? ?? const [])
+          .map((e) => '$e')
+          .toList(),
+      sopCodes: (json['sopCodes'] as List<dynamic>? ?? const [])
+          .map((e) => '$e')
+          .toList(),
     );
   }
 }

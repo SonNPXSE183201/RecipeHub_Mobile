@@ -6,8 +6,10 @@ class MockPracticeHistoryStore implements IPracticeHistoryStore {
   final Map<String, List<SelfPracticeRecord>> data = {};
 
   @override
-  Future<List<SelfPracticeRecord>> load(String uid) async => List.of(data[uid] ?? const []);
+  Future<List<SelfPracticeRecord>> load(String uid) async =>
+      List.of(data[uid] ?? const []);
 
   @override
-  Future<void> save(String uid, List<SelfPracticeRecord> records) async => data[uid] = List.of(records);
+  Future<void> save(String uid, List<SelfPracticeRecord> records) async =>
+      data[uid] = List.of(records);
 }

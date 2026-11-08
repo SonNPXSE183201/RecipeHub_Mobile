@@ -3,31 +3,21 @@ import 'package:flutter/material.dart';
 /// Vai trò người dùng trên Mobile
 enum UserRole {
   viewer, // Barista / Nhân viên pha chế tại quầy
-  admin,  // Quản lý cửa hàng / Quản lý đào tạo
+  admin, // Quản lý cửa hàng / Quản lý đào tạo
 }
 
 /// Trạng thái nhiệm vụ học
-enum TaskStatus {
-  notStarted,
-  inProgress,
-  completed,
-}
+enum TaskStatus { notStarted, inProgress, completed }
 
 /// Loại feedback
 enum FeedbackType {
-  inquiry,    // Hỏi cách làm
-  issue,      // Báo vấn đề định lượng/thao tác
+  inquiry, // Hỏi cách làm
+  issue, // Báo vấn đề định lượng/thao tác
   suggestion, // Đề xuất thay đổi
 }
 
 /// Trạng thái feedback
-enum FeedbackStatus {
-  newFeedback,
-  inProgress,
-  waitingInfo,
-  resolved,
-  closed,
-}
+enum FeedbackStatus { newFeedback, inProgress, waitingInfo, resolved, closed }
 
 /// Nguyên liệu theo Size
 class IngredientPortion {
@@ -49,7 +39,7 @@ class IngredientPortion {
 /// Biến thể Size của công thức
 class RecipeSizeOption {
   final String sizeCode; // S, M, L
-  final String label;    // Size Nhỏ (350ml), Size Vừa (500ml), Size Lớn (700ml)
+  final String label; // Size Nhỏ (350ml), Size Vừa (500ml), Size Lớn (700ml)
   final List<IngredientPortion> ingredients;
   final String servingNotes;
 
@@ -93,7 +83,7 @@ class RecipeItem {
   final String name;
   final String category; // Cà phê, Trà sữa, Trà trái cây, Đá xay
   final String version;
-  final String status;   // Ban hành
+  final String status; // Ban hành
   final String publishedDate;
   final String publisher;
   final String description;
@@ -125,7 +115,8 @@ class RecipeItem {
   });
 
   @override
-  bool operator ==(Object other) => other is RecipeItem && other.id == id && other.code == code;
+  bool operator ==(Object other) =>
+      other is RecipeItem && other.id == id && other.code == code;
 
   @override
   int get hashCode => Object.hash(id, code);
@@ -206,7 +197,7 @@ class LearningTaskItem {
   });
 }
 
-/// Phản hồi của nhân viên
+/// Phản hồi của nhân viên – Firestore `feedback/{id}`; trả lời ở `feedback/{id}/replies`.
 class FeedbackItemModel {
   final String id;
   final String senderName;
@@ -219,9 +210,14 @@ class FeedbackItemModel {
   final String version;
   final String? stepNote;
   FeedbackStatus status;
-  final String createdAt;
+  final String createdAt; // chuỗi hiển thị (dd/MM/yyyy HH:mm)
   final List<FeedbackReplyModel> replies;
   final String? attachmentUrl; // ảnh đính kèm đã upload lên Firebase Storage
+  final String? attachmentPath;
+  final String ownerUid;
+  final int replyCount;
+  final DateTime? createdAtTime;
+  final DateTime? updatedAtTime;
 
   FeedbackItemModel({
     required this.id,
@@ -238,20 +234,78 @@ class FeedbackItemModel {
     required this.createdAt,
     required this.replies,
     this.attachmentUrl,
+    this.attachmentPath,
+    this.ownerUid = '',
+    this.replyCount = 0,
+    this.createdAtTime,
+    this.updatedAtTime,
   });
+
+  bool get hasAttachment => attachmentUrl != null && attachmentUrl!.isNotEmpty;
+
+  String get typeLabel => switch (type) {
+    FeedbackType.issue => 'Báo vấn đề',
+    FeedbackType.inquiry => 'Hỏi cách làm',
+    FeedbackType.suggestion => 'Đề xuất',
+  };
 }
 
+/// Nội dung phản hồi mới (chưa có id / thời gian server).
+class NewFeedback {
+  const NewFeedback({
+    required this.ownerUid,
+    required this.ownerName,
+    required this.ownerRole,
+    required this.storeBranch,
+    required this.type,
+    required this.content,
+    required this.targetCode,
+    required this.targetName,
+    required this.version,
+    this.stepNote,
+    this.attachmentUrl,
+    this.attachmentPath,
+  });
+
+  final String ownerUid;
+  final String ownerName;
+  final String ownerRole;
+  final String storeBranch;
+  final FeedbackType type;
+  final String content;
+  final String targetCode;
+  final String targetName;
+  final String version;
+  final String? stepNote;
+  final String? attachmentUrl;
+  final String? attachmentPath;
+}
+
+String feedbackStatusLabel(FeedbackStatus s) => switch (s) {
+  FeedbackStatus.newFeedback => 'Mới gửi',
+  FeedbackStatus.inProgress => 'Đang xử lý',
+  FeedbackStatus.waitingInfo => 'Chờ bổ sung',
+  FeedbackStatus.resolved => 'Đã giải quyết',
+  FeedbackStatus.closed => 'Đã đóng',
+};
+
 class FeedbackReplyModel {
+  final String id;
+  final String authorUid;
   final String senderName;
   final bool isAdmin;
   final String message;
   final String time;
+  final DateTime? createdAtTime;
 
   const FeedbackReplyModel({
+    this.id = '',
+    this.authorUid = '',
     required this.senderName,
     required this.isAdmin,
     required this.message,
     required this.time,
+    this.createdAtTime,
   });
 }
 
@@ -265,7 +319,8 @@ class SelfPracticeRecord {
   final String notes;
   final String practicedAt;
   final int targetSeconds; // 0 = chưa có chuẩn thời gian
-  int get deviationSeconds => targetSeconds == 0 ? 0 : durationSeconds - targetSeconds;
+  int get deviationSeconds =>
+      targetSeconds == 0 ? 0 : durationSeconds - targetSeconds;
 
   const SelfPracticeRecord({
     required this.id,
@@ -279,17 +334,18 @@ class SelfPracticeRecord {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'recipeName': recipeName,
-        'recipeCode': recipeCode,
-        'size': size,
-        'durationSeconds': durationSeconds,
-        'notes': notes,
-        'practicedAt': practicedAt,
-        'targetSeconds': targetSeconds,
-      };
+    'id': id,
+    'recipeName': recipeName,
+    'recipeCode': recipeCode,
+    'size': size,
+    'durationSeconds': durationSeconds,
+    'notes': notes,
+    'practicedAt': practicedAt,
+    'targetSeconds': targetSeconds,
+  };
 
-  factory SelfPracticeRecord.fromJson(Map<String, dynamic> j) => SelfPracticeRecord(
+  factory SelfPracticeRecord.fromJson(Map<String, dynamic> j) =>
+      SelfPracticeRecord(
         id: j['id'] as String? ?? '',
         recipeName: j['recipeName'] as String? ?? '',
         recipeCode: j['recipeCode'] as String? ?? '',
@@ -342,6 +398,7 @@ class EvaluationCriterion {
 /// Đánh giá thực hành tại quầy
 class PracticalEvaluationRecord {
   final String id;
+  final String traineeUid;
   final String traineeName;
   final String storeBranch;
   final String evaluatorName;
@@ -356,6 +413,7 @@ class PracticalEvaluationRecord {
 
   PracticalEvaluationRecord({
     required this.id,
+    this.traineeUid = '',
     required this.traineeName,
     required this.storeBranch,
     required this.evaluatorName,
@@ -369,4 +427,3 @@ class PracticalEvaluationRecord {
     required this.criteria,
   });
 }
-

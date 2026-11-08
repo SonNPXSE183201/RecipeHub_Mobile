@@ -18,50 +18,61 @@ class PracticeHistoryViewModel extends ChangeNotifier {
   bool _loading = false;
   bool _disposed = false;
   Future<void>? _loadFuture;
+  int _generation = 0;
 
   List<SelfPracticeRecord> get records => _records;
   bool get isLoading => _loading;
   int get totalSessions => _records.length;
 
-  int get averageSeconds =>
-      _records.isEmpty ? 0 : (_records.fold<int>(0, (s, r) => s + r.durationSeconds) / _records.length).round();
+  int get averageSeconds => _records.isEmpty
+      ? 0
+      : (_records.fold<int>(0, (s, r) => s + r.durationSeconds) /
+                _records.length)
+            .round();
 
   /// Tỷ lệ (%) lần luyện đạt thời gian chuẩn; lần không có chuẩn (target = 0) không tính vào mẫu số.
   int? get withinTolerancePercent {
     final timed = _records.where((r) => r.targetSeconds > 0).toList();
     if (timed.isEmpty) return null;
-    final ok = timed.where((r) => r.deviationSeconds.abs() <= toleranceSeconds).length;
+    final ok = timed
+        .where((r) => r.deviationSeconds.abs() <= toleranceSeconds)
+        .length;
     return (ok * 100 / timed.length).round();
   }
 
   Future<void> load(String uid) {
     if (_uid == uid && _loadFuture != null) return _loadFuture!;
     _uid = uid;
-    return _loadFuture = _load(uid);
+    _records = const [];
+    return _loadFuture = _load(uid, ++_generation);
   }
 
-  Future<void> _load(String uid) async {
+  Future<void> _load(String uid, int generation) async {
     _loading = true;
     _notify();
     try {
       final loaded = await _store.load(uid);
-      if (_uid == uid) _records = loaded;
+      if (_generation == generation) _records = loaded;
     } catch (e, s) {
       await _crash.recordError(e, s, reason: 'practice_history_load');
     } finally {
-      _loading = false;
-      _notify();
+      if (_generation == generation) {
+        _loading = false;
+        _notify();
+      }
     }
   }
 
   Future<void> add(SelfPracticeRecord record) async {
+    final uid = _uid;
+    final generation = _generation;
+    if (uid == null) return;
     // Lưu khi chưa tải xong sẽ ghi đè lịch sử cũ trên máy → chờ load trước.
     final pending = _loadFuture;
     if (pending != null) await pending;
+    if (_generation != generation) return;
     _records = [record, ..._records];
     _notify();
-    final uid = _uid;
-    if (uid == null) return;
     try {
       await _store.save(uid, _records);
     } catch (e, s) {
@@ -70,8 +81,10 @@ class PracticeHistoryViewModel extends ChangeNotifier {
   }
 
   void clear() {
+    _generation++;
     _uid = null;
     _loadFuture = null;
+    _loading = false;
     _records = const [];
     _notify();
   }

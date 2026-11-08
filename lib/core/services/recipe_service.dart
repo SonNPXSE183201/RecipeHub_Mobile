@@ -16,15 +16,16 @@ class RecipeService {
     int pageSize = 20,
   }) async {
     final response = await _dio.get(
-        '/api/v1/recipes',
-        queryParameters: {
-          if (query != null && query.isNotEmpty) 'query': query,
-          if (state != null && state.isNotEmpty) 'state': state,
-          if (versionStatus != null && versionStatus.isNotEmpty) 'versionStatus': versionStatus,
-          'page': page,
-          'pageSize': pageSize,
-        },
-      );
+      '/api/v1/recipes',
+      queryParameters: {
+        if (query != null && query.isNotEmpty) 'query': query,
+        if (state != null && state.isNotEmpty) 'state': state,
+        if (versionStatus != null && versionStatus.isNotEmpty)
+          'versionStatus': versionStatus,
+        'page': page,
+        'pageSize': pageSize,
+      },
+    );
 
     return PagedResponse<RecipeSummaryResponse>.fromJson(
       response.data as Map<String, dynamic>,

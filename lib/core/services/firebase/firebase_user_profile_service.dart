@@ -9,17 +9,22 @@ typedef ProfileCallable = Future<Map<String, dynamic>> Function(String name);
 
 /// Vai trò lấy từ custom claim trong ID token (do Function `ensureProfile` / `setUserRole` đặt).
 class FirebaseUserProfileService implements IUserProfileService {
-  FirebaseUserProfileService({FirebaseAuth? auth, FirebaseFirestore? firestore, ProfileCallable? call})
-    : _auth = auth ?? FirebaseAuth.instance,
-      _db = firestore ?? FirebaseFirestore.instance,
-      _call = call ?? _defaultCall;
+  FirebaseUserProfileService({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+    ProfileCallable? call,
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _db = firestore ?? FirebaseFirestore.instance,
+       _call = call ?? _defaultCall;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _db;
   final ProfileCallable _call;
 
   static Future<Map<String, dynamic>> _defaultCall(String name) async {
-    final res = await FirebaseFunctions.instanceFor(region: 'asia-southeast1').httpsCallable(name).call<Object?>();
+    final res = await FirebaseFunctions.instanceFor(region: 'asia-southeast1')
+        .httpsCallable(name)
+        .call<Object?>();
     final d = res.data;
     return d is Map ? Map<String, dynamic>.from(d) : <String, dynamic>{};
   }

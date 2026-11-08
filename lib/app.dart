@@ -9,6 +9,7 @@ import 'core/viewmodels/notification_viewmodel.dart';
 import 'core/viewmodels/practice_history_viewmodel.dart';
 import 'core/viewmodels/recipe_viewmodel.dart';
 import 'core/viewmodels/storage_viewmodel.dart';
+import 'core/viewmodels/training_viewmodel.dart';
 import 'features/auth/auth_gate.dart';
 
 /// Navigator gốc – dùng cho deep link FCM & automation server (debug).
@@ -38,9 +39,25 @@ class RecipeHubApp extends StatelessWidget {
             incidents: s.incidents,
           )..start(),
         ),
-        ChangeNotifierProvider(create: (_) => AppConfigViewModel(service: s.remoteConfig)..init()),
-        ChangeNotifierProvider(create: (_) => RecipeViewModel(source: s.recipes, crash: s.crash)),
-        ChangeNotifierProvider(create: (_) => PracticeHistoryViewModel(store: s.practice, crash: s.crash)),
+        ChangeNotifierProvider(
+          create: (_) => AppConfigViewModel(service: s.remoteConfig)..init(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RecipeViewModel(source: s.recipes, crash: s.crash),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              PracticeHistoryViewModel(store: s.practice, crash: s.crash),
+        ),
+        // Dữ liệu đào tạo real-time: bind(uid) khi đăng nhập (AuthGate), clear() khi đăng xuất.
+        ChangeNotifierProvider(
+          create: (_) => TrainingViewModel(repo: s.training, crash: s.crash),
+        ),
+        // Giám sát của Admin: start() khi vào màn Admin.
+        ChangeNotifierProvider(
+          create: (_) =>
+              AdminTrainingViewModel(repo: s.training, crash: s.crash),
+        ),
         ChangeNotifierProvider(
           create: (_) => StorageViewModel(
             storage: s.storage,
@@ -48,10 +65,15 @@ class RecipeHubApp extends StatelessWidget {
             auth: s.auth,
             analytics: s.analytics,
             crash: s.crash,
+            fileSaver: s.fileSaver,
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => NotificationViewModel(service: s.notifications, crash: s.crash, devices: s.devices),
+          create: (_) => NotificationViewModel(
+            service: s.notifications,
+            crash: s.crash,
+            devices: s.devices,
+          ),
         ),
       ],
       child: MaterialApp(
@@ -71,8 +93,9 @@ class RecipeHubApp extends StatelessWidget {
         ),
         home: ValueListenableBuilder<Widget?>(
           valueListenable: debugScreenOverride,
-          builder: (context, override, _) =>
-              override == null ? const AuthGate() : KeyedSubtree(key: UniqueKey(), child: override),
+          builder: (context, override, _) => override == null
+              ? const AuthGate()
+              : KeyedSubtree(key: UniqueKey(), child: override),
         ),
       ),
     );

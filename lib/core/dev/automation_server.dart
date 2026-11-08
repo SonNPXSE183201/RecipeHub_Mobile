@@ -1,10 +1,16 @@
 // Chỉ dùng khi debug: cho phép tool ngoài mở nhanh một màn hình (cổng 8888).
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../app.dart';
 import '../models/app_models.dart';
-import '../services/mock_data_service.dart';
+
+import 'package:provider/provider.dart';
+
+import '../viewmodels/auth_viewmodel.dart';
+import '../viewmodels/recipe_viewmodel.dart';
+import '../viewmodels/training_viewmodel.dart';
 
 // 17 M-Screens according to requirements-draft.md
 import '../../features/auth/login_page.dart';
@@ -31,16 +37,26 @@ Future<void> startAutomationServer() async {
       final name = request.uri.queryParameters['name'] ?? '';
       Widget? target;
 
-      if (MockDataService.instance.recipes.isEmpty) {
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx == null || ctx.read<RecipeViewModel>().items.isEmpty) {
         request.response
           ..statusCode = HttpStatus.serviceUnavailable
-          ..write('Recipes chưa tải từ backend (đăng nhập trước)')
+          ..write('Dữ liệu chưa tải từ backend (đăng nhập trước)')
           ..close();
         return;
       }
-      final sampleRecipe = MockDataService.instance.recipes.first;
-      final sampleSop = MockDataService.instance.sops.first;
-      final sampleTask = MockDataService.instance.tasks.first;
+      final auth = ctx.read<AuthViewModel>();
+      final training = ctx.read<TrainingViewModel>();
+      final sampleRecipe = ctx.read<RecipeViewModel>().items.first;
+      if (training.sops.isEmpty || training.tasks.isEmpty) {
+        request.response
+          ..statusCode = HttpStatus.serviceUnavailable
+          ..write('SOP/nhiệm vụ học chưa có dữ liệu trên backend')
+          ..close();
+        return;
+      }
+      final sampleSop = training.sops.first;
+      final sampleTask = training.tasks.first;
 
       switch (name) {
         // M-01 to M-17 Standard Names
@@ -52,7 +68,7 @@ Future<void> startAutomationServer() async {
         case 'm02_counter_lookup':
         case '04_flow1_recipe_catalog':
         case '15_flow2_viewer_home':
-          MockDataService.instance.switchRole(UserRole.viewer);
+          await auth.switchRole(UserRole.viewer);
           target = const MainAppShell(initialTabIndex: 0);
           break;
 
@@ -63,7 +79,10 @@ Future<void> startAutomationServer() async {
 
         case 'm04_step_video_guide':
         case '20_flow2_barista_viewer_speed':
-          target = StepVideoGuidePage(recipe: sampleRecipe, initialStepNumber: 1);
+          target = StepVideoGuidePage(
+            recipe: sampleRecipe,
+            initialStepNumber: 1,
+          );
           break;
 
         case 'm05_sop_catalog':
@@ -77,7 +96,7 @@ Future<void> startAutomationServer() async {
           break;
 
         case 'm07_my_learning':
-          MockDataService.instance.switchRole(UserRole.viewer);
+          await auth.switchRole(UserRole.viewer);
           target = const MainAppShell(initialTabIndex: 1);
           break;
 
@@ -102,13 +121,13 @@ Future<void> startAutomationServer() async {
           break;
 
         case 'm12_my_feedback_list':
-          MockDataService.instance.switchRole(UserRole.viewer);
+          await auth.switchRole(UserRole.viewer);
           target = const MainAppShell(initialTabIndex: 2);
           break;
 
         case 'm13_account_profile':
         case '22_flow3_settings_account':
-          MockDataService.instance.switchRole(UserRole.viewer);
+          await auth.switchRole(UserRole.viewer);
           target = const MainAppShell(initialTabIndex: 3);
           break;
 
@@ -131,12 +150,14 @@ Future<void> startAutomationServer() async {
 
         case 'admin_store_training':
         case '23_flow3_admin_console':
-          MockDataService.instance.switchRole(UserRole.admin);
+          await auth.switchRole(UserRole.admin);
           target = const MainAppShell(initialTabIndex: 1);
           break;
 
         case '28_system_loading_transition':
-          target = const LoadingTransitionPage(message: 'Đang tải tiêu chuẩn đào tạo quầy bar...');
+          target = const LoadingTransitionPage(
+            message: 'Đang tải tiêu chuẩn đào tạo quầy bar...',
+          );
           break;
 
         case '29_system_error_recovery':
@@ -166,4 +187,3 @@ Future<void> startAutomationServer() async {
     debugPrint('Automation server bind error: $e');
   }
 }
-

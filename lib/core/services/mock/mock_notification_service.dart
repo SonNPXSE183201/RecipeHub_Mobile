@@ -15,12 +15,15 @@ class MockNotificationService implements INotificationService {
   bool grantOnRequest;
   AppNotification? initialNotification;
   final List<String> topics = [];
+
   /// Lịch sử theo phạm vi (uid) như bản thật.
   final Map<String, List<AppNotification>> histories = {};
   bool initialized = false;
 
-  final StreamController<AppNotification> _foreground = StreamController<AppNotification>.broadcast();
-  final StreamController<AppNotification> _opened = StreamController<AppNotification>.broadcast();
+  final StreamController<AppNotification> _foreground =
+      StreamController<AppNotification>.broadcast();
+  final StreamController<AppNotification> _opened =
+      StreamController<AppNotification>.broadcast();
 
   void simulateForeground(AppNotification n) => _foreground.add(n);
   void simulateOpened(AppNotification n) => _opened.add(n);
@@ -30,7 +33,9 @@ class MockNotificationService implements INotificationService {
 
   @override
   Future<NotificationPermission> requestPermission() async {
-    permission = grantOnRequest ? NotificationPermission.granted : NotificationPermission.denied;
+    permission = grantOnRequest
+        ? NotificationPermission.granted
+        : NotificationPermission.denied;
     return permission;
   }
 
@@ -40,7 +45,8 @@ class MockNotificationService implements INotificationService {
   @override
   Future<String?> getToken() async => 'mock-fcm-token-RH-0001';
 
-  final StreamController<String> tokenRefreshes = StreamController<String>.broadcast();
+  final StreamController<String> tokenRefreshes =
+      StreamController<String>.broadcast();
 
   @override
   Stream<String> get onTokenRefresh => tokenRefreshes.stream;
@@ -59,10 +65,12 @@ class MockNotificationService implements INotificationService {
   }
 
   @override
-  Future<List<AppNotification>> loadHistory(String scope) async => List.of(histories[scope] ?? const []);
+  Future<List<AppNotification>> loadHistory(String scope) async =>
+      List.of(histories[scope] ?? const []);
 
   @override
-  Future<void> saveHistory(String scope, List<AppNotification> items) async => histories[scope] = List.of(items);
+  Future<void> saveHistory(String scope, List<AppNotification> items) async =>
+      histories[scope] = List.of(items);
 
   @override
   Future<void> subscribeToTopic(String topic) async {

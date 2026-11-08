@@ -5,15 +5,19 @@ import '../i_recipe_source.dart';
 
 /// Công thức lưu trên Firestore `recipes/{code}` (Admin quản lý trên web).
 /// Chuyển về đúng DTO của Gateway để `RecipeMapper`, ViewModel và View không phải đổi.
-class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
-  FirestoreRecipeSource({FirebaseFirestore? firestore}) : _db = firestore ?? FirebaseFirestore.instance;
+class FirestoreRecipeSource
+    implements IRecipeSource, IBulkRecipeSource, ILiveRecipeSource {
+  FirestoreRecipeSource({FirebaseFirestore? firestore})
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
   /// Bỏ dấu tiếng Việt, chữ thường – khớp `searchKeywords` do web ghi.
   static String normalize(String s) {
-    const from = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
-    const to = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
+    const from =
+        'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
+    const to =
+        'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
     final lower = s.toLowerCase();
     final b = StringBuffer();
     for (final ch in lower.split('')) {
@@ -24,25 +28,52 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
   }
 
   @override
-  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({String? query, int pageSize = 50}) async {
-    Query<Map<String, dynamic>> q = _db.collection('recipes').where('status', isEqualTo: 'published');
-    final words = normalize(query ?? '').split(RegExp(r'[^a-z0-9]+')).where((w) => w.isNotEmpty).toList();
+  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({
+    String? query,
+    int pageSize = 50,
+  }) async {
+    Query<Map<String, dynamic>> q = _db
+        .collection('recipes')
+        .where('status', isEqualTo: 'published');
+    final words = normalize(query ?? '')
+        .split(RegExp(r'[^a-z0-9]+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
     if (words.isNotEmpty) {
       q = q.where('searchKeywords', arrayContains: words.first);
     } else {
       q = q.orderBy('name');
     }
     final snap = await q.limit(pageSize).get();
-    if (snap.docs.isEmpty && snap.metadata.isFromCache) throw const RecipeOfflineException();
-    final items = snap.docs.map((d) => RecipeSummaryResponse.fromJson(_summaryJson(d.id, d.data()))).toList();
-    return PagedResponse(items: items, page: 1, pageSize: pageSize, totalCount: items.length);
+    if (snap.docs.isEmpty && snap.metadata.isFromCache) {
+      throw const RecipeOfflineException();
+    }
+    final items = snap.docs
+        .map(
+          (d) => RecipeSummaryResponse.fromJson(_summaryJson(d.id, d.data())),
+        )
+        .toList();
+    return PagedResponse(
+      items: items,
+      page: 1,
+      pageSize: pageSize,
+      totalCount: items.length,
+    );
   }
 
   @override
-  Future<List<RecipeDetailResponse>> loadPublishedDetails({int limit = 50}) async {
-    final snap =
-        await _db.collection('recipes').where('status', isEqualTo: 'published').orderBy('name').limit(limit).get();
-    if (snap.docs.isEmpty && snap.metadata.isFromCache) throw const RecipeOfflineException();
+  Future<List<RecipeDetailResponse>> loadPublishedDetails({
+    int limit = 50,
+  }) async {
+    final snap = await _db
+        .collection('recipes')
+        .where('status', isEqualTo: 'published')
+        .orderBy('name')
+        .limit(limit)
+        .get();
+    if (snap.docs.isEmpty && snap.metadata.isFromCache) {
+      throw const RecipeOfflineException();
+    }
     final out = <RecipeDetailResponse>[];
     for (final d in snap.docs) {
       try {
@@ -55,6 +86,28 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
   }
 
   @override
+  Stream<List<RecipeDetailResponse>> watchPublishedDetails({int limit = 50}) =>
+      _db
+          .collection('recipes')
+          .where('status', isEqualTo: 'published')
+          .orderBy('name')
+          .limit(limit)
+          .snapshots()
+          .map((snap) {
+            final out = <RecipeDetailResponse>[];
+            for (final d in snap.docs) {
+              try {
+                out.add(
+                  RecipeDetailResponse.fromJson(detailJson(d.id, d.data())),
+                );
+              } catch (_) {
+                // Bỏ qua món dữ liệu hỏng.
+              }
+            }
+            return out;
+          });
+
+  @override
   Future<RecipeDetailResponse> getRecipe(String id) async {
     final snap = await _db.doc('recipes/$id').get();
     final data = snap.data();
@@ -64,7 +117,8 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
     return RecipeDetailResponse.fromJson(detailJson(snap.id, data));
   }
 
-  static Map<String, dynamic> _summaryJson(String id, Map<String, dynamic> d) => {
+  static Map<String, dynamic> _summaryJson(String id, Map<String, dynamic> d) =>
+      {
         'id': id,
         'code': d['code'] ?? id,
         'state': 'active',
@@ -78,11 +132,19 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
 
   /// Firestore → JSON dạng `RecipeDetailResponse` của Gateway.
   static Map<String, dynamic> detailJson(String id, Map<String, dynamic> d) {
-    final ingredients = (d['ingredients'] as List<dynamic>? ?? const []).cast<Map<dynamic, dynamic>>();
-    final steps = (d['steps'] as List<dynamic>? ?? const []).cast<Map<dynamic, dynamic>>();
+    final ingredients = (d['ingredients'] as List<dynamic>? ?? const [])
+        .cast<Map<dynamic, dynamic>>();
+    final steps = (d['steps'] as List<dynamic>? ?? const [])
+        .cast<Map<dynamic, dynamic>>();
     return {
       ..._summaryJson(id, d),
       'description': d['description'],
+      'category': d['category'],
+      'videoUrl': d['videoUrl'],
+      'sizes': d['sizes'] ?? const [],
+      'servingNotes': d['servingNotes'] ?? const [],
+      'specialRequests': d['specialRequests'] ?? const [],
+      'sopCodes': d['sopCodes'] ?? const [],
       'ingredients': [
         for (var i = 0; i < ingredients.length; i++)
           {
@@ -108,7 +170,8 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
             'title': steps[i]['title'] ?? 'Bước ${i + 1}',
             'description': steps[i]['description'] ?? '',
             'durationSeconds': (steps[i]['durationSeconds'] as num?)?.toInt(),
-            'temperatureCelsius': (steps[i]['temperatureCelsius'] as num?)?.toDouble(),
+            'temperatureCelsius': (steps[i]['temperatureCelsius'] as num?)
+                ?.toDouble(),
             'equipment': steps[i]['equipment'],
             'safetyNote': steps[i]['safetyNote'],
             'media': const [],
@@ -117,6 +180,7 @@ class FirestoreRecipeSource implements IRecipeSource, IBulkRecipeSource {
     };
   }
 
-  static String _iso(Object? v) =>
-      v is Timestamp ? v.toDate().toUtc().toIso8601String() : DateTime.now().toUtc().toIso8601String();
+  static String _iso(Object? v) => v is Timestamp
+      ? v.toDate().toUtc().toIso8601String()
+      : DateTime.now().toUtc().toIso8601String();
 }

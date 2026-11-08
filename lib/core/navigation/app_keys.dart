@@ -15,8 +15,18 @@ class AppKeys {
   // M-01 Login
   static const googleSignIn = Key('login_google');
   static const guestSignIn = Key('login_guest');
-  static Key roleOption(String role) => Key('login_role_$role'); // viewer | admin
+  static Key roleOption(String role) =>
+      Key('login_role_$role'); // viewer | admin
   static const loginError = Key('login_error');
+  static const selfPracticeFab = Key('self_practice_fab');
+  static const loginEmail = Key('login_email');
+  static const loginPassword = Key('login_password');
+  static const loginTogglePassword = Key('login_toggle_password');
+  static const loginSubmit = Key('login_submit');
+  static const loginForgot = Key('login_forgot');
+  static const forgotEmail = Key('forgot_email');
+  static const forgotSubmit = Key('forgot_submit');
+  static const forgotResult = Key('forgot_result');
 
   // Recipe load gate
   static const recipeRetry = Key('recipe_load_retry');

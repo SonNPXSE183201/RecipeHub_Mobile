@@ -3,7 +3,10 @@ import 'recipe_service.dart';
 
 /// Nguồn công thức (API thật). Interface để test thay bằng fake, không mock trong app.
 abstract class IRecipeSource {
-  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({String? query, int pageSize = 50});
+  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({
+    String? query,
+    int pageSize = 50,
+  });
   Future<RecipeDetailResponse> getRecipe(String id);
 }
 
@@ -12,18 +15,30 @@ abstract class IBulkRecipeSource {
   Future<List<RecipeDetailResponse>> loadPublishedDetails({int limit = 50});
 }
 
+/// Nguồn phát thay đổi real-time (Firestore `snapshots()`): Admin sửa / ẩn món trên web thì app cập nhật ngay.
+abstract class ILiveRecipeSource {
+  Stream<List<RecipeDetailResponse>> watchPublishedDetails({int limit = 50});
+}
+
 /// Không có mạng và chưa có dữ liệu đệm (thay vì báo nhầm "chưa có món").
 class RecipeOfflineException implements Exception {
   const RecipeOfflineException();
 }
 
 class GatewayRecipeSource implements IRecipeSource {
-  GatewayRecipeSource([RecipeService? service]) : _service = service ?? RecipeService.instance;
+  GatewayRecipeSource([RecipeService? service])
+    : _service = service ?? RecipeService.instance;
   final RecipeService _service;
 
   @override
-  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({String? query, int pageSize = 50}) =>
-      _service.searchRecipes(query: query, versionStatus: 'published', pageSize: pageSize);
+  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({
+    String? query,
+    int pageSize = 50,
+  }) => _service.searchRecipes(
+    query: query,
+    versionStatus: 'published',
+    pageSize: pageSize,
+  );
 
   @override
   Future<RecipeDetailResponse> getRecipe(String id) => _service.getRecipe(id);
