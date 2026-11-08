@@ -11,8 +11,10 @@ service firebase.storage {
     function owner(uid) { return request.auth != null && request.auth.uid == uid; }
     function underLimit() { return request.resource.size < 5 * 1024 * 1024; }
 
+    // Admin cửa hàng (claim role = admin) xem ảnh đính kèm phản hồi của mọi Barista.
     match /feedback/{uid}/{allPaths=**} {
-      allow read, delete: if owner(uid);
+      allow read: if owner(uid) || (request.auth != null && request.auth.token.role == 'admin');
+      allow delete: if owner(uid);
       allow create, update: if owner(uid) && underLimit()
                             && request.resource.contentType.matches('image/(png|jpeg|jpg|webp|heic|heif)');
     }
@@ -27,6 +29,15 @@ service firebase.storage {
     match /sop/{file} {
       allow read: if request.auth != null;
       allow write: if false;
+    }
+
+    // Video hướng dẫn món: Admin tải lên từ web (MP4 ≤ 100 MB), mọi tài khoản đăng nhập xem.
+    match /recipe-videos/{code}/{file} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.token.role == 'admin'
+                            && request.resource.size < 100 * 1024 * 1024
+                            && request.resource.contentType == 'video/mp4';
+      allow delete: if request.auth != null && request.auth.token.role == 'admin';
     }
 
     match /{allPaths=**} {

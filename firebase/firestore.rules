@@ -112,5 +112,155 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
     }
+
+    // ---------- catalog đào tạo: Admin nạp/sửa trên web, mọi tài khoản đã đăng nhập đọc ----------
+    function isCatalogDoc(d) {
+      return d.updatedAt == request.time && d.keys().size() <= 40;
+    }
+    match /sops/{code} {
+      allow read: if signedIn() && (isAdmin() || resource.data.status == 'published');
+      allow create, update: if isAdmin() && request.resource.data.code == code
+        && isShortString(request.resource.data.title, 200) && request.resource.data.title.size() > 0
+        && request.resource.data.status in ['published', 'hidden']
+        && request.resource.data.steps is list && isCatalogDoc(request.resource.data);
+      allow delete: if false;
+    }
+    match /learningTasks/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.status == 'active');
+      allow create, update: if isAdmin()
+        && isShortString(request.resource.data.title, 200) && request.resource.data.title.size() > 0
+        && request.resource.data.type in ['sop', 'recipe']
+        && request.resource.data.status in ['active', 'archived']
+        && request.resource.data.sections is list && isCatalogDoc(request.resource.data);
+      allow delete: if false;
+    }
+    match /evaluationCriteria/{group} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin() && request.resource.data.criteria is list
+        && isCatalogDoc(request.resource.data);
+      allow delete: if false;
+    }
+    match /quizzes/{quizId} {
+      // Câu hỏi KHÔNG chứa đáp án.
+      allow read: if signedIn();
+      allow create, update: if isAdmin() && request.resource.data.questions is list
+        && !('correctIndex' in request.resource.data) && isCatalogDoc(request.resource.data);
+      allow delete: if false;
+
+      // Đáp án chỉ đọc được sau khi chính người đó đã nộp lần đầu (bài nộp không sửa được).
+      match /answerKey/{doc} {
+        allow read: if isAdmin() || (signedIn()
+          && exists(/databases/$(database)/documents/quizAttempts/$(request.auth.uid + '_' + quizId + '_1')));
+        allow create, update: if isAdmin() && request.resource.data.correct is list;
+        allow delete: if false;
+      }
+    }
+    match /quizAttempts/{attemptId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if notDisabled() && request.resource.data.uid == request.auth.uid
+        && attemptId == request.auth.uid + '_' + request.resource.data.quizId + '_' + string(request.resource.data.attemptNo)
+        && request.resource.data.attemptNo is int && request.resource.data.attemptNo >= 1
+        && request.resource.data.answers is list
+        && request.resource.data.submittedAt == request.time
+        && request.resource.data.keys().hasOnly(['uid', 'userName', 'quizId', 'quizTitle', 'attemptNo', 'answers',
+                                                  'score', 'total', 'submittedAt']);
+      allow update, delete: if false;
+    }
+
+    // ---------- tiến độ học + tự luyện của chính người dùng (Admin đọc để giám sát) ----------
+    match /users/{uid}/taskProgress/{taskId} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow create, update: if isSelf(uid) && notDisabled()
+        && request.resource.data.keys().hasOnly(['taskId', 'completedSections', 'totalSections', 'status',
+                                                  'progress', 'updatedAt'])
+        && request.resource.data.taskId == taskId
+        && request.resource.data.completedSections is list
+        && request.resource.data.status in ['notStarted', 'inProgress', 'completed']
+        && request.resource.data.progress is number
+        && request.resource.data.progress >= 0 && request.resource.data.progress <= 1
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+    match /users/{uid}/practiceRecords/{id} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid) && notDisabled()
+        && request.resource.data.keys().hasOnly(['recipeName', 'recipeCode', 'size', 'durationSeconds', 'notes',
+                                                  'practicedAt', 'targetSeconds', 'createdAt'])
+        && request.resource.data.durationSeconds is int && request.resource.data.durationSeconds >= 0
+        && isShortString(request.resource.data.recipeCode, 60)
+        && isOptString(request.resource.data, 'notes', 1000)
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if isSelf(uid);
+    }
+
+    // ---------- chấm thực hành tại quầy: Admin chấm, Barista xem kết quả của mình ----------
+    match /evaluations/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.traineeUid == request.auth.uid);
+      allow create: if isAdmin()
+        && request.resource.data.evaluatorUid == request.auth.uid
+        && request.resource.data.traineeUid is string && request.resource.data.traineeUid.size() > 0
+        && request.resource.data.criteria is list && request.resource.data.criteria.size() > 0
+        && request.resource.data.isPassed is bool
+        && isShortString(request.resource.data.recipeCode, 60)
+        && isOptString(request.resource.data, 'overallComment', 2000)
+        && isOptString(request.resource.data, 'relearnPlan', 2000)
+        && request.resource.data.evaluatedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // ---------- feedback (Barista gửi → Admin xem, trả lời, đổi trạng thái) ----------
+    // Viewer chỉ đọc phản hồi của chính mình (query phải lọc ownerUid); Admin đọc tất cả.
+    match /feedback/{id} {
+      function isOwner() { return signedIn() && resource.data.ownerUid == request.auth.uid; }
+      function validNewFeedback(d) {
+        return d.keys().hasAll(['ownerUid', 'ownerName', 'type', 'content', 'targetCode', 'targetName',
+                                'status', 'createdAt', 'updatedAt', 'replyCount'])
+          && d.keys().hasOnly(['ownerUid', 'ownerName', 'ownerRole', 'storeBranch', 'type', 'content',
+                               'targetCode', 'targetName', 'version', 'stepNote', 'attachmentUrl',
+                               'attachmentPath', 'status', 'createdAt', 'updatedAt', 'replyCount', 'lastReplyAt'])
+          && d.ownerUid == request.auth.uid
+          && d.type in ['inquiry', 'issue', 'suggestion']
+          && d.status == 'newFeedback'
+          && d.createdAt == request.time && d.updatedAt == request.time
+          && d.replyCount == 0
+          && isShortString(d.ownerName, 120)
+          && isShortString(d.content, 2000) && d.content.size() > 0
+          && isShortString(d.targetCode, 60) && isShortString(d.targetName, 160)
+          && isOptString(d, 'ownerRole', 60) && isOptString(d, 'storeBranch', 160)
+          && isOptString(d, 'version', 20) && isOptString(d, 'stepNote', 300)
+          && isOptString(d, 'attachmentUrl', 2048)
+          && (!('attachmentPath' in d) || d.attachmentPath == null
+              || d.attachmentPath.matches('feedback/' + request.auth.uid + '/.+'));
+      }
+
+      allow create: if notDisabled() && validNewFeedback(request.resource.data);
+      allow get: if isOwner() || isAdmin();
+      allow list: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      // Admin đổi trạng thái; chủ hoặc Admin cập nhật bộ đếm trả lời (cùng batch với reply).
+      allow update: if notDisabled() && request.resource.data.updatedAt == request.time
+        && request.resource.data.replyCount is int
+        && request.resource.data.replyCount >= resource.data.replyCount
+        && request.resource.data.replyCount <= resource.data.replyCount + 1
+        && ((isAdmin()
+              && changedOnly(['status', 'updatedAt', 'replyCount', 'lastReplyAt'])
+              && request.resource.data.status in ['newFeedback', 'inProgress', 'waitingInfo', 'resolved', 'closed'])
+            || (isOwner() && changedOnly(['updatedAt', 'replyCount', 'lastReplyAt'])));
+      allow delete: if false;
+
+      match /replies/{rid} {
+        function parent() { return get(/databases/$(database)/documents/feedback/$(id)).data; }
+        function canSee() { return isAdmin() || (signedIn() && parent().ownerUid == request.auth.uid); }
+        allow read: if canSee();
+        allow create: if notDisabled() && canSee()
+          && request.resource.data.keys().hasOnly(['authorUid', 'authorName', 'isAdmin', 'message', 'createdAt'])
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.isAdmin == isAdmin()
+          && isShortString(request.resource.data.authorName, 120)
+          && isShortString(request.resource.data.message, 2000) && request.resource.data.message.size() > 0
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+    }
   }
 }
