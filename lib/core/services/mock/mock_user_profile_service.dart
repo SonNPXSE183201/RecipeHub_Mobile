@@ -9,7 +9,8 @@ class MockUserProfileService implements IUserProfileService {
   String role;
   bool disabled = false;
   int syncCalls = 0;
-  final StreamController<ProfileState> _ctrl = StreamController<ProfileState>.broadcast();
+  final StreamController<ProfileState> _ctrl =
+      StreamController<ProfileState>.broadcast();
 
   void emit(ProfileState s) {
     role = s.role;

@@ -12,7 +12,11 @@ abstract class IUserProfileService {
 }
 
 class ProfileState {
-  const ProfileState({required this.role, required this.disabled, this.claimsVersion});
+  const ProfileState({
+    required this.role,
+    required this.disabled,
+    this.claimsVersion,
+  });
 
   /// 'viewer' | 'admin'.
   final String role;

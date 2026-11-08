@@ -18,7 +18,6 @@ import 'package:recipehub_mobile/core/viewmodels/practice_history_viewmodel.dart
 import 'package:recipehub_mobile/core/viewmodels/storage_viewmodel.dart';
 import 'package:recipehub_mobile/features/learning/notifications_page.dart';
 import 'package:recipehub_mobile/features/shell/main_app_shell.dart';
-import 'package:recipehub_mobile/core/services/mock_data_service.dart';
 import 'package:recipehub_mobile/core/services/recipe_mapper.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/recipe_viewmodel.dart';
@@ -41,41 +40,105 @@ Future<void> _frames(WidgetTester tester, [int n = 10]) async {
 }
 
 void main() {
-  testWidgets('E2E-01 Thông báo khi app đang mở: SnackBar có nút "Xem" mở đúng món, nguồn notification',
-      (tester) async {
-    _redmi7(tester);
-    final original = FlutterError.onError;
-    FlutterError.onError = (d) {
-      if (d.exceptionAsString().contains('overflowed')) return; // font test 1em/ký tự
-      original?.call(d);
-    };
-    addTearDown(() => FlutterError.onError = original);
+  testWidgets(
+    'E2E-01 Thông báo khi app đang mở: SnackBar có nút "Xem" mở đúng món, nguồn notification',
+    (tester) async {
+      _redmi7(tester);
+      final original = FlutterError.onError;
+      FlutterError.onError = (d) {
+        if (d.exceptionAsString().contains('overflowed')) {
+          return; // font test 1em/ký tự
+        }
+        original?.call(d);
+      };
+      addTearDown(() => FlutterError.onError = original);
 
-    final notifications = MockNotificationService();
-    final analytics = MockAnalyticsService();
-    final services = AppServices.mock(recipes: FakeRecipeSource(), notifications: notifications, analytics: analytics);
-    await tester.pumpWidget(RecipeHubApp(services: services));
-    await _frames(tester);
-    await tester.tap(find.byKey(AppKeys.guestSignIn));
-    await _frames(tester, 20);
+      final notifications = MockNotificationService();
+      final analytics = MockAnalyticsService();
+      final services = AppServices.mock(
+        recipes: FakeRecipeSource(),
+        notifications: notifications,
+        analytics: analytics,
+      );
+      await tester.pumpWidget(RecipeHubApp(services: services));
+      await _frames(tester);
+      await tester.tap(find.byKey(AppKeys.guestSignIn));
+      await _frames(tester, 20);
 
-    notifications.simulateForeground(AppNotification(
-      id: 'fg-1',
-      title: 'Họp ca tối',
-      body: 'Kiểm tra Cà Phê Muối',
-      receivedAt: DateTime(2026, 11, 5, 16, 27),
-      data: const {'type': 'recipe', 'target_id': 'RC-CFE-01'},
-    ));
-    await _frames(tester, 3);
-    expect(find.byKey(AppKeys.bannerOpen), findsOneWidget);
-    // Font test (1em/ký tự) làm nội dung SnackBar tràn, lệch vùng chạm → kích hoạt action trực tiếp.
-    tester.widget<SnackBarAction>(find.byKey(AppKeys.bannerOpen)).onPressed();
-    await _frames(tester, 6);
-    expect(find.byType(RecipeDetailSizePage), findsOneWidget);
-    expect(analytics.loggedEvents.lastWhere((e) => e.name == 'view_recipe').parameters['source'], 'notification');
-  });
+      notifications.simulateForeground(
+        AppNotification(
+          id: 'fg-1',
+          origin: NotificationOrigin.foreground,
+          title: 'Họp ca tối',
+          body: 'Kiểm tra Cà Phê Muối',
+          receivedAt: DateTime(2026, 11, 5, 16, 27),
+          data: const {'type': 'recipe', 'target_id': 'RC-CFE-01'},
+        ),
+      );
+      await _frames(tester, 3);
+      expect(find.byKey(AppKeys.bannerOpen), findsOneWidget);
+      // Font test (1em/ký tự) làm nội dung SnackBar tràn, lệch vùng chạm → kích hoạt action trực tiếp.
+      tester.widget<SnackBarAction>(find.byKey(AppKeys.bannerOpen)).onPressed();
+      await _frames(tester, 6);
+      expect(find.byType(RecipeDetailSizePage), findsOneWidget);
+      expect(
+        analytics.loggedEvents
+            .lastWhere((e) => e.name == 'view_recipe')
+            .parameters['source'],
+        'notification',
+      );
+    },
+  );
 
-  testWidgets('E2E-02 Thư viện SOP không tràn ngang trên màn 720px', (tester) async {
+  for (final origin in [
+    NotificationOrigin.background,
+    NotificationOrigin.terminated,
+  ]) {
+    testWidgets('Mở từ khay ($origin) không hiện SnackBar trùng', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final notification = AppNotification(
+        id: 'tray-${origin.name}',
+        title: 'Thông báo mới',
+        body: 'Nội dung cập nhật',
+        receivedAt: DateTime(2026, 11, 8),
+        origin: origin,
+      );
+      final notifications = MockNotificationService(
+        permission: NotificationPermission.granted,
+        initialNotification: origin == NotificationOrigin.terminated
+            ? notification
+            : null,
+      );
+      final services = AppServices.mock(
+        recipes: FakeRecipeSource(),
+        notifications: notifications,
+      );
+      await tester.pumpWidget(RecipeHubApp(services: services));
+      await _frames(tester);
+      await tester.tap(find.byKey(AppKeys.guestSignIn));
+      await _frames(tester, 4);
+      if (origin == NotificationOrigin.background) {
+        notifications.simulateOpened(notification);
+        await _frames(tester, 3);
+      }
+
+      expect(find.byType(NotificationsPage), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(AppKeys.bannerOpen), findsNothing);
+      final context = tester.element(find.byType(NotificationsPage));
+      final vm = context.read<NotificationViewModel>();
+      expect(vm.items.single.id, notification.id);
+      expect(vm.items.single.isRead, isTrue);
+    });
+  }
+
+  testWidgets('E2E-02 Thư viện SOP không tràn ngang trên màn 720px', (
+    tester,
+  ) async {
     _redmi7(tester);
     final services = AppServices.mock(recipes: FakeRecipeSource());
     final overflows = <String>[];
@@ -83,95 +146,155 @@ void main() {
     FlutterError.onError = (d) {
       final msg = d.exceptionAsString();
       // Chỉ bắt tràn trong card SOP (hàng mã/phiên bản/phân loại và hàng "Áp dụng").
-      if (msg.contains('overflowed') && d.toString().contains('sop_catalog_page.dart')) overflows.add(msg);
+      if (msg.contains('overflowed') &&
+          d.toString().contains('sop_catalog_page.dart')) {
+        overflows.add(msg);
+      }
     };
     addTearDown(() => FlutterError.onError = original);
-    await tester.pumpWidget(MultiProvider(
-      providers: [Provider<AppServices>.value(value: services)],
-      child: const MaterialApp(home: SopCatalogPage()),
-    ));
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [Provider<AppServices>.value(value: services)],
+        child: const MaterialApp(home: SopCatalogPage()),
+      ),
+    );
     await _frames(tester, 3);
     FlutterError.onError = original;
     expect(overflows, isEmpty);
   });
 
-  testWidgets('E2E-03 Chi tiết món: không hiện nhãn "Quy cách phục vụ chuẩn:" trống', (tester) async {
-    _redmi7(tester);
-    final original = FlutterError.onError;
-    FlutterError.onError = (d) {
-      if (d.exceptionAsString().contains('overflowed')) return;
-      original?.call(d);
-    };
-    addTearDown(() => FlutterError.onError = original);
-    final recipe = RecipeMapper.fromDetail(FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối'));
-    MockDataService.instance.recipes = [recipe];
-    final services = AppServices.mock(recipes: FakeRecipeSource());
-    await tester.pumpWidget(MultiProvider(
-      providers: [
-        Provider<AppServices>.value(value: services),
-        ChangeNotifierProvider(
-          create: (_) => AuthViewModel(auth: services.auth, analytics: services.analytics, crash: services.crash),
+  testWidgets(
+    'E2E-03 Chi tiết món: không hiện nhãn "Quy cách phục vụ chuẩn:" trống',
+    (tester) async {
+      _redmi7(tester);
+      final original = FlutterError.onError;
+      FlutterError.onError = (d) {
+        if (d.exceptionAsString().contains('overflowed')) return;
+        original?.call(d);
+      };
+      addTearDown(() => FlutterError.onError = original);
+      final recipe = RecipeMapper.fromDetail(
+        FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối'),
+      );
+      final services = AppServices.mock(recipes: FakeRecipeSource());
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AppServices>.value(value: services),
+            ChangeNotifierProvider(
+              create: (_) => AuthViewModel(
+                auth: services.auth,
+                analytics: services.analytics,
+                crash: services.crash,
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => RecipeViewModel(
+                source: services.recipes,
+                crash: services.crash,
+              ),
+            ),
+          ],
+          child: MaterialApp(home: RecipeDetailSizePage(recipe: recipe)),
         ),
-        ChangeNotifierProvider(create: (_) => RecipeViewModel(source: services.recipes, crash: services.crash)),
-      ],
-      child: MaterialApp(home: RecipeDetailSizePage(recipe: recipe)),
-    ));
-    await _frames(tester, 3);
-    expect(recipe.sizes.first.servingNotes, isEmpty);
-    expect(find.textContaining('Quy cách phục vụ chuẩn'), findsNothing);
-  });
+      );
+      await _frames(tester, 3);
+      expect(recipe.sizes.first.servingNotes, isEmpty);
+      expect(find.textContaining('Quy cách phục vụ chuẩn'), findsNothing);
+    },
+  );
 
-  testWidgets('E2E-04 Đang ở trang Thông báo thì shell bị gỡ (đổi vai trò/đăng xuất): back về không lỗi setState',
-      (tester) async {
-    _redmi7(tester);
-    final errors = <String>[];
-    final original = FlutterError.onError;
-    FlutterError.onError = (d) {
-      final msg = d.exceptionAsString();
-      if (!msg.contains('overflowed')) errors.add(msg);
-    };
-    addTearDown(() => FlutterError.onError = original);
-    final s = AppServices.mock(recipes: FakeRecipeSource());
-    final showShell = ValueNotifier(true);
-    final nav = GlobalKey<NavigatorState>();
-    await tester.pumpWidget(MultiProvider(
-      providers: [
-        Provider<AppServices>.value(value: s),
-        ChangeNotifierProvider(create: (_) => AuthViewModel(auth: s.auth, analytics: s.analytics, crash: s.crash)),
-        ChangeNotifierProvider(create: (_) => AppConfigViewModel(service: s.remoteConfig)..init()),
-        ChangeNotifierProvider(create: (_) => RecipeViewModel(source: s.recipes, crash: s.crash)..load()),
-        ChangeNotifierProvider(
-          create: (_) => StorageViewModel(
-            storage: s.storage, picker: s.mediaPicker, auth: s.auth, analytics: s.analytics, crash: s.crash,
+  testWidgets(
+    'E2E-04 Đang ở trang Thông báo thì shell bị gỡ (đổi vai trò/đăng xuất): back về không lỗi setState',
+    (tester) async {
+      _redmi7(tester);
+      final errors = <String>[];
+      final original = FlutterError.onError;
+      FlutterError.onError = (d) {
+        final msg = d.exceptionAsString();
+        if (!msg.contains('overflowed')) errors.add(msg);
+      };
+      addTearDown(() => FlutterError.onError = original);
+      final s = AppServices.mock(recipes: FakeRecipeSource());
+      final showShell = ValueNotifier(true);
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AppServices>.value(value: s),
+            ChangeNotifierProvider(
+              create: (_) => AuthViewModel(
+                auth: s.auth,
+                analytics: s.analytics,
+                crash: s.crash,
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (_) =>
+                  AppConfigViewModel(service: s.remoteConfig)..init(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) =>
+                  RecipeViewModel(source: s.recipes, crash: s.crash)..load(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => StorageViewModel(
+                storage: s.storage,
+                picker: s.mediaPicker,
+                auth: s.auth,
+                analytics: s.analytics,
+                crash: s.crash,
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => NotificationViewModel(
+                service: s.notifications,
+                crash: s.crash,
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (_) =>
+                  PracticeHistoryViewModel(store: s.practice, crash: s.crash),
+            ),
+          ],
+          child: MaterialApp(
+            navigatorKey: nav,
+            home: ValueListenableBuilder<bool>(
+              valueListenable: showShell,
+              builder: (_, show, _) => show
+                  ? const MainAppShell(key: ValueKey('shell_viewer'))
+                  : const Text('GONE'),
+            ),
           ),
         ),
-        ChangeNotifierProvider(create: (_) => NotificationViewModel(service: s.notifications, crash: s.crash)),
-        ChangeNotifierProvider(create: (_) => PracticeHistoryViewModel(store: s.practice, crash: s.crash)),
-      ],
-      child: MaterialApp(
-        navigatorKey: nav,
-        home: ValueListenableBuilder<bool>(
-          valueListenable: showShell,
-          builder: (_, show, _) => show ? const MainAppShell(key: ValueKey('shell_viewer')) : const Text('GONE'),
-        ),
-      ),
-    ));
-    await _frames(tester, 3);
-    tester.widget<IconButton>(find.byKey(AppKeys.notificationBell)).onPressed!();
-    await _frames(tester, 3);
-    expect(find.byType(NotificationsPage), findsOneWidget);
-    showShell.value = false; // AuthGate dựng shell mới theo vai trò → shell cũ bị dispose
-    await _frames(tester, 2);
-    nav.currentState!.pop();
-    await _frames(tester, 3);
-    FlutterError.onError = original;
-    expect(errors.where((e) => e.contains('setState() called after dispose')), isEmpty);
-  });
+      );
+      await _frames(tester, 3);
+      tester
+          .widget<IconButton>(find.byKey(AppKeys.notificationBell))
+          .onPressed!();
+      await _frames(tester, 3);
+      expect(find.byType(NotificationsPage), findsOneWidget);
+      showShell.value =
+          false; // AuthGate dựng shell mới theo vai trò → shell cũ bị dispose
+      await _frames(tester, 2);
+      nav.currentState!.pop();
+      await _frames(tester, 3);
+      FlutterError.onError = original;
+      expect(
+        errors.where((e) => e.contains('setState() called after dispose')),
+        isEmpty,
+      );
+    },
+  );
 
   test('E2E-05 Đăng nhập lỗi mạng/hủy: báo người dùng, không ghi Crashlytics; lỗi lạ vẫn ghi', () async {
     final auth = MockAuthService();
     final crash = MockCrashReporter();
-    final vm = AuthViewModel(auth: auth, analytics: MockAnalyticsService(), crash: crash);
+    final vm = AuthViewModel(
+      auth: auth,
+      analytics: MockAnalyticsService(),
+      crash: crash,
+    );
     auth.nextGoogleFailure = const AuthFailure(AuthFailureCode.network);
     expect(await vm.signInWithGoogle(), isFalse);
     expect(vm.errorMessage, isNotNull);
@@ -185,16 +308,28 @@ void main() {
 
   test('E2E-06 Chạm thông báo lúc app tắt: tin vẫn "đã đọc" dù background handler đã lưu bản chưa đọc', () async {
     AppNotification msg({bool read = false}) => AppNotification(
-          id: 'm-cold', title: 'Cold Brew mẻ mới', body: 'Ủ đủ 16 giờ', receivedAt: DateTime(2026, 11, 5, 16, 59),
-          data: const {'type': 'recipe', 'target_id': 'CF-COLDBREW'}, origin: NotificationOrigin.background,
-        )..isRead = read;
-    final service = _OpenedBeforeHistoryService(msg(read: true))..histories['u1'] = [msg()];
-    final vm = NotificationViewModel(service: service, crash: MockCrashReporter());
+      id: 'm-cold',
+      title: 'Cold Brew mẻ mới',
+      body: 'Ủ đủ 16 giờ',
+      receivedAt: DateTime(2026, 11, 5, 16, 59),
+      data: const {'type': 'recipe', 'target_id': 'CF-COLDBREW'},
+      origin: NotificationOrigin.background,
+    )..isRead = read;
+    final service = _OpenedBeforeHistoryService(msg(read: true))
+      ..histories['u1'] = [msg()];
+    final vm = NotificationViewModel(
+      service: service,
+      crash: MockCrashReporter(),
+    );
     await vm.start(roleCode: 'viewer', storeCode: 'hcm01', uid: 'u1');
     expect(vm.items.where((n) => n.id == 'm-cold'), hasLength(1));
     expect(vm.items.single.isRead, isTrue);
     expect(vm.takePendingDeepLink()?.id, 'CF-COLDBREW');
-    expect(service.histories['u1']!.single.isRead, isTrue, reason: 'lưu lại trạng thái đã đọc');
+    expect(
+      service.histories['u1']!.single.isRead,
+      isTrue,
+      reason: 'lưu lại trạng thái đã đọc',
+    );
   });
 }
 

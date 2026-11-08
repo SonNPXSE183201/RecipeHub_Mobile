@@ -1,21 +1,26 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/app_models.dart';
 import '../models/recipe_models.dart';
 import '../models/session_models.dart';
+import '../services/firebase/firestore_recipe_source.dart';
 import '../services/i_recipe_source.dart';
 import '../services/interfaces/i_crash_reporter.dart';
 import '../services/recipe_mapper.dart';
-import '../services/mock_data_service.dart';
 
-/// Nạp công thức đã ban hành từ Gateway thật; hiển thị loading / ready / empty / error.
+/// Nạp công thức đã ban hành; hiển thị loading / ready / empty / error.
+/// Nguồn Firestore: sau lần tải đầu, nghe `snapshots()` để cập nhật real-time khi Admin sửa trên web.
 class RecipeViewModel extends ChangeNotifier {
   RecipeViewModel({required this._source, required this._crash});
 
   final IRecipeSource _source;
   final ICrashReporter _crash;
   bool _disposed = false;
+  StreamSubscription<List<RecipeDetailResponse>>? _live;
+  int _liveLimit = 0;
 
   ViewState _state = ViewState.idle;
   List<RecipeItem> _items = const [];
@@ -38,34 +43,62 @@ class RecipeViewModel extends ChangeNotifier {
       final details = await _loadDetails(limit);
       _loadedLimit = limit;
       _items = details.map(RecipeMapper.fromDetail).toList();
-      MockDataService.instance.recipes = List.of(_items);
       _state = _items.isEmpty ? ViewState.empty : ViewState.ready;
+      _listen(limit);
     } catch (e, s) {
       // Tải ngầm lỗi: giữ danh sách đang có, chỉ ghi non-fatal.
       if (!silent) {
         _error = _message(e);
         _state = ViewState.error;
       }
-      await _crash.recordError(e, s, reason: silent ? 'recipe_reload_limit' : 'recipe_load');
+      await _crash.recordError(
+        e,
+        s,
+        reason: silent ? 'recipe_reload_limit' : 'recipe_load',
+      );
     }
     _notify();
+  }
+
+  void _listen(int limit) {
+    final src = _source;
+    if (src is! ILiveRecipeSource) return;
+    if (_live != null && _liveLimit == limit) return;
+    _live?.cancel();
+    _liveLimit = limit;
+    _live = (src as ILiveRecipeSource)
+        .watchPublishedDetails(limit: limit)
+        .listen(
+          (details) {
+            _items = details.map(RecipeMapper.fromDetail).toList();
+            _state = _items.isEmpty ? ViewState.empty : ViewState.ready;
+            _error = null;
+            _notify();
+          },
+          onError: (Object e, StackTrace s) =>
+              _crash.recordError(e, s, reason: 'recipe_live'),
+        );
   }
 
   /// Firestore: một truy vấn ra đủ chi tiết. Gateway: danh sách + chi tiết từng món; món lỗi (vừa bị ẩn,
   /// 404…) bị bỏ qua thay vì làm hỏng cả lần tải – chỉ báo lỗi khi KHÔNG món nào tải được.
   Future<List<RecipeDetailResponse>> _loadDetails(int limit) async {
     final src = _source;
-    if (src is IBulkRecipeSource) return (src as IBulkRecipeSource).loadPublishedDetails(limit: limit);
+    if (src is IBulkRecipeSource) {
+      return (src as IBulkRecipeSource).loadPublishedDetails(limit: limit);
+    }
     final page = await src.searchApproved(pageSize: limit);
     Object? firstError;
-    final details = await Future.wait(page.items.map((s) async {
-      try {
-        return await src.getRecipe(s.id);
-      } catch (e) {
-        firstError ??= e;
-        return null;
-      }
-    }));
+    final details = await Future.wait(
+      page.items.map((s) async {
+        try {
+          return await src.getRecipe(s.id);
+        } catch (e) {
+          firstError ??= e;
+          return null;
+        }
+      }),
+    );
     final ok = details.whereType<RecipeDetailResponse>().toList();
     if (ok.isEmpty && firstError != null) throw firstError!;
     return ok;
@@ -75,11 +108,47 @@ class RecipeViewModel extends ChangeNotifier {
   /// Tăng vượt số đã tải trong khi danh sách đang bị cắt đúng bằng giới hạn cũ → tải lại ngầm.
   Future<void> applyLimit(int limit) async {
     if (kDebugMode) {
-      debugPrint('[Recipe] applyLimit $limit state=$_state loaded=$_loadedLimit items=${_items.length}');
+      debugPrint(
+        '[Recipe] applyLimit $limit state=$_state loaded=$_loadedLimit items=${_items.length}',
+      );
     }
     if (_state != ViewState.ready) return;
     if (limit > _loadedLimit && _items.length >= _loadedLimit) {
       await load(limit: limit, silent: true);
+    }
+  }
+
+  /// Cùng điều kiện tìm theo tên không dấu hoặc mã cho kết quả cục bộ và server.
+  static bool matchesQuery(RecipeItem recipe, String query) {
+    final normalized = FirestoreRecipeSource.normalize(query.trim());
+    return normalized.isEmpty ||
+        FirestoreRecipeSource.normalize(recipe.name).contains(normalized) ||
+        recipe.code.toLowerCase().contains(normalized);
+  }
+
+  /// Tìm trên server các món ngoài danh sách đã tải (bị giới hạn bởi Remote Config `max_lookup_results`).
+  /// Lỗi mạng → danh sách rỗng (màn vẫn hiện kết quả cục bộ).
+  Future<List<RecipeItem>> searchAll(String query, {int limit = 20}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    try {
+      final page = await _source.searchApproved(query: q, pageSize: limit);
+      final known = {for (final r in _items) r.code};
+      final out = <RecipeItem>[];
+      for (final s in page.items) {
+        if (known.contains(s.code)) continue;
+        try {
+          final recipe = RecipeMapper.fromDetail(await _source.getRecipe(s.id));
+          // Server có thể chỉ khớp từ đầu tiên; kiểm tra lại toàn bộ query.
+          if (matchesQuery(recipe, q)) out.add(recipe);
+        } catch (_) {
+          // Món vừa bị ẩn: bỏ qua.
+        }
+      }
+      return out;
+    } catch (e, s) {
+      await _crash.recordError(e, s, reason: 'recipe_search_remote');
+      return const [];
     }
   }
 
@@ -126,7 +195,9 @@ class RecipeViewModel extends ChangeNotifier {
           return 'Không kết nối được máy chủ công thức. Kiểm tra mạng / Gateway rồi thử lại.';
         default:
           final code = e.response?.statusCode;
-          return code == null ? 'Lỗi mạng khi tải công thức.' : 'Máy chủ trả lỗi $code khi tải công thức.';
+          return code == null
+              ? 'Lỗi mạng khi tải công thức.'
+              : 'Máy chủ trả lỗi $code khi tải công thức.';
       }
     }
     return 'Không tải được công thức. Vui lòng thử lại.';
@@ -139,6 +210,7 @@ class RecipeViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _live?.cancel();
     super.dispose();
   }
 }

@@ -34,7 +34,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/fake_recipe_source.dart';
 
-Future<void> _settle([int ms = 20]) => Future<void>.delayed(Duration(milliseconds: ms));
+Future<void> _settle([int ms = 20]) =>
+    Future<void>.delayed(Duration(milliseconds: ms));
 
 /// Thiết bị không bao giờ xác nhận xóa (Firestore offline).
 class _HangingRegistry implements IDeviceRegistry {
@@ -66,8 +67,10 @@ class _SlowProfile extends MockUserProfileService {
 
 class _OfflineSource extends FakeRecipeSource {
   @override
-  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({String? query, int pageSize = 50}) =>
-      Future.error(const RecipeOfflineException());
+  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({
+    String? query,
+    int pageSize = 50,
+  }) => Future.error(const RecipeOfflineException());
 }
 
 /// Món thứ hai lỗi (vừa bị ẩn) – lần tải vẫn phải ra các món còn lại.
@@ -80,24 +83,38 @@ class _PartlyBrokenSource extends FakeRecipeSource {
 }
 
 AuthViewModel _vm(MockAuthService auth, {IUserProfileService? profile}) =>
-    AuthViewModel(auth: auth, analytics: MockAnalyticsService(), crash: MockCrashReporter(), profile: profile)
-      ..start();
+    AuthViewModel(
+      auth: auth,
+      analytics: MockAnalyticsService(),
+      crash: MockCrashReporter(),
+      profile: profile,
+    )..start();
 
-Map<String, dynamic> _recipeDoc(String code, String name, {String status = 'published'}) => {
-      'code': code,
-      'name': name,
-      'description': 'Mô tả $name',
-      'status': status,
-      'versionNumber': 1,
-      'ingredients': [
-        {'name': 'Espresso', 'quantity': 40, 'unit': 'ml'},
-      ],
-      'steps': [
-        {'title': 'Chiết xuất', 'description': '2 shot', 'durationSeconds': 28, 'equipment': 'Máy', 'safetyNote': 'Nóng'},
-      ],
-      'searchKeywords': FirestoreRecipeSource.normalize('$name $code').split(' '),
-      'updatedAt': Timestamp.fromDate(DateTime(2026, 11, 5)),
-    };
+Map<String, dynamic> _recipeDoc(
+  String code,
+  String name, {
+  String status = 'published',
+}) => {
+  'code': code,
+  'name': name,
+  'description': 'Mô tả $name',
+  'status': status,
+  'versionNumber': 1,
+  'ingredients': [
+    {'name': 'Espresso', 'quantity': 40, 'unit': 'ml'},
+  ],
+  'steps': [
+    {
+      'title': 'Chiết xuất',
+      'description': '2 shot',
+      'durationSeconds': 28,
+      'equipment': 'Máy',
+      'safetyNote': 'Nóng',
+    },
+  ],
+  'searchKeywords': FirestoreRecipeSource.normalize('$name $code').split(' '),
+  'updatedAt': Timestamp.fromDate(DateTime(2026, 11, 5)),
+};
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -106,7 +123,11 @@ void main() {
     test('RF-01 đăng xuất KHÔNG treo khi xóa thiết bị không bao giờ xong (offline)', () async {
       final auth = MockAuthService();
       final vm = _vm(auth);
-      final notif = NotificationViewModel(service: MockNotificationService(), crash: MockCrashReporter(), devices: _HangingRegistry());
+      final notif = NotificationViewModel(
+        service: MockNotificationService(),
+        crash: MockCrashReporter(),
+        devices: _HangingRegistry(),
+      );
       vm.addBeforeSignOut(notif.unregisterDevice);
       await _settle();
       await vm.signInWithGoogle();
@@ -130,7 +151,11 @@ void main() {
       await _settle();
       expect(vm.status, AuthStatus.authenticated);
       expect(vm.isAdmin, isTrue);
-      expect(profile.syncCalls, 1, reason: 'authStateChanges và signIn dùng chung một lần đồng bộ');
+      expect(
+        profile.syncCalls,
+        1,
+        reason: 'authStateChanges và signIn dùng chung một lần đồng bộ',
+      );
 
       final locked = _SlowProfile()..disabled = true;
       final vm2 = _vm(MockAuthService(), profile: locked);
@@ -166,14 +191,22 @@ void main() {
       final profile = _SlowProfile(role: 'viewer')..failRefresh = true;
       profile.gate.complete();
       final analytics = MockAnalyticsService();
-      final vm = AuthViewModel(auth: MockAuthService(), analytics: analytics, crash: MockCrashReporter(), profile: profile)
-        ..start();
+      final vm = AuthViewModel(
+        auth: MockAuthService(),
+        analytics: analytics,
+        crash: MockCrashReporter(),
+        profile: profile,
+      )..start();
       await _settle();
       await vm.signInWithGoogle();
       await _settle();
-      profile.emit(const ProfileState(role: 'viewer', disabled: false, claimsVersion: 1));
+      profile.emit(
+        const ProfileState(role: 'viewer', disabled: false, claimsVersion: 1),
+      );
       await _settle();
-      profile.emit(const ProfileState(role: 'admin', disabled: false, claimsVersion: 2));
+      profile.emit(
+        const ProfileState(role: 'admin', disabled: false, claimsVersion: 2),
+      );
       await _settle();
       expect(vm.isAdmin, isTrue);
       profile.emit(const ProfileState(role: 'admin', disabled: true));
@@ -186,9 +219,20 @@ void main() {
   group('NotificationViewModel', () {
     test('RF-05 lịch sử thông báo tách theo người dùng', () async {
       final service = MockNotificationService();
-      final vm = NotificationViewModel(service: service, crash: MockCrashReporter(), devices: MockDeviceRegistry());
+      final vm = NotificationViewModel(
+        service: service,
+        crash: MockCrashReporter(),
+        devices: MockDeviceRegistry(),
+      );
       await vm.start(roleCode: 'viewer', storeCode: 'Q1', uid: 'A');
-      service.simulateForeground(AppNotification(id: 'n1', title: 'Riêng A', body: '', receivedAt: DateTime.now()));
+      service.simulateForeground(
+        AppNotification(
+          id: 'n1',
+          title: 'Riêng A',
+          body: '',
+          receivedAt: DateTime.now(),
+        ),
+      );
       await _settle();
       expect(vm.items, hasLength(1));
       await vm.reset();
@@ -198,7 +242,10 @@ void main() {
     });
 
     test('RF-06 vai trò đổi → đổi topic role_*', () async {
-      final vm = NotificationViewModel(service: MockNotificationService(), crash: MockCrashReporter());
+      final vm = NotificationViewModel(
+        service: MockNotificationService(),
+        crash: MockCrashReporter(),
+      );
       await vm.start(roleCode: 'viewer', storeCode: 'Q1', uid: 'A');
       await _settle();
       expect(vm.topics, contains('role_viewer'));
@@ -209,39 +256,76 @@ void main() {
   });
 
   group('Sự cố', () {
-    test('RF-07 cùng id gửi 2 lần không trùng; gửi bù chỉ sau khi đăng nhập', () async {
-      final r = MockIncidentReporter();
-      final rep = IncidentReport(kind: IncidentKind.fatal, source: IncidentSource.flutterError, message: 'x');
-      await r.report(rep);
-      await r.report(rep);
-      expect(r.reported, hasLength(1));
-      await r.stashForNextLaunch(IncidentReport(kind: IncidentKind.fatal, source: IncidentSource.platformError, message: 'y'));
-      r.scheduleFlush(crashedLastRun: true);
-      expect(r.flushCount, 0, reason: 'chưa đăng nhập → chưa gửi');
-      r.setUser(uid: 'u1', email: 'a@x.com');
-      await _settle();
-      expect(r.flushCount, 1);
-      expect(r.reported.map((e) => e.message), contains('y'));
-    });
+    test(
+      'RF-07 cùng id gửi 2 lần không trùng; gửi bù chỉ sau khi đăng nhập',
+      () async {
+        final r = MockIncidentReporter();
+        final rep = IncidentReport(
+          kind: IncidentKind.fatal,
+          source: IncidentSource.flutterError,
+          message: 'x',
+        );
+        await r.report(rep);
+        await r.report(rep);
+        expect(r.reported, hasLength(1));
+        await r.stashForNextLaunch(
+          IncidentReport(
+            kind: IncidentKind.fatal,
+            source: IncidentSource.platformError,
+            message: 'y',
+          ),
+        );
+        r.scheduleFlush(crashedLastRun: true);
+        expect(r.flushCount, 0, reason: 'chưa đăng nhập → chưa gửi');
+        r.setUser(uid: 'u1', email: 'a@x.com');
+        await _settle();
+        expect(r.flushCount, 1);
+        expect(r.reported.map((e) => e.message), contains('y'));
+      },
+    );
 
     test('RF-08 Firestore reporter: id = document id; gửi bù không đổi người dùng hiện tại; stash người khác gửi ẩn danh', () async {
       final db = FakeFirebaseFirestore();
       final reporter = FirestoreIncidentReporter(firestore: db);
       reporter.setUser(uid: 'u1', email: 'u1@x.com');
-      await reporter.stashForNextLaunch(IncidentReport(kind: IncidentKind.fatal, source: IncidentSource.flutterError, message: 'cũ của u1'));
+      await reporter.stashForNextLaunch(
+        IncidentReport(
+          kind: IncidentKind.fatal,
+          source: IncidentSource.flutterError,
+          message: 'cũ của u1',
+        ),
+      );
       reporter.setUser(uid: 'u2', email: 'u2@x.com');
-      final rep = IncidentReport(kind: IncidentKind.nonFatal, source: IncidentSource.nonFatalReport, message: 'mới');
+      final rep = IncidentReport(
+        kind: IncidentKind.nonFatal,
+        source: IncidentSource.nonFatalReport,
+        message: 'mới',
+      );
       expect(await reporter.report(rep), isTrue);
       final doc = (await db.doc('incidents/${rep.id}').get()).data()!;
       expect(doc['uid'], 'u2');
       expect(doc['status'], 'open');
       expect(await reporter.flushPending(crashedLastRun: false), 1);
-      final all = (await db.collection('incidents').get()).docs.map((d) => d.data()).toList();
+      final all = (await db.collection('incidents').get()).docs
+          .map((d) => d.data())
+          .toList();
       final old = all.firstWhere((d) => d['message'] == 'cũ của u1');
-      expect(old['uid'], isNull, reason: 'rules chỉ cho ghi uid của chính mình');
-      final rep2 = IncidentReport(kind: IncidentKind.nonFatal, source: IncidentSource.nonFatalReport, message: 'sau flush');
+      expect(
+        old['uid'],
+        isNull,
+        reason: 'rules chỉ cho ghi uid của chính mình',
+      );
+      final rep2 = IncidentReport(
+        kind: IncidentKind.nonFatal,
+        source: IncidentSource.nonFatalReport,
+        message: 'sau flush',
+      );
       await reporter.report(rep2);
-      expect((await db.doc('incidents/${rep2.id}').get()).data()!['uid'], 'u2', reason: 'flush không xóa người dùng hiện tại');
+      expect(
+        (await db.doc('incidents/${rep2.id}').get()).data()!['uid'],
+        'u2',
+        reason: 'flush không xóa người dùng hiện tại',
+      );
       await reporter.stashForNextLaunch(rep2);
       await reporter.removeStashed(rep2.id);
       expect(await reporter.flushPending(crashedLastRun: false), 0);
@@ -249,24 +333,37 @@ void main() {
 
     test('RF-09 crash lần trước: gửi previous_crash một lần; nút demo đã báo thì không', () async {
       final db = FakeFirebaseFirestore();
-      final reporter = FirestoreIncidentReporter(firestore: db)..setUser(uid: 'u', email: 'u@x.com');
+      final reporter = FirestoreIncidentReporter(firestore: db)
+        ..setUser(uid: 'u', email: 'u@x.com');
       expect(await reporter.flushPending(crashedLastRun: true), 1);
       await reporter.markCrashAlreadyReported();
       expect(await reporter.flushPending(crashedLastRun: true), 0);
-      expect((await db.collection('incidents').get()).docs.single.data()['source'], 'previous_crash');
+      expect(
+        (await db.collection('incidents').get()).docs.single.data()['source'],
+        'previous_crash',
+      );
     });
   });
 
   group('Công thức', () {
-    test('RF-10 offline chưa có dữ liệu → lỗi mạng, không phải "chưa có món"', () async {
-      final vm = RecipeViewModel(source: _OfflineSource(), crash: MockCrashReporter());
-      await vm.load();
-      expect(vm.state, ViewState.error);
-      expect(vm.error, contains('mạng'));
-    });
+    test(
+      'RF-10 offline chưa có dữ liệu → lỗi mạng, không phải "chưa có món"',
+      () async {
+        final vm = RecipeViewModel(
+          source: _OfflineSource(),
+          crash: MockCrashReporter(),
+        );
+        await vm.load();
+        expect(vm.state, ViewState.error);
+        expect(vm.error, contains('mạng'));
+      },
+    );
 
     test('RF-11 một món lỗi không làm hỏng cả danh sách', () async {
-      final vm = RecipeViewModel(source: _PartlyBrokenSource(), crash: MockCrashReporter());
+      final vm = RecipeViewModel(
+        source: _PartlyBrokenSource(),
+        crash: MockCrashReporter(),
+      );
       await vm.load();
       expect(vm.state, ViewState.ready);
       expect(vm.items.map((r) => r.code), isNot(contains('RC-CFE-01')));
@@ -275,10 +372,19 @@ void main() {
 
     test('RF-12 FirestoreRecipeSource: tải một lần đủ chi tiết, deep link đọc thẳng theo mã, món ẩn bị chặn', () async {
       final db = FakeFirebaseFirestore();
-      for (final (code, name) in [('CF-A1', 'Cà Phê A'), ('CF-A2', 'Cà Phê B'), ('CF-A3', 'Cà Phê C'), ('CF-A4', 'Cà Phê D'), ('CF-A5', 'Cà Phê E'), ('CF-BACXIU', 'Bạc Xỉu')]) {
+      for (final (code, name) in [
+        ('CF-A1', 'Cà Phê A'),
+        ('CF-A2', 'Cà Phê B'),
+        ('CF-A3', 'Cà Phê C'),
+        ('CF-A4', 'Cà Phê D'),
+        ('CF-A5', 'Cà Phê E'),
+        ('CF-BACXIU', 'Bạc Xỉu'),
+      ]) {
         await db.doc('recipes/$code').set(_recipeDoc(code, name));
       }
-      await db.doc('recipes/TS-HIDE').set(_recipeDoc('TS-HIDE', 'Ẩn', status: 'hidden'));
+      await db
+          .doc('recipes/TS-HIDE')
+          .set(_recipeDoc('TS-HIDE', 'Ẩn', status: 'hidden'));
       final src = FirestoreRecipeSource(firestore: db);
       final details = await src.loadPublishedDetails(limit: 50);
       expect(details, hasLength(6));
@@ -296,12 +402,22 @@ void main() {
     });
 
     test('RF-13 nhóm món theo tiền tố mã; RecipeItem so sánh theo id', () {
-      expect(RecipeMapper.categoryOf('Bạc Xỉu', code: 'CF-BACXIU'), 'Cà phê & Cold Brew');
-      expect(RecipeMapper.categoryOf('Matcha', code: 'TS-MATCHA'), 'Trà Sữa & Kem Mây');
+      expect(
+        RecipeMapper.categoryOf('Bạc Xỉu', code: 'CF-BACXIU'),
+        'Cà phê & Cold Brew',
+      );
+      expect(
+        RecipeMapper.categoryOf('Matcha', code: 'TS-MATCHA'),
+        'Trà Sữa & Kem Mây',
+      );
       expect(RecipeMapper.categoryOf('Đào', code: 'TT-DAO'), 'Trà Trái Cây');
       expect(RecipeMapper.categoryOf('Bạc xỉu đá'), 'Cà phê & Cold Brew');
-      final a = RecipeMapper.fromDetail(FakeRecipeSource.detail('r-1', 'RC-1', 'A'));
-      final b = RecipeMapper.fromDetail(FakeRecipeSource.detail('r-1', 'RC-1', 'A'));
+      final a = RecipeMapper.fromDetail(
+        FakeRecipeSource.detail('r-1', 'RC-1', 'A'),
+      );
+      final b = RecipeMapper.fromDetail(
+        FakeRecipeSource.detail('r-1', 'RC-1', 'A'),
+      );
       expect(a, b);
       expect({a, b}, hasLength(1));
     });
@@ -316,14 +432,30 @@ void main() {
       expect(id, hasLength(32));
       final d = (await db.doc('users/u1/devices/$id').get()).data()!;
       expect(d['token'], 'tok:abc');
-      expect(d.keys, containsAll(['platform', 'model', 'osVersion', 'appVersion', 'updatedAt']));
+      expect(
+        d.keys,
+        containsAll([
+          'platform',
+          'model',
+          'osVersion',
+          'appVersion',
+          'updatedAt',
+        ]),
+      );
       await reg.unregister('u1', 'tok:abc');
       expect((await db.doc('users/u1/devices/$id').get()).exists, isFalse);
     });
 
     test('RF-15 hồ sơ: ensureProfile + làm mới token khi cần; nghe khóa / đổi vai trò', () async {
       final db = FakeFirebaseFirestore();
-      final auth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'u1@x.com', customClaim: {'role': 'admin'}));
+      final auth = MockFirebaseAuth(
+        signedIn: true,
+        mockUser: MockUser(
+          uid: 'u1',
+          email: 'u1@x.com',
+          customClaim: {'role': 'admin'},
+        ),
+      );
       final calls = <String>[];
       final svc = FirebaseUserProfileService(
         auth: auth,
@@ -336,7 +468,11 @@ void main() {
       final state = await svc.sync();
       expect(calls, ['ensureProfile']);
       expect(state.isAdmin, isTrue);
-      await db.doc('users/u1').set({'role': 'viewer', 'disabled': false, 'claimsUpdatedAt': Timestamp.fromMillisecondsSinceEpoch(5)});
+      await db.doc('users/u1').set({
+        'role': 'viewer',
+        'disabled': false,
+        'claimsUpdatedAt': Timestamp.fromMillisecondsSinceEpoch(5),
+      });
       final events = <ProfileState>[];
       final sub = svc.watch('u1').listen(events.add);
       await _settle();
@@ -350,37 +486,60 @@ void main() {
   });
 
   group('Lịch sử tự luyện', () {
-    SelfPracticeRecord rec(String id, int secs, int target) => SelfPracticeRecord(
-          id: id, recipeName: 'Muối', recipeCode: 'CF-MUOI', size: 'M', durationSeconds: secs, notes: '',
-          practicedAt: '05/11/2026 10:00', targetSeconds: target,
+    SelfPracticeRecord rec(String id, int secs, int target) =>
+        SelfPracticeRecord(
+          id: id,
+          recipeName: 'Muối',
+          recipeCode: 'CF-MUOI',
+          size: 'M',
+          durationSeconds: secs,
+          notes: '',
+          practicedAt: '05/11/2026 10:00',
+          targetSeconds: target,
         );
 
-    test('RF-16 lưu bền theo uid qua SharedPreferences; tỷ lệ đạt thời gian chuẩn', () async {
-      final store = PrefsPracticeHistoryStore();
-      final vm = PracticeHistoryViewModel(store: store, crash: MockCrashReporter());
-      await vm.load('u1');
-      expect(vm.withinTolerancePercent, isNull);
-      await vm.add(rec('a', 30, 30));
-      await vm.add(rec('b', 50, 30));
-      await vm.add(rec('c', 40, 0));
-      expect(vm.withinTolerancePercent, 50);
-      expect(vm.averageSeconds, 40);
-      final again = PracticeHistoryViewModel(store: store, crash: MockCrashReporter());
-      await again.load('u1');
-      expect(again.records.map((r) => r.id), ['c', 'b', 'a']);
-      await again.load('u2');
-      expect(again.records, isEmpty);
-    });
+    test(
+      'RF-16 lưu bền theo uid qua SharedPreferences; tỷ lệ đạt thời gian chuẩn',
+      () async {
+        final store = PrefsPracticeHistoryStore();
+        final vm = PracticeHistoryViewModel(
+          store: store,
+          crash: MockCrashReporter(),
+        );
+        await vm.load('u1');
+        expect(vm.withinTolerancePercent, isNull);
+        await vm.add(rec('a', 30, 30));
+        await vm.add(rec('b', 50, 30));
+        await vm.add(rec('c', 40, 0));
+        expect(vm.withinTolerancePercent, 50);
+        expect(vm.averageSeconds, 40);
+        final again = PracticeHistoryViewModel(
+          store: store,
+          crash: MockCrashReporter(),
+        );
+        await again.load('u1');
+        expect(again.records.map((r) => r.id), ['c', 'b', 'a']);
+        await again.load('u2');
+        expect(again.records, isEmpty);
+      },
+    );
 
-    test('RF-17 thêm bản ghi khi lịch sử đang tải không ghi đè dữ liệu cũ', () async {
-      final store = MockPracticeHistoryStore()..data['u1'] = [rec('old', 10, 0)];
-      final vm = PracticeHistoryViewModel(store: store, crash: MockCrashReporter());
-      final loading = vm.load('u1');
-      await vm.add(rec('new', 20, 0));
-      await loading;
-      expect(store.data['u1']!.map((r) => r.id), ['new', 'old']);
-      vm.clear();
-      expect(vm.records, isEmpty);
-    });
+    test(
+      'RF-17 thêm bản ghi khi lịch sử đang tải không ghi đè dữ liệu cũ',
+      () async {
+        final store = MockPracticeHistoryStore()
+          ..data['u1'] = [rec('old', 10, 0)];
+        final vm = PracticeHistoryViewModel(
+          store: store,
+          crash: MockCrashReporter(),
+        );
+        final loading = vm.load('u1');
+        await vm.add(rec('new', 20, 0));
+        await loading;
+        expect(store.data['u1']!.map((r) => r.id), ['new', 'old']);
+        vm.clear();
+        expect(vm.records, isEmpty);
+      },
+    );
   });
 }

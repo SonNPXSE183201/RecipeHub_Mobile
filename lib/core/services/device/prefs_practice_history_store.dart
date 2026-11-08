@@ -18,7 +18,9 @@ class PrefsPracticeHistoryStore implements IPracticeHistoryStore {
     final out = <SelfPracticeRecord>[];
     for (final s in raw) {
       try {
-        out.add(SelfPracticeRecord.fromJson(jsonDecode(s) as Map<String, dynamic>));
+        out.add(
+          SelfPracticeRecord.fromJson(jsonDecode(s) as Map<String, dynamic>),
+        );
       } catch (_) {
         // Bỏ qua bản ghi hỏng thay vì làm hỏng cả lịch sử.
       }

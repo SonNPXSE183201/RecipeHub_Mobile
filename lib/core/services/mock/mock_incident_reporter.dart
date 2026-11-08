@@ -30,16 +30,20 @@ class MockIncidentReporter implements IIncidentReporter {
 
   @override
   Future<bool> report(IncidentReport report) async {
-    if (reported.any((r) => r.id == report.id)) return true; // id cố định → không trùng
+    if (reported.any((r) => r.id == report.id)) {
+      return true; // id cố định → không trùng
+    }
     reported.add(report);
     return true;
   }
 
   @override
-  Future<void> stashForNextLaunch(IncidentReport report) async => stashed.add(report);
+  Future<void> stashForNextLaunch(IncidentReport report) async =>
+      stashed.add(report);
 
   @override
-  Future<void> removeStashed(String id) async => stashed.removeWhere((r) => r.id == id);
+  Future<void> removeStashed(String id) async =>
+      stashed.removeWhere((r) => r.id == id);
 
   @override
   Future<void> markCrashAlreadyReported() async => crashAlreadyReported = true;
@@ -55,7 +59,13 @@ class MockIncidentReporter implements IIncidentReporter {
       await report(r);
     }
     if (crashedLastRun && pending.isEmpty && !skip) {
-      reported.add(IncidentReport(kind: IncidentKind.fatal, source: IncidentSource.previousCrash, message: 'previous crash'));
+      reported.add(
+        IncidentReport(
+          kind: IncidentKind.fatal,
+          source: IncidentSource.previousCrash,
+          message: 'previous crash',
+        ),
+      );
       return 1;
     }
     return pending.length;

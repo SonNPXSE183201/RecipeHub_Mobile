@@ -6,7 +6,8 @@ import '../interfaces/i_analytics_service.dart';
 
 /// Google Analytics for Firebase – mọi tham số đi qua [AnalyticsEvent.sanitize] (không PII).
 class FirebaseAnalyticsService implements IAnalyticsService {
-  FirebaseAnalyticsService({FirebaseAnalytics? analytics}) : _fa = analytics ?? FirebaseAnalytics.instance;
+  FirebaseAnalyticsService({FirebaseAnalytics? analytics})
+    : _fa = analytics ?? FirebaseAnalytics.instance;
 
   final FirebaseAnalytics _fa;
 
@@ -24,7 +25,8 @@ class FirebaseAnalyticsService implements IAnalyticsService {
   Future<void> setUserId(String? uid) => _fa.setUserId(id: uid);
 
   @override
-  Future<void> setUserProperty(String name, String? value) => _fa.setUserProperty(name: name, value: value);
+  Future<void> setUserProperty(String name, String? value) =>
+      _fa.setUserProperty(name: name, value: value);
 
   @override
   Future<void> logLogin({required String method, required String role}) =>
@@ -40,16 +42,23 @@ class FirebaseAnalyticsService implements IAnalyticsService {
     required String category,
     required String size,
     required String source,
-  }) =>
-      _log('view_recipe', {'recipe_code': recipeCode, 'category': category, 'size': size, 'source': source});
+  }) => _log('view_recipe', {
+    'recipe_code': recipeCode,
+    'category': category,
+    'size': size,
+    'source': source,
+  });
 
   @override
   Future<void> logStartBrewTimer({
     required String recipeCode,
     required String size,
     required int targetSeconds,
-  }) =>
-      _log('start_brew_timer', {'recipe_code': recipeCode, 'size': size, 'target_seconds': targetSeconds});
+  }) => _log('start_brew_timer', {
+    'recipe_code': recipeCode,
+    'size': size,
+    'target_seconds': targetSeconds,
+  });
 
   @override
   Future<void> logCompleteBrewTimer({
@@ -58,14 +67,13 @@ class FirebaseAnalyticsService implements IAnalyticsService {
     required int actualSeconds,
     required int deviationSeconds,
     required bool withinTolerance,
-  }) =>
-      _log('complete_brew_timer', {
-        'recipe_code': recipeCode,
-        'size': size,
-        'actual_seconds': actualSeconds,
-        'deviation_seconds': deviationSeconds,
-        'within_tolerance': withinTolerance,
-      });
+  }) => _log('complete_brew_timer', {
+    'recipe_code': recipeCode,
+    'size': size,
+    'actual_seconds': actualSeconds,
+    'deviation_seconds': deviationSeconds,
+    'within_tolerance': withinTolerance,
+  });
 
   @override
   Future<void> logSubmitFeedback({
@@ -73,22 +81,25 @@ class FirebaseAnalyticsService implements IAnalyticsService {
     required String targetType,
     required String targetCode,
     required bool hasAttachment,
-  }) =>
-      _log('submit_feedback', {
-        'feedback_type': feedbackType,
-        'target_type': targetType,
-        'target_code': targetCode,
-        'has_attachment': hasAttachment,
-      });
+  }) => _log('submit_feedback', {
+    'feedback_type': feedbackType,
+    'target_type': targetType,
+    'target_code': targetCode,
+    'has_attachment': hasAttachment,
+  });
 
   @override
   Future<void> logExportReportPdf({
     required String reportType,
     required int recordCount,
     required int fileSizeKb,
-  }) =>
-      _log('export_report_pdf', {'report_type': reportType, 'record_count': recordCount, 'file_size_kb': fileSizeKb});
+  }) => _log('export_report_pdf', {
+    'report_type': reportType,
+    'record_count': recordCount,
+    'file_size_kb': fileSizeKb,
+  });
 
   @override
-  Future<void> logTriggerTestCrash({required String kind}) => _log('trigger_test_crash', {'kind': kind});
+  Future<void> logTriggerTestCrash({required String kind}) =>
+      _log('trigger_test_crash', {'kind': kind});
 }

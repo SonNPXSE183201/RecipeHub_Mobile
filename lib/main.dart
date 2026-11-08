@@ -14,9 +14,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final firebaseReady = await FirebaseBootstrap.initialize();
   // Firebase chưa cấu hình (desktop/test) → services mock, công thức vẫn lấy từ Gateway thật.
-  final services = firebaseReady ? AppServices.firebase() : AppServices.mock(recipes: GatewayRecipeSource());
-  if (firebaseReady) unawaited(FirebaseBootstrap.attachIncidentReporter(services.incidents));
-  if (kDebugMode && !kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
+  final services = firebaseReady
+      ? AppServices.firebase()
+      : AppServices.mock(recipes: GatewayRecipeSource());
+  if (firebaseReady) {
+    unawaited(FirebaseBootstrap.attachIncidentReporter(services.incidents));
+  }
+  if (kDebugMode &&
+      !kIsWeb &&
+      !Platform.environment.containsKey('FLUTTER_TEST')) {
     startAutomationServer();
   }
   runApp(RecipeHubApp(services: services));

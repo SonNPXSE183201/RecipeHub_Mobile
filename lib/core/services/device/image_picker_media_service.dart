@@ -5,7 +5,8 @@ import '../interfaces/i_media_picker_service.dart';
 
 /// Chọn ảnh bằng image_picker (camera / gallery), nén nhẹ để dưới 5MB.
 class ImagePickerMediaService implements IMediaPickerService {
-  ImagePickerMediaService({ImagePicker? picker}) : _picker = picker ?? ImagePicker();
+  ImagePickerMediaService({ImagePicker? picker})
+    : _picker = picker ?? ImagePicker();
 
   final ImagePicker _picker;
 

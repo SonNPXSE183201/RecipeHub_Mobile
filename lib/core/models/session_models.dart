@@ -6,7 +6,7 @@ import 'app_models.dart';
 enum ViewState { idle, loading, ready, empty, error }
 
 /// Phương thức đăng nhập.
-enum AuthMethod { google, guest }
+enum AuthMethod { google, password, guest }
 
 /// Người dùng đã xác thực (không chứa token / secret).
 class AppUser {
@@ -32,12 +32,25 @@ class AppUser {
         : displayName!.trim();
     final parts = name.split(RegExp(r'\s+'));
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
   }
 }
 
 /// Lỗi xác thực đã được chuẩn hóa để View hiển thị thân thiện.
-enum AuthFailureCode { cancelled, network, configuration, disabled, unknown }
+enum AuthFailureCode {
+  cancelled,
+  network,
+  configuration,
+  disabled,
+  invalidCredentials,
+  tooManyRequests,
+  passwordDisabled,
+  weakPassword,
+  requiresRecentLogin,
+  passwordNotApplicable,
+  unknown,
+}
 
 class AuthFailure implements Exception {
   const AuthFailure(this.code, [this.message]);
@@ -55,6 +68,18 @@ class AuthFailure implements Exception {
         return 'Cấu hình Google Sign-In chưa đúng (SHA-1 / google-services.json).';
       case AuthFailureCode.disabled:
         return 'Tài khoản đã bị Admin khóa. Liên hệ quản lý cửa hàng để mở lại.';
+      case AuthFailureCode.invalidCredentials:
+        return 'Email hoặc mật khẩu không đúng.';
+      case AuthFailureCode.tooManyRequests:
+        return 'Bạn thử quá nhiều lần. Vui lòng đợi ít phút rồi thử lại.';
+      case AuthFailureCode.passwordDisabled:
+        return 'Đăng nhập bằng mật khẩu chưa được bật trên hệ thống.';
+      case AuthFailureCode.weakPassword:
+        return 'Mật khẩu mới phải có ít nhất 8 ký tự.';
+      case AuthFailureCode.requiresRecentLogin:
+        return 'Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi đổi mật khẩu.';
+      case AuthFailureCode.passwordNotApplicable:
+        return 'Tài khoản này không đăng nhập bằng mật khẩu nên không thể đổi mật khẩu.';
       case AuthFailureCode.unknown:
         return 'Không thể đăng nhập lúc này. Vui lòng thử lại.';
     }
@@ -65,7 +90,13 @@ class AuthFailure implements Exception {
 }
 
 /// Loại thông báo trong trung tâm thông báo (M-10).
-enum NotificationKind { versionUpdate, feedbackReply, taskAssigned, sopUpdate, system }
+enum NotificationKind {
+  versionUpdate,
+  feedbackReply,
+  taskAssigned,
+  sopUpdate,
+  system,
+}
 
 NotificationKind notificationKindFrom(String? raw) {
   switch (raw) {
@@ -99,7 +130,8 @@ class DeepLink {
   /// Ví dụ: `{ "type": "recipe", "target_id": "rc-02" }`.
   static DeepLink fromData(Map<String, dynamic> data) {
     final type = (data['type'] ?? data['screen'] ?? '').toString();
-    final id = (data['target_id'] ?? data['targetId'] ?? data['id'])?.toString();
+    final id = (data['target_id'] ?? data['targetId'] ?? data['id'])
+        ?.toString();
     switch (type) {
       case 'recipe':
       case 'version_update':
@@ -148,27 +180,29 @@ class AppNotification {
   DeepLink get deepLink => DeepLink.fromData(data);
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'body': body,
-        'receivedAt': receivedAt.toIso8601String(),
-        'data': data.map((k, v) => MapEntry(k, v.toString())),
-        'isRead': isRead,
-        'origin': origin.name,
-      };
+    'id': id,
+    'title': title,
+    'body': body,
+    'receivedAt': receivedAt.toIso8601String(),
+    'data': data.map((k, v) => MapEntry(k, v.toString())),
+    'isRead': isRead,
+    'origin': origin.name,
+  };
 
   static AppNotification fromJson(Map<String, dynamic> json) => AppNotification(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? '',
-        body: json['body'] as String? ?? '',
-        receivedAt: DateTime.tryParse(json['receivedAt'] as String? ?? '') ?? DateTime.now(),
-        data: Map<String, dynamic>.from(json['data'] as Map? ?? const {}),
-        isRead: json['isRead'] as bool? ?? false,
-        origin: NotificationOrigin.values.firstWhere(
-          (o) => o.name == json['origin'],
-          orElse: () => NotificationOrigin.local,
-        ),
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? '',
+    body: json['body'] as String? ?? '',
+    receivedAt:
+        DateTime.tryParse(json['receivedAt'] as String? ?? '') ??
+        DateTime.now(),
+    data: Map<String, dynamic>.from(json['data'] as Map? ?? const {}),
+    isRead: json['isRead'] as bool? ?? false,
+    origin: NotificationOrigin.values.firstWhere(
+      (o) => o.name == json['origin'],
+      orElse: () => NotificationOrigin.local,
+    ),
+  );
 }
 
 /// Quyền nhận thông báo (Android 13+ POST_NOTIFICATIONS).
@@ -208,7 +242,14 @@ class UploadResult {
 }
 
 /// Lỗi Storage chuẩn hóa.
-enum StorageFailureCode { tooLarge, invalidType, unauthorized, network, cancelled, unknown }
+enum StorageFailureCode {
+  tooLarge,
+  invalidType,
+  unauthorized,
+  network,
+  cancelled,
+  unknown,
+}
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code, [this.message]);
@@ -240,7 +281,7 @@ class StorageFailure implements Exception {
 /// Một sự kiện Analytics đã được chuẩn hóa (không PII).
 class AnalyticsEvent {
   AnalyticsEvent(this.name, [Map<String, Object> parameters = const {}])
-      : parameters = sanitize(parameters) {
+    : parameters = sanitize(parameters) {
     assert(isValidName(name), 'Analytics event name must be snake_case: $name');
   }
 

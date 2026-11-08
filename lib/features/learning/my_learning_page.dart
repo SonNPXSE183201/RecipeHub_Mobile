@@ -1,7 +1,13 @@
+import '../../core/viewmodels/auth_viewmodel.dart';
+import '../../core/widgets/personal_learning_blocked.dart';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/widgets/load_state_view.dart';
 import '../../core/utils/navigation.dart';
 import 'learning_task_detail_page.dart';
 import 'personal_progress_page.dart';
@@ -15,7 +21,8 @@ class MyLearningPage extends StatefulWidget {
   State<MyLearningPage> createState() => _MyLearningPageState();
 }
 
-class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProviderStateMixin {
+class _MyLearningPageState extends State<MyLearningPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -32,11 +39,21 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final tasks = MockDataService.instance.tasks;
+    if (!context.watch<AuthViewModel>().hasPersonalLearning) {
+      return const PersonalLearningBlocked();
+    }
+    final training = context.watch<TrainingViewModel>();
+    final tasks = training.tasks;
 
-    final notStartedTasks = tasks.where((t) => t.status == TaskStatus.notStarted).toList();
-    final inProgressTasks = tasks.where((t) => t.status == TaskStatus.inProgress).toList();
-    final completedTasks = tasks.where((t) => t.status == TaskStatus.completed).toList();
+    final notStartedTasks = tasks
+        .where((t) => t.status == TaskStatus.notStarted)
+        .toList();
+    final inProgressTasks = tasks
+        .where((t) => t.status == TaskStatus.inProgress)
+        .toList();
+    final completedTasks = tasks
+        .where((t) => t.status == TaskStatus.completed)
+        .toList();
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
@@ -55,25 +72,28 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                     children: [
                       const Text(
                         'Việc học của tôi',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: NomadKit.ink),
-                      ),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          side: const BorderSide(color: NomadKit.sandDark),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          foregroundColor: NomadKit.sandDark,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: NomadKit.ink,
                         ),
-                        onPressed: () => go(context, const PersonalProgressPage()),
-                        icon: const Icon(Icons.insights_rounded, size: 16),
-                        label: const Text('Tiến độ cá nhân', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                      Semantics(
+                        label: 'Tiến độ cá nhân',
+                        button: true,
+                        child: IconButton(
+                          tooltip: 'Tiến độ cá nhân',
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          color: NomadKit.sandDark,
+                          onPressed: () =>
+                              go(context, const PersonalProgressPage()),
+                          icon: const Icon(Icons.insights_rounded),
+                        ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Nội dung chuẩn và SOP được phân công theo từng phiên bản.',
-                    style: TextStyle(fontSize: 13, color: NomadKit.secondary),
                   ),
                   const SizedBox(height: 14),
 
@@ -98,11 +118,22 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                                   width: 22,
                                   height: 22,
                                   filterQuality: FilterQuality.medium,
-                                  errorBuilder: (ctx, err, stack) => const Icon(Icons.quiz_outlined, size: 18, color: NomadKit.sandDark),
+                                  errorBuilder: (ctx, err, stack) => const Icon(
+                                    Icons.quiz_outlined,
+                                    size: 18,
+                                    color: NomadKit.sandDark,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 const Expanded(
-                                  child: Text('Làm bài Quiz', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.sandDark)),
+                                  child: Text(
+                                    'Làm bài Quiz',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: NomadKit.sandDark,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -113,13 +144,16 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                       Expanded(
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () => go(context, const PracticalEvaluationPage()),
+                          onTap: () =>
+                              go(context, const PracticalEvaluationPage()),
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: NomadKit.forestLight,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: NomadKit.forest.withOpacity(0.2)),
+                              border: Border.all(
+                                color: NomadKit.forest.withOpacity(0.2),
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -128,11 +162,22 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                                   width: 22,
                                   height: 22,
                                   filterQuality: FilterQuality.medium,
-                                  errorBuilder: (ctx, err, stack) => const Icon(Icons.checklist_rounded, size: 18, color: NomadKit.forest),
+                                  errorBuilder: (ctx, err, stack) => const Icon(
+                                    Icons.checklist_rounded,
+                                    size: 18,
+                                    color: NomadKit.forest,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 const Expanded(
-                                  child: Text('Kết quả thực hành', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.forest)),
+                                  child: Text(
+                                    'Kết quả thực hành',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: NomadKit.forest,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -161,7 +206,10 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                       ),
                       labelColor: Colors.white,
                       unselectedLabelColor: NomadKit.secondary,
-                      labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                      labelStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                       tabs: [
                         Tab(text: 'Đang học (${inProgressTasks.length})'),
                         Tab(text: 'Chưa học (${notStartedTasks.length})'),
@@ -177,14 +225,25 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
 
             // Tab Views
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildTaskList(inProgressTasks),
-                  _buildTaskList(notStartedTasks),
-                  _buildTaskList(completedTasks),
-                ],
-              ),
+              child:
+                  (training.taskState == LoadState.error && tasks.isEmpty) ||
+                      training.progressState == LoadState.error
+                  ? LoadStateView.error(
+                      message: training.error ?? 'Không tải được nhiệm vụ học.',
+                      onRetry: training.retry,
+                    )
+                  : (training.taskState == LoadState.loading &&
+                            tasks.isEmpty) ||
+                        training.progressState == LoadState.loading
+                  ? const LoadStateView.loading()
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildTaskList(inProgressTasks),
+                        _buildTaskList(notStartedTasks),
+                        _buildTaskList(completedTasks),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -198,9 +257,16 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_turned_in_outlined, size: 48, color: NomadKit.secondary.withOpacity(0.4)),
+            Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 48,
+              color: NomadKit.secondary.withOpacity(0.4),
+            ),
             const SizedBox(height: 12),
-            const Text('Không có nhiệm vụ nào trong danh mục này', style: TextStyle(fontSize: 14, color: NomadKit.secondary)),
+            const Text(
+              'Không có nhiệm vụ nào trong danh mục này',
+              style: TextStyle(fontSize: 14, color: NomadKit.secondary),
+            ),
           ],
         ),
       );
@@ -218,7 +284,11 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: NomadKit.border),
             boxShadow: const [
-              BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
             ],
           ),
           child: Material(
@@ -229,7 +299,9 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
               onTap: () async {
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => LearningTaskDetailPage(task: task)),
+                  MaterialPageRoute(
+                    builder: (_) => LearningTaskDetailPage(task: task),
+                  ),
                 );
                 if (mounted) setState(() {});
               },
@@ -242,45 +314,76 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: task.type == 'Công thức' ? NomadKit.sandLight : NomadKit.oceanLight,
+                            color: task.type == 'Công thức'
+                                ? NomadKit.sandLight
+                                : NomadKit.oceanLight,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '${task.type}: ${task.targetCode}',
+                            task.type,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               fontFamily: 'monospace',
-                              color: task.type == 'Công thức' ? NomadKit.sandDark : NomadKit.ocean,
+                              color: task.type == 'Công thức'
+                                  ? NomadKit.sandDark
+                                  : NomadKit.ocean,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           task.version,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: NomadKit.secondary),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: NomadKit.secondary,
+                          ),
                         ),
                         const Spacer(),
 
                         if (task.isOverdue)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFEE2E2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text('Quá hạn', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: NomadKit.error)),
+                            child: const Text(
+                              'Quá hạn',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: NomadKit.error,
+                              ),
+                            ),
                           )
                         else if (task.isRelearnRequired)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: NomadKit.warningLight,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text('Cần học lại', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: NomadKit.warning)),
+                            child: const Text(
+                              'Cần học lại',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: NomadKit.warning,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -289,13 +392,20 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                     // Title
                     Text(
                       task.title,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: NomadKit.ink),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: NomadKit.ink,
+                      ),
                     ),
                     const SizedBox(height: 6),
 
                     Text(
                       'Người giao: ${task.assignedBy}',
-                      style: const TextStyle(fontSize: 12, color: NomadKit.secondary),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: NomadKit.secondary,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -303,7 +413,9 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: task.isOverdue ? NomadKit.error : NomadKit.secondary,
+                        color: task.isOverdue
+                            ? NomadKit.error
+                            : NomadKit.secondary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -319,7 +431,9 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                               minHeight: 6,
                               backgroundColor: NomadKit.canvas,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                task.progress >= 1.0 ? NomadKit.forest : NomadKit.sand,
+                                task.progress >= 1.0
+                                    ? NomadKit.forest
+                                    : NomadKit.sand,
                               ),
                             ),
                           ),
@@ -327,7 +441,11 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
                         const SizedBox(width: 10),
                         Text(
                           '${(task.progress * 100).toInt()}%',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: NomadKit.ink),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: NomadKit.ink,
+                          ),
                         ),
                       ],
                     ),
@@ -341,4 +459,3 @@ class _MyLearningPageState extends State<MyLearningPage> with SingleTickerProvid
     );
   }
 }
-

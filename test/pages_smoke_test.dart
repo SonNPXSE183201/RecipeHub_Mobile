@@ -6,10 +6,12 @@ import 'package:recipehub_mobile/core/di/app_services.dart';
 import 'package:recipehub_mobile/core/models/app_models.dart';
 import 'package:recipehub_mobile/core/navigation/app_keys.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_analytics_service.dart';
-import 'package:recipehub_mobile/core/services/mock_data_service.dart';
+import 'package:recipehub_mobile/core/models/training_models.dart';
+import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/services/recipe_mapper.dart';
 import 'package:recipehub_mobile/core/viewmodels/app_config_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
+import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/notification_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/practice_history_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/recipe_viewmodel.dart';
@@ -35,10 +37,15 @@ import 'package:recipehub_mobile/features/system/error_recovery_page.dart';
 import 'package:recipehub_mobile/features/system/loading_transition_page.dart';
 
 import 'support/fake_recipe_source.dart';
+import 'support/training_fixtures.dart';
 
 class _Harness {
-  _Harness() {
-    services = AppServices.mock(recipes: FakeRecipeSource(), analytics: analytics);
+  _Harness({MockTrainingRepository? training}) {
+    services = AppServices.mock(
+      recipes: FakeRecipeSource(),
+      analytics: analytics,
+      training: training,
+    );
   }
 
   final analytics = MockAnalyticsService();
@@ -51,16 +58,47 @@ class _Harness {
     return MultiProvider(
       providers: [
         Provider<AppServices>.value(value: s),
-        ChangeNotifierProvider(create: (_) => auth = AuthViewModel(auth: s.auth, analytics: s.analytics, crash: s.crash)..start()),
-        ChangeNotifierProvider(create: (_) => AppConfigViewModel(service: s.remoteConfig)..init()),
-        ChangeNotifierProvider(create: (_) => RecipeViewModel(source: s.recipes, crash: s.crash)..load()),
+        ChangeNotifierProvider(
+          create: (_) => auth = AuthViewModel(
+            auth: s.auth,
+            analytics: s.analytics,
+            crash: s.crash,
+          )..start(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AppConfigViewModel(service: s.remoteConfig)..init(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              RecipeViewModel(source: s.recipes, crash: s.crash)..load(),
+        ),
         ChangeNotifierProvider(
           create: (_) => StorageViewModel(
-            storage: s.storage, picker: s.mediaPicker, auth: s.auth, analytics: s.analytics, crash: s.crash,
+            storage: s.storage,
+            picker: s.mediaPicker,
+            auth: s.auth,
+            analytics: s.analytics,
+            crash: s.crash,
           ),
         ),
-        ChangeNotifierProvider(create: (_) => NotificationViewModel(service: s.notifications, crash: s.crash)),
-        ChangeNotifierProvider(create: (_) => practice = PracticeHistoryViewModel(store: s.practice, crash: s.crash)..load('u1')),
+        ChangeNotifierProvider(
+          create: (_) =>
+              NotificationViewModel(service: s.notifications, crash: s.crash),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              TrainingViewModel(repo: s.training, crash: s.crash)..bind('u1'),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              AdminTrainingViewModel(repo: s.training, crash: s.crash)..start(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => practice = PracticeHistoryViewModel(
+            store: s.practice,
+            crash: s.crash,
+          )..load('u1'),
+        ),
       ],
       child: MaterialApp(home: page),
     );
@@ -69,7 +107,12 @@ class _Harness {
 
 late List<RecipeItem> _recipes;
 
-Future<void> _pumpPage(WidgetTester tester, _Harness h, Widget page, {int frames = 6}) async {
+Future<void> _pumpPage(
+  WidgetTester tester,
+  _Harness h,
+  Widget page, {
+  int frames = 6,
+}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.625;
   addTearDown(tester.view.reset);
@@ -105,13 +148,18 @@ Future<void> _dispose(WidgetTester tester) async {
 void main() {
   setUp(() {
     _recipes = [
-      RecipeMapper.fromDetail(FakeRecipeSource.detail('r1', 'RC-OOL-02', 'Trà Sữa Oolong')),
-      RecipeMapper.fromDetail(FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối')),
+      RecipeMapper.fromDetail(
+        FakeRecipeSource.detail('r1', 'RC-OOL-02', 'Trà Sữa Oolong'),
+      ),
+      RecipeMapper.fromDetail(
+        FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối'),
+      ),
     ];
-    MockDataService.instance.recipes = List.of(_recipes);
   });
 
-  testWidgets('P-01 Tra cứu tại quầy: tìm không dấu, lọc nhóm, mở chi tiết', (tester) async {
+  testWidgets('P-01 Tra cứu tại quầy: tìm không dấu, lọc nhóm, mở chi tiết', (
+    tester,
+  ) async {
     _ignoreOverflow();
     final h = _Harness();
     await _pumpPage(tester, h, const CounterRecipeLookupPage());
@@ -127,40 +175,69 @@ void main() {
     await _dispose(tester);
   });
 
-  testWidgets('P-02 Chi tiết món: view_recipe đúng nguồn, mở hướng dẫn video, tự luyện', (tester) async {
-    _ignoreOverflow();
-    final h = _Harness();
-    await _pumpPage(tester, h, RecipeDetailSizePage(recipe: _recipes[1], source: 'notification'));
-    expect(h.analytics.loggedEvents.lastWhere((e) => e.name == 'view_recipe').parameters['source'], 'notification');
-    await _tapIfPresent(tester, find.textContaining('video chuẩn'));
-    await tester.pump(const Duration(seconds: 1));
-    await _dispose(tester);
-  });
+  testWidgets(
+    'P-02 Chi tiết món: view_recipe đúng nguồn, mở hướng dẫn video, tự luyện',
+    (tester) async {
+      _ignoreOverflow();
+      final h = _Harness();
+      await _pumpPage(
+        tester,
+        h,
+        RecipeDetailSizePage(recipe: _recipes[1], source: 'notification'),
+      );
+      expect(
+        h.analytics.loggedEvents
+            .lastWhere((e) => e.name == 'view_recipe')
+            .parameters['source'],
+        'notification',
+      );
+      await _tapIfPresent(tester, find.textContaining('video chuẩn'));
+      await tester.pump(const Duration(seconds: 1));
+      await _dispose(tester);
+    },
+  );
 
   testWidgets('P-03 Hướng dẫn từng bước: chuyển bước', (tester) async {
     _ignoreOverflow();
     final h = _Harness();
     await _pumpPage(tester, h, StepVideoGuidePage(recipe: _recipes[1]));
-    for (final icon in [Icons.play_arrow_rounded, Icons.skip_next_rounded, Icons.arrow_forward_ios_rounded]) {
+    for (final icon in [
+      Icons.play_arrow_rounded,
+      Icons.skip_next_rounded,
+      Icons.arrow_forward_ios_rounded,
+    ]) {
       await _tapIfPresent(tester, find.byIcon(icon));
     }
     await tester.pump(const Duration(seconds: 2));
     await _dispose(tester);
   });
 
-  testWidgets('P-04 Tự luyện: bấm giờ, dừng, lưu vào lịch sử (bền vững)', (tester) async {
+  testWidgets('P-04 Tự luyện: bấm giờ, dừng, lưu vào lịch sử (bền vững)', (
+    tester,
+  ) async {
     _ignoreOverflow();
     final h = _Harness();
-    await _pumpPage(tester, h, SelfPracticeTimerPage(initialRecipe: _recipes[1]));
+    await _pumpPage(
+      tester,
+      h,
+      SelfPracticeTimerPage(initialRecipe: _recipes[1]),
+    );
     await _tapIfPresent(tester, find.byKey(AppKeys.timerStart));
     await tester.pump(const Duration(seconds: 3));
     await _tapIfPresent(tester, find.byKey(AppKeys.timerStart)); // dừng
     await _tapIfPresent(tester, find.byKey(AppKeys.timerSave));
     await tester.pump(const Duration(seconds: 1));
-    expect(h.analytics.eventNames, containsAll(['start_brew_timer', 'complete_brew_timer']));
+    expect(
+      h.analytics.eventNames,
+      containsAll(['start_brew_timer', 'complete_brew_timer']),
+    );
     final saved = h.practice.records;
     expect(saved, hasLength(1));
-    expect(saved.single.practicedAt, matches(RegExp(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}$')), reason: 'thời điểm thật, không còn "Vừa xong"');
+    expect(
+      saved.single.practicedAt,
+      matches(RegExp(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}$')),
+      reason: 'thời điểm thật, không còn "Vừa xong"',
+    );
     await _dispose(tester);
   });
 
@@ -173,22 +250,30 @@ void main() {
     await _dispose(tester);
   });
 
-  testWidgets('P-06 SOP: danh mục → chi tiết; chỉ hiện món khớp mã', (tester) async {
+  testWidgets('P-06 SOP: danh mục → chi tiết; chỉ hiện món khớp mã', (
+    tester,
+  ) async {
     _ignoreOverflow();
-    final h = _Harness();
+    final h = _Harness(training: testTrainingRepo());
     await _pumpPage(tester, h, const SopCatalogPage());
     await _dispose(tester);
-    await _pumpPage(tester, h, SopDetailPage(sop: MockDataService.instance.sops.first));
-    expect(find.textContaining('(RC-'), findsNothing, reason: 'mã SOP mẫu không khớp món → không hiện chip sai');
+    await _pumpPage(tester, h, const SopDetailPage(sop: testSop));
+    expect(
+      find.textContaining('(RC-'),
+      findsNothing,
+      reason: 'mã SOP mẫu không khớp món → không hiện chip sai',
+    );
     await _dispose(tester);
   });
 
-  testWidgets('P-07 Việc học, chi tiết nhiệm vụ, tiến độ, thông báo', (tester) async {
+  testWidgets('P-07 Việc học, chi tiết nhiệm vụ, tiến độ, thông báo', (
+    tester,
+  ) async {
     _ignoreOverflow();
-    final h = _Harness();
+    final h = _Harness(training: testTrainingRepo());
     for (final page in <Widget>[
       const MyLearningPage(),
-      LearningTaskDetailPage(task: MockDataService.instance.tasks.first),
+      LearningTaskDetailPage(task: testTask()),
       const PersonalProgressPage(),
       const NotificationsPage(),
     ]) {
@@ -201,9 +286,18 @@ void main() {
   testWidgets('P-08 Phản hồi: tạo + danh sách', (tester) async {
     _ignoreOverflow();
     final h = _Harness();
-    await _pumpPage(tester, h, const CreateFeedbackPage(initialRecipeCode: 'RC-CFE-01', initialRecipeName: 'Cà Phê Muối'));
+    await _pumpPage(
+      tester,
+      h,
+      const CreateFeedbackPage(
+        initialRecipeCode: 'RC-CFE-01',
+        initialRecipeName: 'Cà Phê Muối',
+      ),
+    );
     final fields = find.byType(TextField);
-    if (fields.evaluate().isNotEmpty) await tester.enterText(fields.last, 'Vị hơi mặn');
+    if (fields.evaluate().isNotEmpty) {
+      await tester.enterText(fields.last, 'Vị hơi mặn');
+    }
     await tester.pump();
     await _dispose(tester);
     await _pumpPage(tester, h, const MyFeedbackListPage());
@@ -212,15 +306,20 @@ void main() {
 
   testWidgets('P-09 Quiz: chọn đáp án', (tester) async {
     _ignoreOverflow();
-    final h = _Harness();
+    final h = _Harness(training: testTrainingRepo());
     await _pumpPage(tester, h, const QuizExamPage());
-    final q = MockDataService.instance.quizQuestions.first;
-    await _tapIfPresent(tester, find.text(q.options.first));
+    await _tapIfPresent(tester, find.text(testQuiz.title));
+    await _tapIfPresent(
+      tester,
+      find.text(testQuiz.questions.first.options.first),
+    );
     await _tapIfPresent(tester, find.textContaining('Tiếp'));
     await _dispose(tester);
   });
 
-  testWidgets('P-10 Đánh giá thực hành: Barista KHÔNG thấy nút chấm tại quầy', (tester) async {
+  testWidgets('P-10 Đánh giá thực hành: Barista KHÔNG thấy nút chấm tại quầy', (
+    tester,
+  ) async {
     _ignoreOverflow();
     final h = _Harness();
     await _pumpPage(tester, h, const PracticalEvaluationPage());
@@ -228,7 +327,9 @@ void main() {
     await _dispose(tester);
   });
 
-  testWidgets('P-11 Tài khoản, Admin đào tạo, màn lỗi, màn chờ', (tester) async {
+  testWidgets('P-11 Tài khoản, Admin đào tạo, màn lỗi, màn chờ', (
+    tester,
+  ) async {
     _ignoreOverflow();
     final h = _Harness();
     for (final page in <Widget>[
@@ -241,5 +342,33 @@ void main() {
       expect(tester.takeException(), isNull);
       await _dispose(tester);
     }
+  });
+
+  testWidgets('P-12 Admin đào tạo: danh sách Barista thật + trống', (
+    tester,
+  ) async {
+    _ignoreOverflow();
+    await _pumpPage(tester, _Harness(), const AdminStoreTrainingPage());
+    expect(
+      find.textContaining('Chưa có Barista nào được cấp tài khoản'),
+      findsOneWidget,
+    );
+    await _dispose(tester);
+    final h = _Harness(
+      training: MockTrainingRepository(
+        staff: const [
+          StaffMember(
+            uid: 'b1',
+            displayName: 'Trần Barista',
+            email: 'b@x.vn',
+            storeBranch: 'Chi nhánh A',
+          ),
+        ],
+      ),
+    );
+    await _pumpPage(tester, h, const AdminStoreTrainingPage());
+    expect(find.text('Trần Barista'), findsOneWidget);
+    expect(find.textContaining('Chưa đánh giá'), findsOneWidget);
+    await _dispose(tester);
   });
 }

@@ -12,10 +12,12 @@ import '../interfaces/i_auth_service.dart';
 /// `--dart-define=GOOGLE_SERVER_CLIENT_ID=xxx.apps.googleusercontent.com`.
 class FirebaseAuthService implements IAuthService {
   FirebaseAuthService({FirebaseAuth? auth, GoogleSignIn? googleSignIn})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _google = googleSignIn ?? GoogleSignIn.instance;
+    : _auth = auth ?? FirebaseAuth.instance,
+      _google = googleSignIn ?? GoogleSignIn.instance;
 
-  static const String _serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+  static const String _serverClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+  );
 
   final FirebaseAuth _auth;
   final GoogleSignIn _google;
@@ -31,7 +33,11 @@ class FirebaseAuthService implements IAuthService {
     if (user == null) return null;
     return AppUser(
       uid: user.uid,
-      method: user.isAnonymous ? AuthMethod.guest : AuthMethod.google,
+      method: user.isAnonymous
+          ? AuthMethod.guest
+          : (user.providerData.any((p) => p.providerId == 'google.com')
+                ? AuthMethod.google
+                : AuthMethod.password),
       displayName: user.displayName,
       email: user.email,
       photoUrl: user.photoURL,
@@ -51,14 +57,18 @@ class FirebaseAuthService implements IAuthService {
       final GoogleSignInAccount account = await _google.authenticate();
       final String? idToken = account.authentication.idToken;
       if (idToken == null) {
-        throw const AuthFailure(AuthFailureCode.configuration, 'Google idToken is null');
+        throw const AuthFailure(
+          AuthFailureCode.configuration,
+          'Google idToken is null',
+        );
       }
       final credential = GoogleAuthProvider.credential(idToken: idToken);
       final result = await _auth.signInWithCredential(credential);
       return _map(result.user)!;
     } on GoogleSignInException catch (e) {
       final codeName = e.code.name;
-      if (e.code == GoogleSignInExceptionCode.canceled || codeName == 'interrupted') {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          codeName == 'interrupted') {
         throw AuthFailure(AuthFailureCode.cancelled, e.description);
       }
       if (codeName.contains('onfiguration')) {
@@ -81,6 +91,88 @@ class FirebaseAuthService implements IAuthService {
     }
   }
 
+  static AuthFailure _emailFailure(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+      case 'invalid-email':
+        return AuthFailure(AuthFailureCode.invalidCredentials, e.code);
+      case 'too-many-requests':
+        return AuthFailure(AuthFailureCode.tooManyRequests, e.code);
+      case 'network-request-failed':
+        return AuthFailure(AuthFailureCode.network, e.message);
+      case 'user-disabled':
+        return AuthFailure(AuthFailureCode.disabled, e.message);
+      case 'operation-not-allowed':
+        return AuthFailure(AuthFailureCode.passwordDisabled, e.message);
+      case 'weak-password':
+        return AuthFailure(AuthFailureCode.weakPassword, e.message);
+      case 'requires-recent-login':
+        return AuthFailure(AuthFailureCode.requiresRecentLogin, e.message);
+      default:
+        return AuthFailure(AuthFailureCode.unknown, '${e.code}: ${e.message}');
+    }
+  }
+
+  @override
+  Future<AppUser> signInWithEmail(String email, String password) async {
+    try {
+      final result = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      return _map(result.user)!;
+    } on FirebaseAuthException catch (e) {
+      throw _emailFailure(e);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      // Mẫu email của project bị khóa chỉnh sửa → dùng bản dịch tiếng Việt có sẵn của Firebase.
+      try {
+        await _auth.setLanguageCode('vi');
+      } catch (_) {}
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      // Không lộ email có tài khoản hay không.
+      if (e.code == 'user-not-found' || e.code == 'invalid-email') return;
+      throw _emailFailure(e);
+    }
+  }
+
+  @override
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AuthFailure(AuthFailureCode.requiresRecentLogin);
+    }
+    if (user.isAnonymous ||
+        !user.providerData.any((p) => p.providerId == 'password') ||
+        user.email == null) {
+      throw const AuthFailure(AuthFailureCode.passwordNotApplicable);
+    }
+    if (newPassword.length < 8) {
+      throw const AuthFailure(AuthFailureCode.weakPassword);
+    }
+    try {
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(
+          email: user.email!,
+          password: currentPassword,
+        ),
+      );
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _emailFailure(e);
+    }
+  }
+
   @override
   Future<AppUser> signInAsGuest() async {
     try {
@@ -93,8 +185,12 @@ class FirebaseAuthService implements IAuthService {
       if (e.code == 'user-disabled') {
         throw AuthFailure(AuthFailureCode.disabled, e.message);
       }
-      if (e.code == 'operation-not-allowed' || e.code == 'admin-restricted-operation') {
-        throw AuthFailure(AuthFailureCode.configuration, 'Bật Anonymous provider trong Firebase Console');
+      if (e.code == 'operation-not-allowed' ||
+          e.code == 'admin-restricted-operation') {
+        throw AuthFailure(
+          AuthFailureCode.configuration,
+          'Bật Anonymous provider trong Firebase Console',
+        );
       }
       throw AuthFailure(AuthFailureCode.unknown, '${e.code}: ${e.message}');
     }

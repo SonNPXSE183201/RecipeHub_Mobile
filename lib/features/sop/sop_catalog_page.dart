@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/nomad_kit.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/widgets/load_state_view.dart';
 import '../../core/utils/navigation.dart';
+import '../sop_book/sop_book_page.dart';
 import 'sop_detail_page.dart';
 
 class SopCatalogPage extends StatefulWidget {
@@ -16,8 +19,6 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _selectedCategory = 'Tất cả';
 
-  final List<String> _categories = ['Tất cả', 'Kỹ thuật pha chế', 'Vệ sinh máy móc'];
-
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -26,13 +27,22 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
 
   @override
   Widget build(BuildContext context) {
-    final sops = MockDataService.instance.sops;
+    final training = context.watch<TrainingViewModel>();
+    final sops = training.sops;
+    final categories = [
+      'Tất cả',
+      ...{for (final s in sops) s.category}.where((c) => c.isNotEmpty),
+    ];
+    if (!categories.contains(_selectedCategory)) _selectedCategory = 'Tất cả';
     final query = _searchCtrl.text.trim().toLowerCase();
 
     final filtered = sops.where((s) {
-      final matchesCat = _selectedCategory == 'Tất cả' || s.category == _selectedCategory;
+      final matchesCat =
+          _selectedCategory == 'Tất cả' || s.category == _selectedCategory;
       final matchesQuery =
-          query.isEmpty || s.title.toLowerCase().contains(query) || s.code.toLowerCase().contains(query);
+          query.isEmpty ||
+          s.title.toLowerCase().contains(query) ||
+          s.code.toLowerCase().contains(query);
       return matchesCat && matchesQuery;
     }).toList();
 
@@ -42,12 +52,20 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
         backgroundColor: NomadKit.canvas,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: NomadKit.ink,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Thư viện SOP kỹ thuật chuỗi',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: NomadKit.ink),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: NomadKit.ink,
+          ),
         ),
       ),
       body: SafeArea(
@@ -71,7 +89,10 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                       style: const TextStyle(fontSize: 14, color: NomadKit.ink),
                       decoration: InputDecoration(
                         hintText: 'Tìm SOP theo tên hoặc mã quy trình...',
-                        hintStyle: const TextStyle(fontSize: 13, color: NomadKit.secondary),
+                        hintStyle: const TextStyle(
+                          fontSize: 13,
+                          color: NomadKit.secondary,
+                        ),
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(11),
                           child: Image.asset(
@@ -79,13 +100,20 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                             width: 22,
                             height: 22,
                             filterQuality: FilterQuality.medium,
-                            errorBuilder: (ctx, err, stack) =>
-                                const Icon(Icons.search_rounded, color: NomadKit.ocean, size: 22),
+                            errorBuilder: (ctx, err, stack) => const Icon(
+                              Icons.search_rounded,
+                              color: NomadKit.ocean,
+                              size: 22,
+                            ),
                           ),
                         ),
                         suffixIcon: _searchCtrl.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18, color: NomadKit.secondary),
+                                icon: const Icon(
+                                  Icons.clear_rounded,
+                                  size: 18,
+                                  color: NomadKit.secondary,
+                                ),
                                 onPressed: () {
                                   _searchCtrl.clear();
                                   setState(() {});
@@ -93,7 +121,10 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -103,7 +134,7 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: _categories.map((cat) {
+                      children: categories.map((cat) {
                         final isSelected = _selectedCategory == cat;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
@@ -112,14 +143,20 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                               cat,
                               style: TextStyle(
                                 fontSize: 12,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                                 color: isSelected ? Colors.white : NomadKit.ink,
                               ),
                             ),
                             selected: isSelected,
                             selectedColor: NomadKit.ocean,
                             backgroundColor: NomadKit.surface,
-                            side: BorderSide(color: isSelected ? NomadKit.ocean : NomadKit.border),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? NomadKit.ocean
+                                  : NomadKit.border,
+                            ),
                             showCheckmark: false,
                             onSelected: (val) {
                               if (val) setState(() => _selectedCategory = cat);
@@ -132,11 +169,34 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: SizedBox(
+                height: 48,
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => go(context, const SopBookPage()),
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: const Text('Mở sổ tay'),
+                ),
+              ),
+            ),
             const Divider(height: 1, color: NomadKit.border),
 
             // SOP List
             Expanded(
-              child: filtered.isEmpty
+              child: training.sopState == LoadState.loading && sops.isEmpty
+                  ? const LoadStateView.loading()
+                  : training.sopState == LoadState.error && sops.isEmpty
+                  ? LoadStateView.error(
+                      message: training.error ?? 'Không tải được thư viện SOP.',
+                      onRetry: training.retry,
+                    )
+                  : sops.isEmpty
+                  ? const LoadStateView.empty(
+                      message: 'Chưa có SOP nào được ban hành.',
+                    )
+                  : filtered.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -146,13 +206,20 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                             width: 130,
                             height: 130,
                             fit: BoxFit.contain,
-                            errorBuilder: (ctx, err, stack) =>
-                                const Icon(Icons.search_off_rounded, size: 70, color: NomadKit.secondary),
+                            errorBuilder: (ctx, err, stack) => const Icon(
+                              Icons.search_off_rounded,
+                              size: 70,
+                              color: NomadKit.secondary,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           const Text(
                             'Không tìm thấy SOP phù hợp',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: NomadKit.ink),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: NomadKit.ink,
+                            ),
                           ),
                         ],
                       ),
@@ -169,7 +236,11 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(color: NomadKit.border),
                             boxShadow: const [
-                              BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
+                              BoxShadow(
+                                color: Color(0x06000000),
+                                blurRadius: 10,
+                                offset: Offset(0, 2),
+                              ),
                             ],
                           ),
                           child: Material(
@@ -192,15 +263,24 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                           height: 22,
                                           filterQuality: FilterQuality.medium,
                                           errorBuilder: (ctx, err, stack) =>
-                                              const Icon(Icons.description_outlined, size: 18, color: NomadKit.ocean),
+                                              const Icon(
+                                                Icons.description_outlined,
+                                                size: 18,
+                                                color: NomadKit.ocean,
+                                              ),
                                         ),
                                         const SizedBox(width: 8),
                                         // Mã SOP là mã nghiệp vụ dùng để tra cứu → luôn hiển thị đủ, không co.
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: NomadKit.oceanLight,
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           child: Text(
                                             sop.code,
@@ -216,11 +296,17 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                         Flexible(
                                           flex: 3,
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: NomadKit.canvas,
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: NomadKit.border),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: NomadKit.border,
+                                              ),
                                             ),
                                             child: Text(
                                               'Phiên bản ${sop.version}',
@@ -241,7 +327,10 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                             textAlign: TextAlign.end,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: NomadKit.secondary,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -260,7 +349,11 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                     const SizedBox(height: 4),
                                     Text(
                                       sop.summary,
-                                      style: const TextStyle(fontSize: 13, color: NomadKit.secondary, height: 1.35),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: NomadKit.secondary,
+                                        height: 1.35,
+                                      ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -269,7 +362,11 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                     // Bottom row: Linked recipe chips
                                     Row(
                                       children: [
-                                        const Icon(Icons.link_rounded, size: 16, color: NomadKit.sandDark),
+                                        const Icon(
+                                          Icons.link_rounded,
+                                          size: 16,
+                                          color: NomadKit.sandDark,
+                                        ),
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(

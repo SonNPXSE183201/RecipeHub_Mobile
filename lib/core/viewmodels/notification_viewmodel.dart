@@ -29,6 +29,7 @@ class NotificationViewModel extends ChangeNotifier {
 
   List<AppNotification> _items = [];
   NotificationPermission _permission = NotificationPermission.notDetermined;
+  bool _permissionLoaded = false;
   String? _token;
   DeepLink? _pendingDeepLink;
   AppNotification? _pendingBanner;
@@ -40,7 +41,8 @@ class NotificationViewModel extends ChangeNotifier {
   bool _permissionPromptDismissed = false;
 
   List<AppNotification> get items {
-    final sorted = List.of(_items)..sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
+    final sorted = List.of(_items)
+      ..sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
     return sorted;
   }
 
@@ -52,7 +54,10 @@ class NotificationViewModel extends ChangeNotifier {
 
   /// Hiển thị primer xin quyền khi chưa từng hỏi (Android 13+).
   bool get shouldShowPermissionPrimer =>
-      _started && !_permissionPromptDismissed && _permission == NotificationPermission.notDetermined;
+      _started &&
+      _permissionLoaded &&
+      !_permissionPromptDismissed &&
+      _permission == NotificationPermission.notDetermined;
 
   /// Thời gian chờ tối đa cho thao tác cần server (offline: Firestore / FCM có thể treo rất lâu).
   static const Duration serverTimeout = Duration(seconds: 5);
@@ -62,7 +67,11 @@ class NotificationViewModel extends ChangeNotifier {
   String? _roleTopic;
 
   /// Gọi sau khi đăng nhập thành công. [uid] dùng để lưu FCM token lên server (Firestore) và tách lịch sử.
-  Future<void> start({required String roleCode, required String storeCode, String? uid}) async {
+  Future<void> start({
+    required String roleCode,
+    required String storeCode,
+    String? uid,
+  }) async {
     if (_started) return;
     _started = true;
     _uid = uid;
@@ -72,25 +81,36 @@ class NotificationViewModel extends ChangeNotifier {
       await _service.initialize();
       if (stale()) return;
       // 1. Listener + thông báo mở app TRƯỚC: không phụ thuộc mạng.
-      _subs.add(_service.onForegroundMessage.listen((n) {
-        _upsert(n);
-        _pendingBanner = n;
-        _persist();
-        _notify();
-      }));
-      _subs.add(_service.onNotificationOpened.listen((n) {
-        // Android giữ intent của thông báo đã chạm; getInitialMessage có thể trả lại nó sau này.
-        _handledInitialIds.add(n.id);
-        _upsert(n..isRead = true);
-        _pendingDeepLink = n.deepLink;
-        _persist();
-        _notify();
-      }));
-      _subs.add(_service.onTokenRefresh.listen((t) {
-        _token = t;
-        unawaited(_registerToken(t));
-        _notify();
-      }));
+      _subs.add(
+        _service.onForegroundMessage.listen((n) {
+          if (stale()) return;
+          _upsert(n);
+          if (n.origin == NotificationOrigin.foreground) {
+            _pendingBanner = n;
+          }
+          _persist();
+          _notify();
+        }),
+      );
+      _subs.add(
+        _service.onNotificationOpened.listen((n) {
+          if (stale()) return;
+          // Android giữ intent của thông báo đã chạm; getInitialMessage có thể trả lại nó sau này.
+          _handledInitialIds.add(n.id);
+          _upsert(n..isRead = true);
+          _pendingDeepLink = n.deepLink;
+          _persist();
+          _notify();
+        }),
+      );
+      _subs.add(
+        _service.onTokenRefresh.listen((t) {
+          if (stale()) return;
+          _token = t;
+          unawaited(_registerToken(t));
+          _notify();
+        }),
+      );
       final history = await _service.loadHistory(_historyScope);
       if (stale()) return;
       // Tin vừa nhận/chạm trong bộ nhớ (vd. tin chạm lúc app tắt, phát ngay khi listen) mới hơn bản
@@ -98,7 +118,10 @@ class NotificationViewModel extends ChangeNotifier {
       final fresh = {for (final n in _items) n.id: n};
       final merged = [
         for (final h in history)
-          if (fresh.remove(h.id) case final m?) (m..isRead = m.isRead || h.isRead) else h,
+          if (fresh.remove(h.id) case final m?)
+            (m..isRead = m.isRead || h.isRead)
+          else
+            h,
       ];
       _items = [...fresh.values, ...merged];
       final initial = await _service.getInitialNotification();
@@ -107,8 +130,13 @@ class NotificationViewModel extends ChangeNotifier {
         _upsert(initial..isRead = true);
         _pendingDeepLink = initial.deepLink;
       }
-      _permission = await _service.getPermissionStatus();
+      // FCM có thể phát sự kiện trong lúc khởi động. Chỉ hiện primer sau khi
+      // đọc quyền thật, không dùng notDetermined mặc định (Android < 13 không
+      // có quyền runtime; FCM trả granted/denied theo cài đặt thông báo).
+      final permission = await _service.getPermissionStatus();
       if (stale()) return;
+      _permission = permission;
+      _permissionLoaded = true;
       _notify();
 
       // 2. Phần cần mạng: chạy nền, có timeout, kiểm tra thế hệ trước khi ghi vào state.
@@ -120,9 +148,16 @@ class NotificationViewModel extends ChangeNotifier {
     if (!stale()) _notify();
   }
 
-  Future<void> _connect(int gen, {required String roleCode, required String storeCode}) async {
+  Future<void> _connect(
+    int gen, {
+    required String roleCode,
+    required String storeCode,
+  }) async {
     try {
-      final token = await _service.getToken().timeout(serverTimeout, onTimeout: () => null);
+      final token = await _service.getToken().timeout(
+        serverTimeout,
+        onTimeout: () => null,
+      );
       if (gen != _generation) return;
       _token = token;
       await _registerToken(token);
@@ -202,6 +237,7 @@ class NotificationViewModel extends ChangeNotifier {
 
   Future<NotificationPermission> requestPermission() async {
     _permission = await _service.requestPermission();
+    _permissionLoaded = true;
     _permissionPromptDismissed = true;
     if (_permission == NotificationPermission.granted) {
       _token = await _service.getToken();
@@ -269,6 +305,7 @@ class NotificationViewModel extends ChangeNotifier {
     _pendingDeepLink = null;
     _pendingBanner = null;
     _started = false;
+    _permissionLoaded = false;
     _permissionPromptDismissed = false;
     _notify();
     for (final s in subs) {

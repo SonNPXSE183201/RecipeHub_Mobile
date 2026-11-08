@@ -1,4 +1,3 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -22,7 +21,8 @@ class FirebaseBootstrap {
   static Future<void> attachIncidentReporter(IIncidentReporter reporter) async {
     _incidents = reporter;
     try {
-      final crashed = await FirebaseCrashlytics.instance.didCrashOnPreviousExecution();
+      final crashed = await FirebaseCrashlytics.instance
+          .didCrashOnPreviousExecution();
       reporter.scheduleFlush(crashedLastRun: crashed);
     } catch (e) {
       debugPrint('[Bootstrap] check previous crash failed: $e');
@@ -34,10 +34,20 @@ class FirebaseBootstrap {
   static final Set<String> _reportedThisRun = {};
 
   /// Lưu cục bộ trước (app có thể chết ngay), rồi thử gửi luôn.
-  static void _report(Object error, StackTrace? stack, IncidentSource source, IncidentKind kind) {
+  static void _report(
+    Object error,
+    StackTrace? stack,
+    IncidentSource source,
+    IncidentKind kind,
+  ) {
     final r = _incidents;
     if (r == null) return;
-    final report = IncidentReport.fromError(error, stack, kind: kind, source: source);
+    final report = IncidentReport.fromError(
+      error,
+      stack,
+      kind: kind,
+      source: source,
+    );
     if (!_reportedThisRun.add('${report.errorType}|${report.message}')) return;
     // Lưu tạm trước (app có thể chết ngay), gửi được thì bỏ bản lưu tạm → lần mở sau không gửi trùng.
     r
@@ -58,7 +68,12 @@ class FirebaseBootstrap {
         // không chết → sinh sự cố "Crash" giả trên web Admin.
         FirebaseCrashlytics.instance.recordFlutterError(details);
         // Lỗi framework (overflow, lỗi ảnh…) không làm app chết → non-fatal cho Admin.
-        _report(details.exception, details.stack, IncidentSource.flutterError, IncidentKind.nonFatal);
+        _report(
+          details.exception,
+          details.stack,
+          IncidentSource.flutterError,
+          IncidentKind.nonFatal,
+        );
       };
       PlatformDispatcher.instance.onError = (error, stack) {
         FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -66,7 +81,10 @@ class FirebaseBootstrap {
         return true;
       };
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-      await FirebaseCrashlytics.instance.setCustomKey('build_mode', kReleaseMode ? 'release' : 'debug');
+      await FirebaseCrashlytics.instance.setCustomKey(
+        'build_mode',
+        kReleaseMode ? 'release' : 'debug',
+      );
 
       // FCM: tin đến khi app chạy nền / đã đóng.
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);

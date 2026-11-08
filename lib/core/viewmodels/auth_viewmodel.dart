@@ -50,6 +50,9 @@ class AuthViewModel extends ChangeNotifier {
   UserRole _selectedRole = UserRole.viewer;
   bool _googleBusy = false;
   bool _guestBusy = false;
+  bool _emailBusy = false;
+  bool _resetBusy = false;
+  bool _passwordBusy = false;
   String? _errorMessage;
   AuthFailureCode? _lastFailure;
   DateTime? _sessionStart;
@@ -63,7 +66,15 @@ class AuthViewModel extends ChangeNotifier {
   bool get isGuest => _user?.isGuest ?? false;
   bool get isGoogleBusy => _googleBusy;
   bool get isGuestBusy => _guestBusy;
-  bool get isBusy => _googleBusy || _guestBusy;
+  bool get isEmailBusy => _emailBusy;
+  bool get isResetBusy => _resetBusy;
+  bool get isPasswordBusy => _passwordBusy;
+  bool get canChangePassword => _user?.method == AuthMethod.password;
+  bool get isBusy =>
+      _googleBusy || _guestBusy || _emailBusy || _resetBusy || _passwordBusy;
+
+  /// Admin (vai trò đang dùng) không có tiến độ học/tự luyện cá nhân.
+  bool get hasPersonalLearning => _role != UserRole.admin;
   String? get errorMessage => _errorMessage;
   AuthFailureCode? get lastFailure => _lastFailure;
   String get roleCode => _role == UserRole.admin ? 'admin' : 'viewer';
@@ -75,12 +86,14 @@ class AuthViewModel extends ChangeNotifier {
   String? get notice => _notice;
 
   /// Việc cần làm khi còn đăng nhập, ngay trước khi đăng xuất (vd. xóa FCM token trên server).
-  void addBeforeSignOut(Future<void> Function() hook) => _beforeSignOut.add(hook);
+  void addBeforeSignOut(Future<void> Function() hook) =>
+      _beforeSignOut.add(hook);
 
   void clearNotice() {
     _notice = null;
     _notify();
   }
+
   String get storeBranch => AppConfig.storeBranch;
 
   String get displayName {
@@ -92,11 +105,21 @@ class AuthViewModel extends ChangeNotifier {
 
   String get roleLabel => _role == UserRole.admin ? 'Store Admin' : 'Barista';
 
-  /// Lắng nghe authStateChanges – điều hướng Splash → Login/Shell.
-  /// Người dùng hủy hoặc mất mạng là tình huống dự kiến (đã báo bằng thông điệp) — không ghi Crashlytics.
-  static bool _isUnexpected(AuthFailure f) =>
-      f.code != AuthFailureCode.cancelled && f.code != AuthFailureCode.network;
+  /// Chỉ lỗi cấu hình hoặc chưa xác định mới cần ghi Crashlytics.
+  static bool _isUnexpected(AuthFailure f) => switch (f.code) {
+    AuthFailureCode.configuration || AuthFailureCode.unknown => true,
+    AuthFailureCode.cancelled ||
+    AuthFailureCode.network ||
+    AuthFailureCode.disabled ||
+    AuthFailureCode.invalidCredentials ||
+    AuthFailureCode.tooManyRequests ||
+    AuthFailureCode.passwordDisabled ||
+    AuthFailureCode.weakPassword ||
+    AuthFailureCode.requiresRecentLogin ||
+    AuthFailureCode.passwordNotApplicable => false,
+  };
 
+  /// Lắng nghe authStateChanges – điều hướng Splash → Login/Shell.
   void start() {
     _sub ??= _auth.authStateChanges().listen(
       _onAuthState,
@@ -130,11 +153,13 @@ class AuthViewModel extends ChangeNotifier {
     // Chưa vào màn chính cho tới khi server xác nhận vai trò + chưa bị khóa.
     if (_status != AuthStatus.authenticated) _status = AuthStatus.unknown;
     _notify();
-    unawaited(_ensureSynced(user).then((_) {
-      if (_user?.uid != user.uid || _signingOut) return;
-      _status = AuthStatus.authenticated;
-      _notify();
-    }));
+    unawaited(
+      _ensureSynced(user).then((_) {
+        if (_user?.uid != user.uid || _signingOut) return;
+        _status = AuthStatus.authenticated;
+        _notify();
+      }),
+    );
   }
 
   /// Crashlytics gắn uid + custom key cả khi phiên được khôi phục (mở lại app), không chỉ lúc đăng nhập.
@@ -142,7 +167,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _crash.setUserIdentifier(user.uid);
       await _crash.setCustomKey('store_code', AppConfig.storeCode);
-      await _crash.setCustomKey('auth_mode', user.isGuest ? 'guest' : 'google');
+      await _crash.setCustomKey('auth_mode', user.method.name);
     } catch (_) {}
   }
 
@@ -174,16 +199,21 @@ class AuthViewModel extends ChangeNotifier {
       await _forceSignOutDisabled();
       return;
     }
-    _applyServerRole(state.role == 'admin' ? UserRole.admin : UserRole.viewer, fromLogin: true);
-    await _profileSub?.cancel();
-    _profileSub = profile.watch(user.uid).listen(
-      (s) => _onProfileChanged(s).catchError((Object e, StackTrace st) {
-        _crash.recordError(e, st, reason: 'profile_changed');
-      }),
-      onError: (Object e, StackTrace s) {
-        _crash.recordError(e, s, reason: 'profile_watch');
-      },
+    _applyServerRole(
+      state.role == 'admin' ? UserRole.admin : UserRole.viewer,
+      fromLogin: true,
     );
+    await _profileSub?.cancel();
+    _profileSub = profile
+        .watch(user.uid)
+        .listen(
+          (s) => _onProfileChanged(s).catchError((Object e, StackTrace st) {
+            _crash.recordError(e, st, reason: 'profile_changed');
+          }),
+          onError: (Object e, StackTrace s) {
+            _crash.recordError(e, s, reason: 'profile_watch');
+          },
+        );
   }
 
   Future<void> _onProfileChanged(ProfileState s) async {
@@ -192,7 +222,10 @@ class AuthViewModel extends ChangeNotifier {
       await _forceSignOutDisabled();
       return;
     }
-    final changed = s.claimsVersion != null && _claimsVersion != null && s.claimsVersion != _claimsVersion;
+    final changed =
+        s.claimsVersion != null &&
+        _claimsVersion != null &&
+        s.claimsVersion != _claimsVersion;
     _claimsVersion = s.claimsVersion ?? _claimsVersion;
     if (changed) {
       String role;
@@ -203,7 +236,10 @@ class AuthViewModel extends ChangeNotifier {
         await _crash.recordError(e, st, reason: 'profile_refresh_token');
         role = s.role;
       }
-      _applyServerRole(role == 'admin' ? UserRole.admin : UserRole.viewer, fromLogin: false);
+      _applyServerRole(
+        role == 'admin' ? UserRole.admin : UserRole.viewer,
+        fromLogin: false,
+      );
     }
   }
 
@@ -214,7 +250,8 @@ class AuthViewModel extends ChangeNotifier {
       _role = UserRole.admin;
     } else {
       if (fromLogin && _selectedRole == UserRole.admin) {
-        _notice = 'Tài khoản chưa được cấp quyền Admin – đang dùng vai trò Barista.';
+        _notice =
+            'Tài khoản chưa được cấp quyền Admin – đang dùng vai trò Barista.';
       }
       _role = UserRole.viewer;
     }
@@ -271,6 +308,109 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> signInWithEmail(String email, String password) async {
+    if (isBusy) return false;
+    _emailBusy = true;
+    _errorMessage = null;
+    _lastFailure = null;
+    _notify();
+    try {
+      final user = await _auth.signInWithEmail(email, password);
+      await _onSignedIn(user, 'password');
+      return true;
+    } on AuthFailure catch (f, s) {
+      _lastFailure = f.code;
+      _errorMessage = f.userMessage;
+      if (_isUnexpected(f)) {
+        await _crash.recordError(f, s, reason: 'auth_email');
+      }
+      return false;
+    } catch (e, s) {
+      _lastFailure = AuthFailureCode.unknown;
+      _errorMessage = const AuthFailure(AuthFailureCode.unknown).userMessage;
+      await _crash.recordError(e, s, reason: 'auth_email_unexpected');
+      return false;
+    } finally {
+      _emailBusy = false;
+      _notify();
+    }
+  }
+
+  /// Gửi thư đặt lại mật khẩu. Trả true nếu yêu cầu được xử lý (kể cả email không tồn tại).
+  Future<bool> sendPasswordReset(String email) async {
+    if (isBusy) return false;
+    _resetBusy = true;
+    _errorMessage = null;
+    _lastFailure = null;
+    _notify();
+    try {
+      await _auth.sendPasswordReset(email);
+      return true;
+    } on AuthFailure catch (f, s) {
+      _errorMessage = f.userMessage;
+      if (_isUnexpected(f)) {
+        await _crash.recordError(f, s, reason: 'auth_reset');
+      }
+      return false;
+    } catch (e, s) {
+      _errorMessage = const AuthFailure(AuthFailureCode.unknown).userMessage;
+      await _crash.recordError(e, s, reason: 'auth_reset_unexpected');
+      return false;
+    } finally {
+      _resetBusy = false;
+      _notify();
+    }
+  }
+
+  Future<bool> changePassword(
+    String currentPassword,
+    String newPassword,
+    String confirmation,
+  ) async {
+    if (isBusy) return false;
+    _errorMessage = null;
+    _lastFailure = null;
+    if (!canChangePassword) {
+      _lastFailure = AuthFailureCode.passwordNotApplicable;
+      _errorMessage = const AuthFailure(AuthFailureCode.passwordNotApplicable)
+          .userMessage;
+    } else if (currentPassword.isEmpty) {
+      _errorMessage = 'Vui lòng nhập mật khẩu hiện tại.';
+    } else if (newPassword.length < 8) {
+      _lastFailure = AuthFailureCode.weakPassword;
+      _errorMessage = const AuthFailure(AuthFailureCode.weakPassword)
+          .userMessage;
+    } else if (newPassword != confirmation) {
+      _errorMessage = 'Mật khẩu nhập lại chưa khớp.';
+    }
+    if (_errorMessage != null) {
+      _notify();
+      return false;
+    }
+    _passwordBusy = true;
+    _notify();
+    try {
+      await _auth.changePassword(currentPassword, newPassword);
+      return true;
+    } on AuthFailure catch (f) {
+      _lastFailure = f.code;
+      _errorMessage = f.code == AuthFailureCode.invalidCredentials
+          ? 'Mật khẩu hiện tại không đúng. Vui lòng thử lại.'
+          : f.code == AuthFailureCode.unknown
+          ? 'Không thể đổi mật khẩu lúc này. Vui lòng thử lại.'
+          : f.userMessage;
+      return false;
+    } catch (_) {
+      // Không gửi exception có thể chứa credential lên log/Crashlytics.
+      _lastFailure = AuthFailureCode.unknown;
+      _errorMessage = 'Không thể đổi mật khẩu lúc này. Vui lòng thử lại.';
+      return false;
+    } finally {
+      _passwordBusy = false;
+      _notify();
+    }
+  }
+
   Future<bool> continueAsGuest() async {
     if (isBusy) return false;
     _guestBusy = true;
@@ -283,7 +423,9 @@ class AuthViewModel extends ChangeNotifier {
     } on AuthFailure catch (f, s) {
       _lastFailure = f.code;
       _errorMessage = f.userMessage;
-      if (_isUnexpected(f)) await _crash.recordError(f, s, reason: 'auth_guest');
+      if (_isUnexpected(f)) {
+        await _crash.recordError(f, s, reason: 'auth_guest');
+      }
       return false;
     } finally {
       _guestBusy = false;
@@ -293,10 +435,14 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<void> _onSignedIn(AppUser user, String method) async {
     _user = user;
-    _role = _profile == null ? (user.isGuest ? UserRole.viewer : _selectedRole) : _serverRole;
+    _role = _profile == null
+        ? (user.isGuest ? UserRole.viewer : _selectedRole)
+        : _serverRole;
     _incidents?.setUser(uid: user.uid, email: user.email);
     await _ensureSynced(user);
-    if (_user?.uid != user.uid) return; // bị khóa → đã đăng xuất trong lúc đồng bộ
+    if (_user?.uid != user.uid) {
+      return; // bị khóa → đã đăng xuất trong lúc đồng bộ
+    }
     _status = AuthStatus.authenticated;
     _sessionStart = DateTime.now();
     _notify();
@@ -318,7 +464,9 @@ class AuthViewModel extends ChangeNotifier {
       _notify();
       return false;
     }
-    if (role == UserRole.admin && _profile != null && _serverRole != UserRole.admin) {
+    if (role == UserRole.admin &&
+        _profile != null &&
+        _serverRole != UserRole.admin) {
       _errorMessage = 'Tài khoản chưa được Admin cấp quyền quản lý.';
       _notify();
       return false;
@@ -335,7 +483,9 @@ class AuthViewModel extends ChangeNotifier {
     if (_signingOut) return; // bấm đúp / snapshot "bị khóa" tới 2 lần
     _signingOut = true;
     try {
-      final minutes = _sessionStart == null ? 0 : DateTime.now().difference(_sessionStart!).inMinutes;
+      final minutes = _sessionStart == null
+          ? 0
+          : DateTime.now().difference(_sessionStart!).inMinutes;
       await _analytics.logLogout(role: roleCode, sessionMinutes: minutes);
       for (final hook in List.of(_beforeSignOut)) {
         try {

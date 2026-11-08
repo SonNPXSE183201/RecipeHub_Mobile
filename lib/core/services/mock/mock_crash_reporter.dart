@@ -12,14 +12,19 @@ class MockCrashReporter implements ICrashReporter {
   Future<void> setUserIdentifier(String? uid) async => userId = uid;
 
   @override
-  Future<void> setCustomKey(String key, Object value) async => customKeys[key] = value;
+  Future<void> setCustomKey(String key, Object value) async =>
+      customKeys[key] = value;
 
   @override
   Future<void> log(String message) async => logs.add(message);
 
   @override
-  Future<void> recordError(Object error, StackTrace? stackTrace, {String? reason, bool fatal = false}) async =>
-      recordedErrors.add(error);
+  Future<void> recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    String? reason,
+    bool fatal = false,
+  }) async => recordedErrors.add(error);
 
   @override
   void testCrash() => testCrashCount++;

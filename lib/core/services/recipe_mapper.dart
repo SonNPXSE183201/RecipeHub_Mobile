@@ -9,18 +9,25 @@ class RecipeMapper {
   RecipeMapper._();
 
   static RecipeItem fromDetail(RecipeDetailResponse d) {
-    final ingredients = [...d.ingredients]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final steps = [...d.steps]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final ingredients = [...d.ingredients]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final steps = [...d.steps]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
-    final portions = ingredients
-        .map((i) => IngredientPortion(
-              name: i.ingredientName,
-              amount: i.quantity,
-              unit: i.unitCode,
-              note: i.note ?? i.stageName,
-              warning: i.warning,
-            ))
-        .toList();
+    IngredientPortion portionOf(RecipeIngredientResponse i) =>
+        IngredientPortion(
+          name: i.ingredientName,
+          amount: i.quantity,
+          unit: i.unitCode,
+          note: i.note ?? i.stageName,
+          warning: i.warning,
+        );
+    final portions = ingredients.map(portionOf).toList();
+    const nl = '\n';
+    final serving = [
+      ...d.servingNotes,
+      ...d.specialRequests.map((e) => 'Yêu cầu đặc biệt: $e'),
+    ].join(nl);
 
     var cursor = 0;
     var stepNo = 0;
@@ -31,48 +38,80 @@ class RecipeMapper {
       final start = cursor;
       cursor += dur > 0 ? dur : 10;
       final extra = <String>[
-        if (st.equipment != null && st.equipment!.isNotEmpty) 'Dụng cụ: ${st.equipment}',
-        if (st.safetyNote != null && st.safetyNote!.isNotEmpty) 'Lưu ý: ${st.safetyNote}',
+        if (st.equipment != null && st.equipment!.isNotEmpty)
+          'Dụng cụ: ${st.equipment}',
+        if (st.safetyNote != null && st.safetyNote!.isNotEmpty)
+          'Lưu ý: ${st.safetyNote}',
       ];
-      stepItems.add(RecipeStepItem(
-        stepNumber: stepNo,
-        title: st.title,
-        instruction: [st.description, ...extra].where((e) => e.isNotEmpty).join('\n'),
-        videoStartSeconds: start,
-        videoEndSeconds: cursor,
-        temperature: st.temperatureCelsius == null ? null : '${_trim(st.temperatureCelsius!)}°C',
-        durationText: dur > 0 ? '$dur giây' : null,
-      ));
+      stepItems.add(
+        RecipeStepItem(
+          stepNumber: stepNo,
+          title: st.title,
+          instruction: [
+            st.description,
+            ...extra,
+          ].where((e) => e.isNotEmpty).join('\n'),
+          videoStartSeconds: start,
+          videoEndSeconds: cursor,
+          temperature: st.temperatureCelsius == null
+              ? null
+              : '${_trim(st.temperatureCelsius!)}°C',
+          durationText: dur > 0 ? '$dur giây' : null,
+        ),
+      );
     }
 
-    final totalSeconds = steps.fold<int>(0, (a, s) => a + (s.durationSeconds ?? 0));
-    final temps = steps.map((s) => s.temperatureCelsius).whereType<double>().toList();
+    final totalSeconds = steps.fold<int>(
+      0,
+      (a, s) => a + (s.durationSeconds ?? 0),
+    );
+    final temps = steps
+        .map((s) => s.temperatureCelsius)
+        .whereType<double>()
+        .toList();
     final u = d.updatedAt.toLocal();
 
     return RecipeItem(
       id: d.id,
       code: d.code,
       name: d.name,
-      category: categoryOf(d.name, code: d.code),
+      category: d.category ?? categoryOf(d.name, code: d.code),
       version: 'v${d.versionNumber}.0',
-      status: d.versionStatus.toLowerCase() == 'published' ? 'Ban hành' : d.versionStatus,
+      status: d.versionStatus.toLowerCase() == 'published'
+          ? 'Ban hành'
+          : d.versionStatus,
       publishedDate:
           '${u.day.toString().padLeft(2, '0')}/${u.month.toString().padLeft(2, '0')}/${u.year}',
-      publisher: 'R&D RecipeHub',
+      publisher: d.category != null ? 'Bộ công thức Phê La' : 'R&D RecipeHub',
       description: d.description ?? '',
       standardTime: totalSeconds > 0 ? '$totalSeconds giây' : '—',
-      standardTemp: temps.isEmpty ? '—' : '${_trim(temps.reduce((a, b) => a > b ? a : b))}°C',
+      standardTemp: temps.isEmpty
+          ? '—'
+          : '${_trim(temps.reduce((a, b) => a > b ? a : b))}°C',
       hasNewerVersion: false,
-      sizes: [
-        RecipeSizeOption(
-          sizeCode: 'M',
-          label: 'Định lượng chuẩn',
-          servingNotes: '',
-          ingredients: portions,
-        ),
-      ],
+      sizes: d.sizes.isNotEmpty
+          ? [
+              for (final s in d.sizes)
+                RecipeSizeOption(
+                  sizeCode: s.code,
+                  label: s.label,
+                  servingNotes: [
+                    if (s.note != null && s.note!.isNotEmpty) s.note!,
+                    if (serving.isNotEmpty) serving,
+                  ].join(nl),
+                  ingredients: s.ingredients.map(portionOf).toList(),
+                ),
+            ]
+          : [
+              RecipeSizeOption(
+                sizeCode: 'M',
+                label: 'Định lượng chuẩn',
+                servingNotes: serving,
+                ingredients: portions,
+              ),
+            ],
       steps: stepItems,
-      videoUrl: '',
+      videoUrl: d.videoUrl ?? '',
     );
   }
 
@@ -84,12 +123,23 @@ class RecipeMapper {
     if (prefix.startsWith('TT-')) return 'Trà Trái Cây';
     final n = name.toLowerCase();
     if (n.contains('xỉu') || n.contains('xiu')) return 'Cà phê & Cold Brew';
-    if (n.contains('cà phê') || n.contains('cafe') || n.contains('coffee') || n.contains('cold brew') || n.contains('espresso')) {
+    if (n.contains('cà phê') ||
+        n.contains('cafe') ||
+        n.contains('coffee') ||
+        n.contains('cold brew') ||
+        n.contains('espresso')) {
       return 'Cà phê & Cold Brew';
     }
-    if (n.contains('sữa') || n.contains('kem') || n.contains('milk') || n.contains('latte') || n.contains('matcha')) return 'Trà Sữa & Kem Mây';
+    if (n.contains('sữa') ||
+        n.contains('kem') ||
+        n.contains('milk') ||
+        n.contains('latte') ||
+        n.contains('matcha')) {
+      return 'Trà Sữa & Kem Mây';
+    }
     return 'Trà Trái Cây';
   }
 
-  static String _trim(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
+  static String _trim(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
 }

@@ -14,7 +14,8 @@ const String _kReportedKey = 'rh_incident_crash_reported_v1';
 
 /// Ghi sự cố vào Firestore `incidents/{id}`. Web Admin nghe collection này real-time.
 class FirestoreIncidentReporter implements IIncidentReporter {
-  FirestoreIncidentReporter({FirebaseFirestore? firestore}) : _db = firestore ?? FirebaseFirestore.instance;
+  FirestoreIncidentReporter({FirebaseFirestore? firestore})
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
   String? _uid;
@@ -42,31 +43,41 @@ class FirestoreIncidentReporter implements IIncidentReporter {
   Future<bool> report(IncidentReport r) => _write(r, uid: _uid, email: _email);
 
   /// Ghi với người dùng truyền vào (không đổi state dùng chung khi gửi bù).
-  Future<bool> _write(IncidentReport r, {required String? uid, required String? email}) async {
+  Future<bool> _write(
+    IncidentReport r, {
+    required String? uid,
+    required String? email,
+  }) async {
     try {
       final d = await DeviceInfoReader.read();
-      await _db.collection('incidents').doc(r.id).set({
-        'uid': uid,
-        'email': uid == null ? null : email,
-        'kind': r.kindCode,
-        'source': r.sourceCode,
-        'errorType': r.errorType,
-        'message': r.message,
-        'stackTop': r.stackTop,
-        'screen': r.screen,
-        'appVersion': d.appVersion,
-        'buildNumber': d.buildNumber,
-        'deviceModel': d.model,
-        'osVersion': d.osVersion,
-        'occurredAt': Timestamp.fromDate(r.occurredAt ?? DateTime.now()),
-        'reportedAt': FieldValue.serverTimestamp(),
-        'status': 'open',
-      }).timeout(const Duration(seconds: 8));
+      await _db
+          .collection('incidents')
+          .doc(r.id)
+          .set({
+            'uid': uid,
+            'email': uid == null ? null : email,
+            'kind': r.kindCode,
+            'source': r.sourceCode,
+            'errorType': r.errorType,
+            'message': r.message,
+            'stackTop': r.stackTop,
+            'screen': r.screen,
+            'appVersion': d.appVersion,
+            'buildNumber': d.buildNumber,
+            'deviceModel': d.model,
+            'osVersion': d.osVersion,
+            'occurredAt': Timestamp.fromDate(r.occurredAt ?? DateTime.now()),
+            'reportedAt': FieldValue.serverTimestamp(),
+            'status': 'open',
+          })
+          .timeout(const Duration(seconds: 8));
       return true;
     } on FirebaseException catch (e) {
       // Document đã tồn tại (bản trước đã tới server) → rules chặn ghi đè: coi như đã gửi.
       if (e.code == 'permission-denied') {
-        debugPrint('[Incident] ${r.id} bị từ chối (đã có hoặc không hợp lệ) – bỏ qua');
+        debugPrint(
+          '[Incident] ${r.id} bị từ chối (đã có hoặc không hợp lệ) – bỏ qua',
+        );
         return true;
       }
       debugPrint('[Incident] report failed: ${e.code}');
@@ -83,7 +94,10 @@ class FirestoreIncidentReporter implements IIncidentReporter {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_kStashKey) ?? <String>[];
       list.add(jsonEncode({...r.toJson(), 'uid': _uid, 'email': _email}));
-      await prefs.setStringList(_kStashKey, list.length > 20 ? list.sublist(list.length - 20) : list);
+      await prefs.setStringList(
+        _kStashKey,
+        list.length > 20 ? list.sublist(list.length - 20) : list,
+      );
     } catch (_) {
       // Đang crash: không làm gì thêm được.
     }

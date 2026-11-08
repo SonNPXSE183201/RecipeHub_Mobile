@@ -19,8 +19,13 @@ class DeviceSnapshot {
   final String appVersion;
   final String buildNumber;
 
-  static const unknown =
-      DeviceSnapshot(platform: 'android', model: 'unknown', osVersion: 'unknown', appVersion: '0.0.0', buildNumber: '0');
+  static const unknown = DeviceSnapshot(
+    platform: 'android',
+    model: 'unknown',
+    osVersion: 'unknown',
+    appVersion: '0.0.0',
+    buildNumber: '0',
+  );
 }
 
 class DeviceInfoReader {
