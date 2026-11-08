@@ -1,903 +1,277 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRM393 - Lab 3: RecipeHub Mobile Presentation</title>
-  <style>
-    @page {
-      size: 1280px 720px;
-      margin: 0;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background-color: #555555;
-      color: #292524;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      padding: 20px 0;
-    }
-
-    .slide {
-      width: 1280px;
-      height: 720px;
-      background: linear-gradient(135deg, #FFFDF7 0%, #FFF8EE 100%);
-      position: relative;
-      overflow: hidden;
-      page-break-after: always;
-      break-after: page;
-      display: flex;
-      flex-direction: column;
-      padding: 44px 56px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    }
-
-    /* Header & Footer on each slide */
-    .slide-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #E7E0D5;
-      padding-bottom: 12px;
-      margin-bottom: 24px;
-    }
-
-    .slide-category {
-      font-size: 13px;
-      font-weight: 700;
-      color: #C49A6C;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-
-    .slide-title {
-      font-size: 28px;
-      font-weight: 800;
-      color: #664220;
-      line-height: 1.2;
-    }
-
-    .slide-number {
-      font-size: 14px;
-      font-weight: 700;
-      color: #A07040;
-      background-color: #FAF6F0;
-      padding: 4px 12px;
-      border-radius: 12px;
-      border: 1px solid #E7E0D5;
-    }
-
-    .slide-content {
-      flex: 1;
-      display: flex;
-      gap: 32px;
-      position: relative;
-    }
-
-    .slide-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid #E7E0D5;
-      padding-top: 10px;
-      margin-top: 20px;
-      font-size: 12px;
-      color: #78716C;
-    }
-
-    /* Common Card Styles */
-    .card {
-      background: #FFFFFF;
-      border: 1px solid #E7E0D5;
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #8B5A2B;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card p, .card li {
-      font-size: 14px;
-      color: #44403C;
-      line-height: 1.5;
-    }
-
-    .card ul {
-      padding-left: 20px;
-    }
-
-    /* Badge & Tag */
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-    .badge-primary { background: #8B5A2B; color: #FFF; }
-    .badge-sand { background: #FAF6F0; color: #A07040; border: 1px solid #E7E0D5; }
-    .badge-success { background: #DCFCE7; color: #166534; }
-    .badge-warn { background: #FEF9C3; color: #CA8A04; }
-    .badge-error { background: #FEE2E2; color: #DC2626; }
-
-    /* Key Message Pill */
-    .key-message {
-      background: #FAF6F0;
-      border-left: 5px solid #8B5A2B;
-      padding: 12px 18px;
-      border-radius: 0 10px 10px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #664220;
-      margin-bottom: 18px;
-    }
-
-    /* Grid layouts */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      width: 100%;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-      width: 100%;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      width: 100%;
-    }
-
-    /* Print settings */
-    @media print {
-      body {
-        background: transparent;
-        padding: 0;
-        gap: 0;
-      }
-      .slide {
-        box-shadow: none;
-        margin: 0;
-        page-break-after: always;
-      }
-    }
-  </style>
+<meta charset="utf-8">
+<title>RecipeHub Mobile – Lab 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso: #2b1b12;
+    --roast: #5a3a26;
+    --caramel: #c8894f;
+    --crema: #f3e6d4;
+    --milk: #fbf6ef;
+    --matcha: #6f8f5f;
+    --berry: #b5473a;
+    --muted: #8a7462;
+  }
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #e9dfd2; }
+  body { font-family: "Be Vietnam Pro", system-ui, sans-serif; color: var(--espresso); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .slide {
+    width: 1280px; height: 720px; position: relative; overflow: hidden;
+    background: var(--milk); page-break-after: always; break-after: page;
+    padding: 64px 72px;
+  }
+  .slide:last-child { page-break-after: auto; }
+  .num { position: absolute; right: 40px; bottom: 28px; font-size: 14px; color: var(--muted); letter-spacing: .08em; }
+  .brand { position: absolute; left: 72px; bottom: 28px; font-size: 13px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+  .kicker { font-size: 15px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--caramel); margin-bottom: 14px; }
+  h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.02; letter-spacing: -.02em; }
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: 50px; line-height: 1.08; letter-spacing: -.015em; max-width: 620px; }
+  .lead { font-size: 22px; line-height: 1.5; color: var(--roast); margin-top: 18px; max-width: 520px; }
+  .phone {
+    position: absolute; width: 230px; aspect-ratio: 720 / 1520; border-radius: 34px;
+    background: #111; padding: 9px; box-shadow: 0 30px 60px -20px rgba(43,27,18,.45), 0 0 0 1px rgba(0,0,0,.2);
+  }
+  .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 26px; display: block; }
+  .phone.sm { width: 200px; }
+  .phone.lg { width: 260px; }
+  .tag {
+    position: absolute; background: var(--espresso); color: var(--milk); font-size: 15px; font-weight: 600;
+    padding: 8px 16px; border-radius: 999px; white-space: nowrap; z-index: 5;
+  }
+  .tag.c { background: var(--caramel); color: var(--espresso); }
+  .tag.g { background: var(--matcha); }
+  .tag.r { background: var(--berry); }
+  .shot { position: absolute; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 50px -24px rgba(43,27,18,.5), 0 0 0 1px rgba(43,27,18,.12); background: #fff; }
+  .shot img { display: block; width: 100%; }
+  .shot.fix { height: 400px; } .shot.fix img { height: 100%; object-fit: cover; object-position: top; }
+  .blob { position: absolute; border-radius: 50%; }
+  .stat { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: 96px; line-height: 1; color: var(--espresso); }
+  .stat small { display: block; font-family: "Be Vietnam Pro", sans-serif; font-size: 17px; font-weight: 600; color: var(--muted); margin-top: 8px; letter-spacing: .02em; }
+  .row { display: flex; gap: 56px; }
+  .card { background: #fff; border-radius: 20px; padding: 26px 28px; box-shadow: 0 1px 0 rgba(43,27,18,.06), 0 18px 40px -28px rgba(43,27,18,.35); }
+  .card b { display: block; font-size: 21px; margin-bottom: 8px; }
+  .card p { font-size: 16px; line-height: 1.45; color: var(--roast); }
+  .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--crema); display: grid; place-items: center; font-size: 22px; margin-bottom: 14px; }
+  .arrow { position: absolute; height: 3px; background: var(--caramel); }
+  .arrow::after { content: ""; position: absolute; right: -2px; top: -6px; border-left: 12px solid var(--caramel); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
+  .dark { background: var(--espresso); color: var(--milk); }
+  .dark .lead, .dark .brand, .dark .num { color: #d9c4ae; }
+  .dark h1, .dark h2 { color: var(--milk); }
+  .layer { position: absolute; left: 72px; right: 72px; height: 76px; border-radius: 18px; display: flex; align-items: center; padding: 0 28px; font-size: 19px; font-weight: 700; }
+  .layer span { font-weight: 400; opacity: .85; margin-left: 18px; font-size: 16px; }
+  .chip { display: inline-block; font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: var(--crema); color: var(--roast); margin: 0 6px 8px 0; }
+  code { font-family: Consolas, monospace; background: var(--crema); padding: 1px 6px; border-radius: 6px; font-size: .9em; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
 </head>
 <body>
 
-  <!-- ==================== SLIDE 1: BÌA ==================== -->
-  <section class="slide" style="justify-content: space-between; text-align: center; background: radial-gradient(circle at 50% 30%, #FFFDF7 0%, #FAF0E4 100%);">
-    <div style="margin-top: 40px;">
-      <span class="badge badge-sand" style="font-size: 13px; padding: 6px 18px; letter-spacing: 1.5px;">PRM393 – MOBILE PROGRAMMING • LAB 3 REPORT</span>
-      <h1 style="font-size: 44px; font-weight: 900; color: #664220; margin-top: 24px; line-height: 1.2;">
-        RECIPEHUB MOBILE
-      </h1>
-      <p style="font-size: 20px; color: #8B5A2B; font-weight: 600; margin-top: 10px;">
-        Hệ thống Hỗ trợ Nghiệp vụ & Đào tạo Quầy Pha chế Chuỗi Đồ uống
-      </p>
-      <p style="font-size: 15px; color: #78716C; margin-top: 8px;">
-        Kiến trúc MVVM + Provider • Nền tảng Cloud Firebase • Bộ dữ liệu chuẩn Phê La
-      </p>
+<!-- 1. Cover -->
+<section class="slide dark">
+  <div class="blob" style="width:620px;height:620px;right:-120px;top:-160px;background:radial-gradient(circle,#5a3a26 0%,rgba(90,58,38,0) 70%)"></div>
+  <div style="position:relative;z-index:2;margin-top:70px">
+    <div class="kicker">PRM393 · Lab 3 · SE183201</div>
+    <h1>RecipeHub<br>Mobile</h1>
+    <p class="lead">Công thức chuẩn trong túi Barista: tra cứu, học SOP và báo sự cố ngay tại quầy.</p>
+    <div style="margin-top:34px">
+      <span class="chip">Flutter · MVVM</span><span class="chip">Cloud Firestore real-time</span><span class="chip">FCM · Crashlytics · Remote Config</span>
     </div>
-
-    <div style="background: #FFFFFF; border: 1px solid #E7E0D5; border-radius: 16px; padding: 24px 40px; display: inline-block; margin: 0 auto; box-shadow: 0 4px 14px rgba(0,0,0,0.05); text-align: left;">
-      <div style="display: grid; grid-template-columns: auto auto; gap: 12px 30px; font-size: 15px;">
-        <span style="color: #78716C; font-weight: 500;">Sinh viên thực hiện:</span>
-        <strong style="color: #664220; font-size: 16px;">Sinh viên: SE183201</strong>
-        <span style="color: #78716C; font-weight: 500;">Nền tảng kiểm thử vật lý:</span>
-        <strong style="color: #292524;">Xiaomi Redmi 7 (Android 10 - API 29)</strong>
-        <span style="color: #78716C; font-weight: 500;">Hạ tầng đám mây:</span>
-        <strong style="color: #292524;">Google Firebase (Auth, Firestore, Storage, FCM, Analytics, Crashlytics, Remote Config)</strong>
-      </div>
-    </div>
-
-    <div style="font-size: 13px; color: #A07040; border-top: 1px solid #E7E0D5; padding-top: 14px;">
-      Đại học FPT • Tháng 11 Năm 2026 • Bản báo cáo & bảo vệ kỹ thuật
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 2: BÀI TOÁN ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Bối cảnh & Đặt vấn đề</div>
-        <div class="slide-title">Bài toán Nghiệp vụ tại Quầy Bar Chuỗi F&B</div>
-      </div>
-      <div class="slide-number">02 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Chuyển đổi sổ tay giấy và nhóm chat phân mảnh thành một hệ thống tra cứu 5 giây và giám sát đào tạo số hóa tập trung."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-title">❌ Nỗi đau Quầy Bar</div>
-          <ul>
-            <li><strong>Công thức rải rác:</strong> In giấy dễ dính nước/bẩn hoặc lưu PDF dài khó tìm kiếm trên Zalo.</li>
-            <li><strong>Lệch định lượng:</strong> Cùng một món nhưng giữa các ca và các size (S, M, L) pha chế không chuẩn.</li>
-            <li><strong>Thiếu video trực quan:</strong> Khó hình dung thao tác kỹ thuật chuẩn khi chỉ đọc chữ.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-title">❌ Nỗi đau Quản lý</div>
-          <ul>
-            <li><strong>Chấm thực hành thủ công:</strong> Đánh giá thao tác bằng giấy tờ dễ thất lạc, không lưu lịch sử.</li>
-            <li><strong>Mù số liệu đào tạo:</strong> Không rõ nhân sự nào chưa đọc SOP, ai chưa hoàn thành bài Quiz.</li>
-            <li><strong>Chậm cập nhật SOP:</strong> Công thức mới ban hành nhưng quầy bar vẫn pha theo công thức cũ.</li>
-          </ul>
-        </div>
-        <div class="card" style="border-color: #8B5A2B; background: #FFFDF9;">
-          <div class="card-title">✅ Giải pháp RecipeHub</div>
-          <ul>
-            <li><strong>Tra cứu &lt; 5 giây:</strong> Tìm kiếm không dấu tức thì, đổi size ly hiển thị định lượng ngay.</li>
-            <li><strong>Sổ tay SOP & Video:</strong> Sách điện tử 3D, xuất PDF 133 trang, video thao tác theo bước.</li>
-            <li><strong>Giám sát Real-time:</strong> Bảng theo dõi đào tạo chi nhánh, chấm tại quầy và phản hồi có ảnh.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 3: PERSONA & FLOW LAB 2 ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Đặc tả Thiết kế Lab 2</div>
-        <div class="slide-title">Hai Chân dung Người dùng & Ba Luồng Nghiệp vụ Trọng yếu</div>
-      </div>
-      <div class="slide-number">03 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Phân định rạch ròi trải nghiệm quầy bar của Barista và công cụ điều hành của Quản lý cửa hàng trên cùng một ứng dụng."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">👤 Barista Quầy Bar (Viewer)</div>
-          <p style="font-size: 13px; color: #78716C; margin-bottom: 8px;">Đại diện: Nguyễn Hoàng Tuấn (23 tuổi), Landmark 81</p>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Flow 1 – Tra cứu tại quầy:</strong> Đăng nhập → Danh sách món nạp Firestore → Tìm không dấu → Chi tiết món đổi size S/M/L → Video chuẩn từng bước.</li>
-            <li><strong>Flow 2 – Tự luyện pha chế:</strong> Bật đồng hồ bấm giờ (dung sai ±5s) → Lưu lịch sử → Xuất báo cáo PDF Unicode lưu máy và upload Storage.</li>
-            <li><strong>Học tập & Kiểm tra:</strong> Đọc SOP, tick nhiệm vụ học, nộp bài Quiz trắc nghiệm xem giải thích.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-title">👤 Quản lý Cửa hàng (Admin)</div>
-          <p style="font-size: 13px; color: #78716C; margin-bottom: 8px;">Đại diện: Store Admin / Quản lý Đào tạo Chi nhánh</p>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Giám sát đào tạo chi nhánh:</strong> Xem danh sách nhân viên thật, tỷ lệ đọc SOP, cảnh báo nhiệm vụ quá hạn.</li>
-            <li><strong>Chấm thực hành tại quầy:</strong> Đánh giá thao tác pha chế trực tiếp theo checklist tiêu chí chuẩn, lưu kết quả tức thì vào Firestore.</li>
-            <li><strong>Flow 3 – Phản hồi & Xử lý:</strong> Tiếp nhận phản hồi kèm ảnh hiện trường của nhân viên, trao đổi hội thoại 2 chiều và cập nhật trạng thái.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 4: KIẾN TRÚC MVVM ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Kiến trúc Ứng dụng</div>
-        <div class="slide-title">Kiến trúc MVVM + Provider & Nguyên lý Đảo ngược Phụ thuộc</div>
-      </div>
-      <div class="slide-number">04 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Giao diện (View) hoàn toàn không biết đến Firebase SDK; toàn bộ phụ thuộc được trừu tượng hóa qua Service Interface."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-4">
-        <div class="card" style="border-top: 4px solid #0891B2;">
-          <div class="card-title">1. View (Giao diện)</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">lib/features/*</span>
-          <p>Widget khai báo thuần túy:</p>
-          <ul>
-            <li>Quan sát trạng thái qua <code>context.watch()</code></li>
-            <li>Kích hoạt hành động qua <code>context.read()</code></li>
-            <li><strong>Cấm tuyệt đối</strong> gọi trực tiếp SDK Firebase trong màn hình</li>
-          </ul>
-        </div>
-
-        <div class="card" style="border-top: 4px solid #8B5A2B;">
-          <div class="card-title">2. ViewModel</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">lib/core/viewmodels/*</span>
-          <p>Quản lý trạng thái giao diện:</p>
-          <ul>
-            <li>Kế thừa <code>ChangeNotifier</code></li>
-            <li>Quản lý trạng thái: loading, ready, empty, error</li>
-            <li>Chỉ giao tiếp với tầng dữ liệu qua Interface trừu tượng</li>
-          </ul>
-        </div>
-
-        <div class="card" style="border-top: 4px solid #C49A6C;">
-          <div class="card-title">3. Service Interface</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">interfaces/*</span>
-          <p>Hợp đồng nghiệp vụ (Contract):</p>
-          <ul>
-            <li><code>IAuthService</code></li>
-            <li><code>IRecipeSource</code></li>
-            <li><code>ITrainingRepository</code></li>
-            <li><code>IStorageService</code></li>
-            <li><code>IAnalyticsService</code></li>
-          </ul>
-        </div>
-
-        <div class="card" style="border-top: 4px solid #166534;">
-          <div class="card-title">4. Implementation</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">firebase/* & device/*</span>
-          <p>Hiện thực hóa Production:</p>
-          <ul>
-            <li><code>FirebaseAuthService</code></li>
-            <li><code>FirestoreRecipeSource</code></li>
-            <li><code>FirebaseStorageService</code></li>
-            <li><code>AndroidFileSaveService</code></li>
-            <li>Dễ dàng tráo đổi Mock cho E2E</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 5: DỮ LIỆU THẬT FIRESTORE ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Tầng Dữ liệu Real-time</div>
-        <div class="slide-title">Dữ liệu Thật Cloud Firestore: Bộ Công thức Phê La Chuẩn</div>
-      </div>
-      <div class="slide-number">05 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Xóa bỏ hoàn toàn MockDataService; nạp và vận hành 100% trên dữ liệu thật với Cloud Firestore và Security Rules chặt chẽ."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">📦 Dữ liệu Chuẩn hóa Phê La</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-            <div style="background: #FAF6F0; padding: 12px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 26px; font-weight: 800; color: #8B5A2B;">61</div>
-              <div style="font-size: 13px; font-weight: 600; color: #57534E;">Công thức theo Size</div>
-            </div>
-            <div style="background: #FAF6F0; padding: 12px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 26px; font-weight: 800; color: #8B5A2B;">25</div>
-              <div style="font-size: 13px; font-weight: 600; color: #57534E;">Quy trình SOP chuẩn</div>
-            </div>
-          </div>
-          <ul style="margin-top: 14px; font-size: 13.5px;">
-            <li>Định lượng chi tiết thành phần theo Size S (450ml), M (600ml), L (700ml).</li>
-            <li>Nhiệm vụ đào tạo, ngân hàng câu hỏi Quiz và checklist chấm thực hành tại quầy.</li>
-            <li>Đồng bộ tức thì qua luồng <code>snapshots()</code>.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">🛡️ Mô hình Bảo mật Firestore Security Rules</div>
-          <ul style="font-size: 13.5px;">
-            <li><code>users/{uid}</code>: Chỉ chính chủ đọc hoặc Admin; Client chỉ cập nhật <code>lastSeenAt</code>; quyền và vai trò do Cloud Functions cấp.</li>
-            <li><code>recipes</code>, <code>sops</code>: Đã ban hành cho phép đọc chung; chỉ Admin có quyền tạo/sửa.</li>
-            <li><code>quizzes</code>: Ẩn đáp án đúng trong subcollection <code>answerKey</code>, chỉ mở sau khi nộp bài.</li>
-            <li><code>feedback</code>: Barista chỉ thấy phản hồi của mình; Admin xem và trả lời tất cả.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 6: PHẢN HỒI CÓ ẢNH ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Nghiệp vụ Hiện trường</div>
-        <div class="slide-title">Phản hồi Hiện trường Kèm Ảnh & Trao đổi Hai chiều Real-time</div>
-      </div>
-      <div class="slide-number">06 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Barista chụp ảnh nguyên liệu sai lệch gửi lên Cloud Storage; Admin nhận cảnh báo và phản hồi ngay lập tức."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-title">1. Chọn & Tải Ảnh</div>
-          <ul>
-            <li>Tích hợp <strong>Photo Picker hệ thống Android</strong> (không xâm phạm quyền bộ nhớ ngoài).</li>
-            <li>Chặn tại máy file vượt quá <strong>5 MB</strong>.</li>
-            <li>Upload trực tiếp lên Cloud Storage: <code>feedback/{uid}/{file}</code>.</li>
-            <li>Tự động tiếp tục khi mất mạng.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-title">2. Lưu & Cách ly Dữ liệu</div>
-          <ul>
-            <li>Lưu bản ghi phản hồi vào Firestore <code>feedback/{id}</code> kèm URL ảnh.</li>
-            <li><strong>Bảo mật & Cách ly:</strong> Barista A tuyệt đối không xem được phản hồi của Barista B.</li>
-            <li>Admin xem toàn bộ phản hồi qua luồng <code>watchAll()</code>.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-title">3. Trao đổi Hai chiều</div>
-          <ul>
-            <li>Admin mở chi tiết xem ảnh độ phân giải cao.</li>
-            <li>Nhắn tin trả lời trong subcollection <code>feedback/{id}/replies</code>.</li>
-            <li>Cập nhật trạng thái xử lý: <em>Đang xử lý</em>, <em>Chờ thêm thông tin</em>, <em>Đã giải quyết</em>.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 7: SỔ TAY SOP & VIDEO ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Công cụ Đào tạo Trực quan</div>
-        <div class="slide-title">Sổ tay SOP Điện tử 3D & Video Kỹ thuật Chuẩn từng Bước</div>
-      </div>
-      <div class="slide-number">07 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Tích hợp công nghệ lật sách 3D trực quan, xem video đồng bộ mốc thời gian và xuất PDF lưu trữ cục bộ."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">📖 Sổ tay SOP Điện tử & Xuất PDF</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Hiệu ứng lật trang 3D:</strong> Gom 25 SOP và 61 công thức vào giao diện sách điện tử mượt mà trong màn Tài khoản.</li>
-            <li><strong>Mục lục thông minh:</strong> Chuyển trang nhanh theo mục lục chương hồi.</li>
-            <li><strong>Lưu vị trí đọc:</strong> Tự động ghi nhớ số trang đang đọc qua SharedPreferences.</li>
-            <li><strong>Xuất PDF toàn diện:</strong> Sinh file PDF 133 trang tiếng Việt Unicode chuẩn, lưu vào <code>Download/RecipeHub</code>.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">🎥 Video Kỹ thuật Chuẩn từng Bước</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Stream Video MP4:</strong> Phát trực tiếp từ Cloud Storage (<code>recipe.videoUrl</code>) qua <code>video_player</code> native.</li>
-            <li><strong>Đồng bộ Timeline Bước:</strong> Mỗi bước pha chế khớp chính xác mốc thời gian bắt đầu và kết thúc (hiển thị chuẩn <code>mm:ss</code>).</li>
-            <li><strong>Toàn màn hình Landscape:</strong> Tự động xoay ngang màn hình giúp quan sát rõ ràng kỹ thuật thao tác tay của Barista.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 8: FCM TRÊN 3 TRẠNG THÁI ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Thông báo Đám mây</div>
-        <div class="slide-title">Firebase Cloud Messaging (FCM) trên 3 Trạng thái Ứng dụng</div>
-      </div>
-      <div class="slide-number">08 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Kiểm thử thủ công ngày 08/11/2026 trên Redmi 7 xác nhận thông báo hiển thị hoàn hảo trên cả 3 trạng thái vòng đời app."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-title">1. Foreground (Đang mở)</div>
-          <span class="badge badge-success" style="margin-bottom: 8px;">Đã kiểm chứng ✓</span>
-          <p>Ứng dụng nhận thông báo tức thì:</p>
-          <ul>
-            <li>Hiển thị <strong>SnackBar nổi trong app</strong> kèm nút bấm "Xem".</li>
-            <li>Biểu tượng chuông AppBar tự động kích hoạt <strong>chấm đỏ có tin mới</strong>.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">2. Background (Chạy nền)</div>
-          <span class="badge badge-success" style="margin-bottom: 8px;">Đã kiểm chứng ✓</span>
-          <p>Ứng dụng đang ẩn dưới nền:</p>
-          <ul>
-            <li>Nhận push và hiển thị trên <strong>khay thông báo Android</strong>.</li>
-            <li>Đầy đủ tiêu đề, nội dung và âm thanh qua kênh <code>recipehub_updates</code> (High Importance).</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">3. Terminated (Đã đóng)</div>
-          <span class="badge badge-success" style="margin-bottom: 8px;">Đã kiểm chứng ✓</span>
-          <p>Ứng dụng bị tắt hẳn (Kill process):</p>
-          <ul>
-            <li>Đánh thức tiến trình ngầm hiển thị thông báo.</li>
-            <li>Chạm vào thông báo: Khởi động lạnh và <strong>Deep Link mở đúng món / SOP</strong>.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 9: ANALYTICS ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Đo lường & Phân tích Hành vi</div>
-        <div class="slide-title">Firebase Analytics: 8 Sự kiện Chuẩn & Báo cáo GA4 Thực tế</div>
-      </div>
-      <div class="slide-number">09 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Dùng báo cáo Events GA4; log FA-SVC được tài liệu cũ nhắc tới nhưng chưa có trong checkout."
-    </div>
-
-    <div class="slide-content" style="gap: 20px;">
-      <div style="flex: 1.2;">
-        <img src="../evidence/lab3/06-firebase-console/01-analytics-events.jpg" alt="Báo cáo GA4 Events" style="width: 100%; height: 380px; object-fit: contain; border-radius: 8px; border: 1px solid #E7E0D5;">
-        <p style="font-size: 11px; color: #78716C; text-align: center; margin-top: 4px;">Minh chứng thực tế: evidence/lab3/06-firebase-console/01-analytics-events.jpg</p>
-      </div>
-
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-        <div class="card" style="padding: 14px;">
-          <div class="card-title" style="font-size: 15px; margin-bottom: 6px;">📊 Số liệu Đo lường Thực tế (GA4)</div>
-          <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #E7E0D5;">
-              <td style="padding: 4px;"><code>view_recipe</code></td>
-              <td style="text-align: right; font-weight: 700; color: #8B5A2B;">45 lượt</td>
-              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #E7E0D5;">
-              <td style="padding: 4px;"><code>login</code> / <code>logout</code></td>
-              <td style="text-align: right; font-weight: 700;">39 / 34 lượt</td>
-              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #E7E0D5;">
-              <td style="padding: 4px;">FCM receive / open</td>
-              <td style="text-align: right; font-weight: 700;">27 / 16 lượt</td>
-              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
-            </tr>
-            <tr>
-              <td style="padding: 4px;"><code>submit_feedback</code></td>
-              <td style="text-align: right; font-weight: 700;">13 lượt</td>
-              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
-            </tr>
-          </table>
-          <p style="font-size: 12px; color: #57534E; margin-top: 8px;"><strong>Tổng cộng:</strong> 511 sự kiện • 8 người dùng kiểm thử; không suy ra hành vi tại quầy.</p>
-        </div>
-
-        <div class="card" style="padding: 14px;">
-          <div class="card-title" style="font-size: 15px; margin-bottom: 6px;">🔒 Bảo mật Tuyệt đối (No PII)</div>
-          <p style="font-size: 12px; line-height: 1.4;">Hàm <code>AnalyticsEvent.sanitize</code> tự động lọc toàn bộ email (ký tự <code>@</code>) và chuỗi số điện thoại &ge; 9 chữ số. User ID dùng UID Firebase ngẫu nhiên.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 10: CRASHLYTICS & REMOTE CONFIG ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Giám sát & Cấu hình Động</div>
-        <div class="slide-title">Firebase Crashlytics & Remote Config Thời gian thực</div>
-      </div>
-      <div class="slide-number">10 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Lọc nhiễu báo cáo crash thông minh kết hợp cơ chế thay đổi số lượng món quầy bar từ xa trong 4 phút."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">💥 Crashlytics: Bắt lỗi & Lọc Nhiễu</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Phân tách lỗi:</strong> Lỗi nghiêm trọng gửi Fatal Crash; lỗi giao diện overflow gửi Non-fatal error qua <code>recordFlutterError</code>.</li>
-            <li><strong>Lọc nhiễu dữ liệu (CR-09):</strong> Chặn không gửi các lỗi thông thường dự kiến (mất mạng, người dùng bấm hủy chọn tài khoản Google) để giữ sạch dashboard.</li>
-            <li><strong>Cảnh báo tức thì:</strong> Nút demo sự cố đồng bộ với collection <code>incidents/</code>, Web Admin nhận cảnh báo còi và banner đỏ sau <strong>≈ 1 giây</strong>.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">🎛️ Remote Config: Cấu hình Động</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Tham số quản trị:</strong> <code>max_lookup_results</code> (mặc định: 50), <code>enable_ai_assist</code> (false), <code>show_crash_demo</code> (true).</li>
-            <li><strong>Thử nghiệm thực tế:</strong> Đổi giới hạn món từ 50 xuống 3 và từ 3 lên 50 trực tiếp từ Firebase Console.</li>
-            <li><strong>Xử lý lỗi 2 lớp:</strong> Sửa hàm <code>applyLimit</code> để nạp thêm dữ liệu và chuyển màn hình sang <code>context.watch()</code> để tự vẽ lại giao diện.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 11: KIỂM THỬ ARTEMIS ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Kiểm thử Tự động E2E</div>
-        <div class="slide-title">Kế hoạch Kiểm thử Tự động với Agent AI ARTEMIS</div>
-      </div>
-      <div class="slide-number">11 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Thiết kế bộ 24 ca kiểm thử tự động điều khiển bằng ngôn ngữ tự nhiên trên thiết bị vật lý Xiaomi Redmi 7."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">📋 Bộ Kế hoạch 24 Ca Kiểm thử</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Xác thực & Bảo mật (TC-01..06, 24):</strong> Email/Pass, Google Sign-In, hủy chọn tài khoản, mất mạng, đổi mật khẩu, đăng xuất.</li>
-            <li><strong>Tra cứu & Giao diện (TC-07..12):</strong> Tìm không dấu, Empty state, offline recovery, 4 tabs điều hướng, chi tiết size, video bước.</li>
-            <li><strong>Đo lường & Phân quyền (TC-13, 20..22):</strong> Logcat FA-SVC, cách ly phản hồi, Remote config, ẩn tính năng cá nhân của Admin.</li>
-            <li><strong>Thao tác Quầy & PDF (TC-14..19, 23):</strong> Sổ tay SOP lật trang, tick checklist, làm Quiz, bấm giờ tự luyện, chấm thực hành, FCM deep link.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">⏱️ Trạng thái Chạy Đối soát & Khám phá</div>
-          <div style="background: #FEF9C3; border: 1px dashed #CA8A04; padding: 14px; border-radius: 8px; margin-top: 10px;">
-            <strong style="color: #854D0E;">Trạng thái Thực thi:</strong>
-            <p style="font-size: 13px; color: #713F12; margin-top: 4px;">
-              <!-- TODO: điền sau khi chạy ARTEMIS -->
-              Bộ test 24 ca E2E đang chuẩn bị thực thi đối soát 3 vòng độc lập trên thiết bị vật lý Redmi 7. Bảng kết quả Pass Rate và phiên khám phá tự do sẽ được ghi nhận sau khi có dữ liệu thật.
-            </p>
-          </div>
-          <ul style="font-size: 13px; margin-top: 14px; color: #57534E;">
-            <li>Test vật lý: Xiaomi Redmi 7 (Android 10, API 29)</li>
-            <li>Framework điều khiển: pytest + ARTEMIS (Gemini Flash/Pro)</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 12: CODE REVIEW ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Kiểm soát Chất lượng Mã nguồn</div>
-        <div class="slide-title">Đánh giá Mã nguồn (Code Review): 17 Phát hiện & 13 Cải tiến</div>
-      </div>
-      <div class="slide-number">12 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Rà soát toàn diện và xử lý triệt để 13 rủi ro kỹ thuật; phân loại hoãn 4 tính năng sang đồ án Final."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">✅ 13 Điểm đã Sửa Triệt để (CR-01 → CR-13)</div>
-          <ul style="font-size: 12.5px; line-height: 1.45;">
-            <li><strong>CR-01:</strong> Dọn dẹp trạng thái Admin đào tạo khi kết thúc phiên.</li>
-            <li><strong>CR-02:</strong> Duy trì stream tiến độ nhân viên chi nhánh liên tục.</li>
-            <li><strong>CR-03:</strong> Tìm kiếm từ xa lọc theo toàn bộ cụm từ không dấu.</li>
-            <li><strong>CR-04:</strong> Mở công thức được giao vượt giới hạn Remote Config.</li>
-            <li><strong>CR-06:</strong> Giới hạn hàng đợi thông báo 50 tin tránh tràn RAM.</li>
-            <li><strong>CR-07:</strong> Ràng buộc 2000 ký tự nội dung phản hồi theo rules.</li>
-            <li><strong>CR-09:</strong> Dừng gửi lỗi đăng nhập thông thường lên Crashlytics.</li>
-            <li><strong>CR-10 / 11:</strong> Bỏ qua xin quyền Android 10, không lặp SnackBar FCM.</li>
-            <li><strong>CR-13:</strong> Khóa thao tác ghi tiến độ cho đến khi stream sẵn sàng.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">⏳ 4 Điểm Hoãn sang Final (CR-14 → CR-17)</div>
-          <ul style="font-size: 13px; line-height: 1.5;">
-            <li><strong>CR-14 (Đa chi nhánh):</strong> Quản lý bảng dữ liệu chi nhánh độc lập (<code>stores</code>). Hiện gán mã cố định <code>CN-QUAN1</code>.</li>
-            <li><strong>CR-15 (Hàng đợi Offline):</strong> Cơ chế Local Sync Queue cho chấm điểm và gửi phản hồi khi mất mạng kéo dài.</li>
-            <li><strong>CR-16 (Đồng bộ thông báo 2 chiều):</strong> Lưu vết trạng thái đọc lên server khi app bị kill process.</li>
-            <li><strong>CR-17 (Video HLS/DASH):</strong> Nâng cấp trình phát video hỗ trợ bitrate thích ứng thay vì stream MP4 trực tiếp.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 13: KHÓ KHĂN & BÀI HỌC ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Đúc kết Thực tiễn</div>
-        <div class="slide-title">Khó khăn Kỹ thuật Vượt qua & Bài học Kinh nghiệm</div>
-      </div>
-      <div class="slide-number">13 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Kiểm thử trên thiết bị phần cứng thật là chìa khóa then chốt để tạo ra sản phẩm vận hành tin cậy."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">⚠️ Khó khăn Kỹ thuật Vượt qua</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Tràn viền màn hình 360dp (Redmi 7):</strong> Khắc phục bằng <code>Expanded</code>, <code>Flexible</code>, ellipsis và chuyển nút dài thành icon.</li>
-            <li><strong>Cạm bẫy vòng đời widget:</strong> Lỗi <code>setState after dispose</code> khi đổi vai trò; giải quyết bằng chốt kiểm tra <code>mounted</code>.</li>
-            <li><strong>Độ trễ phân tán Remote Config:</strong> Trễ từ 30s đến 4 phút; giải quyết bằng cơ chế lắng nghe cập nhật thời gian thực.</li>
-            <li><strong>Rào cản MIUI Android 10:</strong> Tạo Notification Channel riêng có độ ưu tiên cao để âm báo không bị hệ thống chặn.</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">💡 Bài học Kinh nghiệm Sâu sắc</div>
-          <ul style="font-size: 13.5px;">
-            <li><strong>Kiểm thử sớm trên máy thật:</strong> Máy ảo cấu hình cao thường che giấu các lỗi giật lag, tràn viền và quyền ứng dụng.</li>
-            <li><strong>Giá trị của phân tầng MVVM:</strong> Chuyển đổi toàn bộ nguồn dữ liệu sang Cloud Firestore mượt mà mà không phải sửa một dòng mã View nào.</li>
-            <li><strong>Đo lường bằng số liệu thật:</strong> GA4 và Logcat cung cấp bức tranh chân thực về cách người dùng tương tác tại quầy bar.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 14: CÔNG CỤ AI ĐÃ DÙNG ==================== -->
-  <section class="slide">
-    <div class="slide-header">
-      <div>
-        <div class="slide-category">Minh bạch Liêm chính Học thuật</div>
-        <div class="slide-title">Công khai Sử dụng Công cụ Trí tuệ Nhân tạo (AI Disclosure)</div>
-      </div>
-      <div class="slide-number">14 / 15</div>
-    </div>
-
-    <div class="key-message">
-      Thông điệp: "Sử dụng AI có trách nhiệm: Con người thiết kế kiến trúc, AI hỗ trợ tăng tốc, kiểm thử 100% trên thiết bị thật."
-    </div>
-
-    <div class="slide-content">
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-title">Claude Code (Anthropic)</div>
-          <span class="badge badge-primary" style="margin-bottom: 8px;">Opus 5.5 & Sonnet 5.5</span>
-          <p style="font-size: 13px;"><strong>Opus 5.5:</strong> Điều phối kiến trúc tổng thể, rà soát mã nguồn (Code Review), thiết kế Security Rules và kiểm thử thiết bị.</p>
-          <p style="font-size: 13px; margin-top: 6px;"><strong>Sonnet 5.5:</strong> Chuyển đổi giao diện Flutter theo token NomadKit và xử lý dữ liệu Phê La.</p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Codex CLI & Antigravity</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">GPT-6.1-sol & Gemini</span>
-          <p style="font-size: 13px;"><strong>Codex CLI:</strong> Lập trình xác thực Email, engine sinh PDF tiếng Việt Unicode và sổ tay SOP 133 trang.</p>
-          <p style="font-size: 13px; margin-top: 6px;"><strong>Antigravity (Gemini):</strong> Xây dựng Web Admin quản trị, form món và script tạo video mô phỏng bước.</p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">CodeRabbit & ARTEMIS</div>
-          <span class="badge badge-sand" style="margin-bottom: 8px;">Review & E2E Agent</span>
-          <p style="font-size: 13px;"><strong>CodeRabbit:</strong> Tự động phân tích các Pull Request, kiểm tra bảo mật và đảm bảo <code>flutter analyze</code> đạt 0 issue.</p>
-          <p style="font-size: 13px; margin-top: 6px;"><strong>ARTEMIS (Gemini):</strong> Kế hoạch chạy kịch bản E2E qua ngôn ngữ tự nhiên trên Redmi 7; chưa có kết quả.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide-footer">
-      <span>RecipeHub Mobile – PRM393 Lab 3</span>
-      <span>Sinh viên: SE183201</span>
-    </div>
-  </section>
-
-  <!-- ==================== SLIDE 15: CẢM ƠN ==================== -->
-  <section class="slide" style="justify-content: space-between; text-align: center; background: radial-gradient(circle at 50% 50%, #FFFDF7 0%, #FAF0E4 100%);">
-    <div style="margin-top: 60px;">
-      <span class="badge badge-sand" style="font-size: 14px; padding: 6px 20px; letter-spacing: 1.5px;">BÁO CÁO HOÀN THÀNH LAB 3</span>
-      <h1 style="font-size: 48px; font-weight: 900; color: #664220; margin-top: 24px;">
-        XIN CHÂN THÀNH CẢM ƠN!
-      </h1>
-      <p style="font-size: 20px; color: #8B5A2B; font-weight: 600; margin-top: 14px;">
-        RecipeHub Mobile – Sẵn sàng chuyển tiếp sang Đồ án Tốt nghiệp (Final Assignment)
-      </p>
-    </div>
-
-    <div style="background: #FFFFFF; border: 1px solid #E7E0D5; border-radius: 16px; padding: 22px 40px; display: inline-block; margin: 0 auto; box-shadow: 0 4px 14px rgba(0,0,0,0.05); text-align: left; max-width: 600px;">
-      <div style="font-size: 15px; color: #292524; line-height: 1.6;">
-        <p><strong>Phạm vi kiểm chứng:</strong></p>
-        <p><code>flutter analyze</code>: chưa xác nhận lại trong follow-up offline</p>
-        <p><code>flutter test</code>: chưa xác nhận lại; ARTEMIS: TODO</p>
-        <p>Seed có 61 công thức, 25 SOP; ảnh Firebase trong evidence/lab3/06-firebase-console/</p>
-      </div>
-    </div>
-
-    <div style="font-size: 15px; color: #664220; font-weight: 700; margin-bottom: 20px;">
-      Q&A • Sinh viên: SE183201
-    </div>
-  </section>
+  </div>
+  <div class="phone sm" style="left:700px;top:150px;transform:rotate(-8deg)"><img src="img/sopcover.jpg" alt="Bìa sổ tay SOP"></div>
+  <div class="phone lg" style="left:860px;top:70px;z-index:3"><img src="img/lookup.jpg" alt="Màn tra cứu"></div>
+  <div class="phone sm" style="left:1050px;top:170px;transform:rotate(7deg)"><img src="img/video.jpg" alt="Video chuẩn"></div>
+  <div class="brand">Redmi 7 · Android 10 · Firebase recipehub-mobile</div>
+</section>
+
+<!-- 2. Problem -->
+<section class="slide">
+  <div class="kicker">Bài toán</div>
+  <h2>Giờ cao điểm, Barista không có thời gian lật sổ giấy</h2>
+  <div class="row" style="position:absolute;left:72px;bottom:120px">
+    <div><div class="stat">61<small>món chuẩn hoá</small></div></div>
+    <div><div class="stat">25<small>quy trình SOP</small></div></div>
+    <div><div class="stat">6<small>bộ quiz đào tạo</small></div></div>
+  </div>
+  <p style="position:absolute;left:72px;bottom:64px;font-size:16px;color:var(--muted)">Nguồn dữ liệu: Bộ công thức Phê La, chuẩn hoá và nạp lên Firestore.</p>
+  <div class="phone" style="right:110px;top:70px;transform:rotate(4deg)"><img src="img/detail.jpg" alt="Chi tiết món"></div>
+  <div class="num">02</div>
+</section>
+
+<!-- 3. Architecture -->
+<section class="slide">
+  <div class="kicker">Kiến trúc</div>
+  <h2>MVVM – mỗi lớp một trách nhiệm</h2>
+  <div class="layer" style="top:250px;background:var(--crema);color:var(--espresso)">View<span>lib/features/* – chỉ hiển thị, không chứa logic</span></div>
+  <div class="layer" style="top:340px;background:var(--caramel);color:var(--espresso)">ViewModel<span>ChangeNotifier + Provider – trạng thái, lọc, kiểm tra dữ liệu</span></div>
+  <div class="layer" style="top:430px;background:var(--roast);color:var(--milk)">Service (interface)<span>Firestore · Auth · Storage · FCM · Analytics · Remote Config</span></div>
+  <div class="layer" style="top:520px;background:var(--espresso);color:var(--milk)">Firebase<span>Security Rules quyết định quyền đọc/ghi theo vai trò</span></div>
+  <div class="num">03</div>
+</section>
+
+<!-- 4. Lookup + detail -->
+<section class="slide">
+  <div class="kicker">Tra cứu tại quầy</div>
+  <h2>Gõ không dấu, ra món ngay</h2>
+  <p class="lead">Tìm theo tên, lọc theo nhóm. Chi tiết món có định lượng, quy cách phục vụ và từng bước pha chế.</p>
+  <div class="phone" style="left:700px;top:90px;transform:rotate(-4deg)"><img src="img/lookup.jpg" alt="Tra cứu"></div>
+  <div class="phone" style="left:960px;top:60px;transform:rotate(3deg)"><img src="img/detail.jpg" alt="Chi tiết món"></div>
+  <div class="num">04</div>
+</section>
+
+<!-- 5. Video + SOP -->
+<section class="slide">
+  <div class="kicker">Học bằng mắt</div>
+  <h2 style="max-width:520px">Video chuẩn và sổ tay SOP lật trang</h2>
+  <p class="lead">Video tự chuyển bước theo mốc thời gian. Sổ tay 95 trang có mục lục và xuất PDF về máy.</p>
+  <div class="phone sm" style="left:640px;top:120px"><img src="img/video.jpg" alt="Video chuẩn"></div>
+  <div class="phone sm" style="left:860px;top:80px"><img src="img/sopbook.jpg" alt="Mục lục sổ tay"></div>
+  <div class="phone sm" style="left:1060px;top:140px"><img src="img/soppdf.jpg" alt="Xuất PDF"></div>
+  <div class="tag" style="left:1000px;top:610px">PDF → Download/RecipeHub</div>
+  <div class="num">05</div>
+</section>
+
+<!-- 6. Training -->
+<section class="slide">
+  <div class="kicker">Đào tạo</div>
+  <h2>Quiz chấm ngay, tự luyện có lịch sử</h2>
+  <p class="lead">Nộp bài là thấy điểm, đúng/sai và giải thích kèm bước SOP cần ôn. Tự luyện bấm giờ, lưu ghi chú, xuất PDF.</p>
+  <div class="phone" style="left:730px;top:80px;transform:rotate(-3deg)"><img src="img/quiz.jpg" alt="Kết quả quiz"></div>
+  <div class="phone" style="left:980px;top:110px;transform:rotate(3deg)"><img src="img/practice.jpg" alt="Lịch sử tự luyện"></div>
+  <div class="num">06</div>
+</section>
+
+<!-- 7. Feedback realtime -->
+<section class="slide">
+  <div class="kicker">Phản hồi hai chiều</div>
+  <h2>Barista báo sự cố có ảnh, quản lý thấy ngay</h2>
+  <div class="phone" style="left:150px;top:250px;width:200px"><img src="img/fb-create.jpg" alt="Tạo phản hồi"></div>
+  <div class="arrow" style="left:390px;top:470px;width:250px"></div>
+  <div class="tag g" style="left:420px;top:420px">Firestore real-time</div>
+  <div class="phone" style="left:680px;top:250px;width:200px"><img src="img/fb-reply.jpg" alt="Admin trả lời"></div>
+  <div class="card" style="position:absolute;left:930px;top:300px;width:280px">
+    <div class="icon">🔒</div>
+    <b>Đúng người, đúng quyền</b>
+    <p>Security Rules: Barista chỉ thấy phản hồi của mình; ảnh ≤ 5 MB, chỉ PNG/JPEG/WEBP/HEIC.</p>
+  </div>
+  <div class="num">07</div>
+</section>
+
+<!-- 8. FCM -->
+<section class="slide">
+  <div class="kicker">Firebase Cloud Messaging</div>
+  <h2>Thông báo đến ở cả 3 trạng thái</h2>
+  <div class="shot fix" style="left:72px;top:250px;width:250px"><img src="img/fcm-fg.jpg" alt="Foreground"></div>
+  <div class="shot" style="left:372px;top:250px;width:250px"><img src="img/fcm-bg.jpg" alt="Background"></div>
+  <div class="shot" style="left:672px;top:250px;width:250px"><img src="img/fcm-killed.jpg" alt="Terminated"></div>
+  <div class="tag" style="left:96px;top:232px">Đang mở</div>
+  <div class="tag c" style="left:396px;top:232px">Chạy nền</div>
+  <div class="tag r" style="left:696px;top:232px">Đã tắt</div>
+  <div class="card" style="position:absolute;left:970px;top:260px;width:240px">
+    <div class="icon">👆</div>
+    <b>Chạm là mở đúng màn</b>
+    <p>Mọi trạng thái đều dẫn tới "Thông báo &amp; Thay đổi".</p>
+  </div>
+  <div class="num">08</div>
+</section>
+
+<!-- 9. Analytics + Crashlytics -->
+<section class="slide">
+  <div class="kicker">Đo lường &amp; ổn định</div>
+  <h2>Biết người dùng làm gì, biết app hỏng ở đâu</h2>
+  <div class="shot" style="left:72px;top:260px;width:560px"><img src="img/analytics.jpg" alt="Analytics events"></div>
+  <div class="shot" style="left:660px;top:260px;width:548px"><img src="img/crashlytics.jpg" alt="Crashlytics"></div>
+  <div class="tag" style="left:72px;top:222px">24 event snake_case · không PII</div>
+  <div class="tag r" style="left:660px;top:222px">Crash thử + lỗi thật đã sửa</div>
+  <p style="position:absolute;left:72px;bottom:56px;font-size:15px;color:var(--muted)">Số liệu Analytics là dữ liệu kiểm thử của nhóm, không phải hành vi Barista thật.</p>
+  <div class="num">09</div>
+</section>
+
+<!-- 10. Remote Config -->
+<section class="slide">
+  <div class="kicker">Remote Config</div>
+  <h2 style="max-width:540px">Đổi cấu hình, không build lại app</h2>
+  <div style="position:absolute;left:72px;top:300px;display:flex;align-items:center;gap:22px">
+    <div class="stat">50</div><div style="font-size:40px;color:var(--caramel)">→</div><div class="stat" style="color:var(--berry)">5</div><div style="font-size:40px;color:var(--caramel)">→</div><div class="stat">50</div>
+  </div>
+  <p class="lead" style="position:absolute;left:72px;top:420px;width:520px">Đổi <code>max_lookup_results</code> trên Console, mở lại app: danh sách chỉ còn 5 món. Đã trả về 50 ngay sau khi quay.</p>
+  <div class="shot" style="left:630px;top:300px;width:350px"><img src="img/rc.jpg" alt="Tham số Remote Config"></div>
+  <div class="phone sm" style="left:1010px;top:150px"><img src="img/rc-five.jpg" alt="Còn 5 món"></div>
+  <div class="num">10</div>
+</section>
+
+<!-- 11. ARTEMIS -->
+<section class="slide dark">
+  <div class="kicker">Kiểm thử E2E · Google ARTEMIS</div>
+  <h2>AI agent tự thao tác trên máy thật</h2>
+  <div class="row" style="position:absolute;left:72px;top:330px;gap:32px">
+    <div class="card" style="width:250px;background:#3a271b"><div class="icon">📝</div><b style="color:var(--milk)">24 ca kiểm thử</b><p style="color:#d9c4ae">Mỗi ca một câu lệnh tiếng Anh, trả về JSON để assert.</p></div>
+    <div class="card" style="width:250px;background:#3a271b"><div class="icon">📱</div><b style="color:var(--milk)">Redmi 7 thật</b><p style="color:#d9c4ae">pytest gọi ARTEMIS; đăng nhập bằng adb để tiết kiệm lượt gọi model.</p></div>
+    <div class="card" style="width:250px;background:#3a271b"><div class="icon">📊</div><b style="color:var(--milk)">Kết quả</b><p style="color:#d9c4ae"><!-- ARTEMIS_RESULT -->Xem docs/test-plan.md</p></div>
+  </div>
+  <div class="phone sm" style="right:80px;top:110px;transform:rotate(5deg)"><img src="img/lookup.jpg" alt="App được kiểm thử"></div>
+  <div class="num">11</div>
+</section>
+
+<!-- 12. Code review -->
+<section class="slide">
+  <div class="kicker">AI code review · CodeRabbit + Codex</div>
+  <h2>17 phát hiện, 13 đã sửa</h2>
+  <div class="row" style="position:absolute;left:72px;top:290px">
+    <div><div class="stat">17<small>phát hiện</small></div></div>
+    <div><div class="stat" style="color:var(--matcha)">13<small>đã sửa · có test</small></div></div>
+    <div><div class="stat" style="color:var(--caramel)">4<small>hoãn có lý do</small></div></div>
+  </div>
+  <div class="card" style="position:absolute;left:72px;top:480px;width:560px">
+    <b>Ví dụ CR-10</b>
+    <p>Android 10 không có quyền thông báo runtime nhưng app vẫn hỏi "Bật thông báo?". Đã sửa và kiểm trên Redmi 7.</p>
+  </div>
+  <div class="phone" style="left:900px;top:70px"><img src="img/cr10.jpg" alt="Không còn hộp xin quyền"></div>
+  <div class="tag c" style="left:780px;top:300px">Mở lạnh: không còn hộp xin quyền</div>
+  <div class="tag g" style="left:870px;top:612px">275 test Flutter · 0 issue analyze</div>
+  <div class="num">12</div>
+</section>
+
+<!-- 13. Lessons -->
+<section class="slide">
+  <div class="kicker">Khó khăn &amp; bài học</div>
+  <h2>Điều rút ra</h2>
+  <div class="row" style="position:absolute;left:72px;right:72px;top:290px;gap:28px">
+    <div class="card" style="flex:1"><div class="icon">🧪</div><b>Kiểm lại mọi thứ AI viết</b><p>Một phát hiện suýt bị bác vì giả định sai; đọc lại code mới thấy đúng.</p></div>
+    <div class="card" style="flex:1"><div class="icon">📶</div><b>Máy thật khác giả lập</b><p>Android 10, MIUI và quyền thông báo lộ lỗi mà test không thấy.</p></div>
+    <div class="card" style="flex:1"><div class="icon">💸</div><b>Hạn mức có thật</b><p>ARTEMIS dùng Gemini free tier nên phải chọn model nhẹ và chia lượt chạy.</p></div>
+  </div>
+  <div class="num">13</div>
+</section>
+
+<!-- 14. AI tools -->
+<section class="slide">
+  <div class="kicker">Minh bạch công cụ AI</div>
+  <h2>Ai làm gì</h2>
+  <div class="row" style="position:absolute;left:72px;right:72px;top:280px;gap:24px">
+    <div class="card" style="flex:1"><b>Claude Code</b><p>Điều phối, review, kiểm thử trên thiết bị, thiết kế slide.</p></div>
+    <div class="card" style="flex:1"><b>Codex CLI</b><p>Bản sửa CR-01…CR-13 kèm test, bộ e2e, script.</p></div>
+    <div class="card" style="flex:1"><b>Antigravity</b><p>Web Admin, nháp tài liệu và test plan.</p></div>
+    <div class="card" style="flex:1"><b>CodeRabbit · ARTEMIS</b><p>Review theo dòng trên PR; agent kiểm thử E2E.</p></div>
+  </div>
+  <p style="position:absolute;left:72px;bottom:70px;font-size:16px;color:var(--muted)">Mọi thay đổi đều qua flutter analyze, flutter test và chạy thử trên Redmi 7 trước khi commit.</p>
+  <div class="num">14</div>
+</section>
+
+<!-- 15. Thanks -->
+<section class="slide dark">
+  <div style="position:absolute;left:72px;top:230px">
+    <h1>Cảm ơn<br>thầy cô</h1>
+    <p class="lead">github.com/SonNPXSE183201/RecipeHub_Mobile</p>
+  </div>
+  <div class="phone sm" style="left:820px;top:130px;transform:rotate(-6deg)"><img src="img/quiz.jpg" alt=""></div>
+  <div class="phone sm" style="left:1010px;top:90px;transform:rotate(5deg)"><img src="img/fb-create.jpg" alt=""></div>
+  <div class="brand">SE183201 · PRM393</div>
+</section>
 
 </body>
 </html>
