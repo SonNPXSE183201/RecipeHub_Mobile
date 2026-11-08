@@ -24,6 +24,7 @@ class LearningTaskDetailPage extends StatefulWidget {
 
 class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
   bool _saving = false;
+  bool _openingContent = false;
 
   void _snack(String msg, {Color color = NomadKit.error}) {
     ScaffoldMessenger.of(context)
@@ -56,13 +57,21 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
     }
   }
 
-  void _openRelatedContent(LearningTaskItem task) {
+  Future<void> _openRelatedContent(LearningTaskItem task) async {
+    if (_openingContent) return;
     if (task.type == 'Công thức') {
-      final recipe = context
-          .read<RecipeViewModel>()
-          .items
-          .where((r) => r.code == task.targetCode)
-          .firstOrNull;
+      final recipes = context.read<RecipeViewModel>();
+      setState(() => _openingContent = true);
+      RecipeItem? recipe;
+      try {
+        recipe = await recipes.findForDeepLink(task.targetCode);
+      } catch (_) {
+        if (mounted) _snack('Không tải được công thức. Vui lòng thử lại.');
+        return;
+      } finally {
+        if (mounted) setState(() => _openingContent = false);
+      }
+      if (!mounted) return;
       if (recipe == null) {
         _snack('Công thức này chưa có trong danh sách đã ban hành.');
         return;
@@ -373,7 +382,9 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                     // Linked Material Summary Card
                     InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () => _openRelatedContent(task),
+                      onTap: _openingContent
+                          ? null
+                          : () => _openRelatedContent(task),
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
@@ -519,14 +530,21 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           elevation: 0,
                         ),
-                        onPressed: () => _openRelatedContent(task),
-                        icon: const Icon(
-                          Icons.play_circle_fill_rounded,
-                          size: 19,
-                        ),
-                        label: const Text(
-                          'Mở học ngay',
-                          style: TextStyle(
+                        onPressed: _openingContent
+                            ? null
+                            : () => _openRelatedContent(task),
+                        icon: _openingContent
+                            ? const SizedBox.square(
+                                dimension: 19,
+                                child: CircularProgressIndicator(),
+                              )
+                            : const Icon(
+                                Icons.play_circle_fill_rounded,
+                                size: 19,
+                              ),
+                        label: Text(
+                          _openingContent ? 'Đang tải...' : 'Mở học ngay',
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                           ),

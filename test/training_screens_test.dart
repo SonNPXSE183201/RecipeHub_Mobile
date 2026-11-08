@@ -1,8 +1,12 @@
 // Màn đào tạo dùng dữ liệu thật (repository), có trạng thái loading/empty và luồng nộp quiz.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:recipehub_mobile/core/di/app_services.dart';
+import 'package:recipehub_mobile/core/models/app_models.dart';
+import 'package:recipehub_mobile/core/models/recipe_models.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/viewmodels/app_config_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
@@ -11,6 +15,7 @@ import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/features/learning/learning_task_detail_page.dart';
 import 'package:recipehub_mobile/features/learning/my_learning_page.dart';
 import 'package:recipehub_mobile/features/learning/personal_progress_page.dart';
+import 'package:recipehub_mobile/features/lookup/step_video_guide_page.dart';
 import 'package:recipehub_mobile/features/practice/quiz_exam_page.dart';
 import 'package:recipehub_mobile/features/sop/sop_catalog_page.dart';
 
@@ -20,12 +25,17 @@ import 'support/training_fixtures.dart';
 Future<void> _pump(
   WidgetTester tester,
   MockTrainingRepository repo,
-  Widget page,
-) async {
+  Widget page, {
+  FakeRecipeSource? recipes,
+  int recipeLimit = 50,
+}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.625;
   addTearDown(tester.view.reset);
-  final s = AppServices.mock(recipes: FakeRecipeSource(), training: repo);
+  final s = AppServices.mock(
+    recipes: recipes ?? FakeRecipeSource(),
+    training: repo,
+  );
   await tester.pumpWidget(
     MultiProvider(
       providers: [
@@ -41,8 +51,10 @@ Future<void> _pump(
           create: (_) => AppConfigViewModel(service: s.remoteConfig)..init(),
         ),
         ChangeNotifierProvider(
+          lazy: false,
           create: (_) =>
-              RecipeViewModel(source: s.recipes, crash: s.crash)..load(),
+              RecipeViewModel(source: s.recipes, crash: s.crash)
+                ..load(limit: recipeLimit),
         ),
         ChangeNotifierProvider(
           create: (_) =>
@@ -57,6 +69,34 @@ Future<void> _pump(
   }
 }
 
+class _DeferredRecipeSource extends FakeRecipeSource {
+  final pending = Completer<RecipeDetailResponse>();
+  int remoteReads = 0;
+
+  @override
+  Future<RecipeDetailResponse> getRecipe(String id) {
+    if (id == 'r2') {
+      remoteReads++;
+      return pending.future;
+    }
+    return super.getRecipe(id);
+  }
+}
+
+LearningTaskItem _recipeTask(String code) => LearningTaskItem(
+  id: 'recipe-task',
+  title: 'Học công thức',
+  type: 'Công thức',
+  targetCode: code,
+  version: 'v1.0',
+  assignedBy: 'Quản lý',
+  assignedDate: '01/11/2026',
+  dueDate: '10/11/2026',
+  status: TaskStatus.notStarted,
+  progress: 0,
+  sections: const [],
+);
+
 /// Font test vẽ mỗi ký tự thành ô 1em nên tràn layout chỉ có trong test: bỏ qua riêng lỗi overflow.
 void _ignoreOverflow() {
   final original = FlutterError.onError;
@@ -68,6 +108,112 @@ void _ignoreOverflow() {
 }
 
 void main() {
+  testWidgets('Mở học tải món ngoài giới hạn, loading và không mở lặp', (
+    tester,
+  ) async {
+    _ignoreOverflow();
+    final source = _DeferredRecipeSource();
+    await _pump(
+      tester,
+      testTrainingRepo(),
+      LearningTaskDetailPage(task: _recipeTask('RC-CFE-01')),
+      recipes: source,
+      recipeLimit: 1,
+    );
+    await tester.tap(find.text('Mở học ngay'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(StepVideoGuidePage), findsNothing);
+    await tester.tap(find.text('TÀI LIỆU & VIDEO CHUẨN LIÊN KẾT'));
+    await tester.pump();
+    expect(source.remoteReads, 1);
+    source.pending.complete(
+      FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối'),
+    );
+    await tester.pumpAndSettle();
+    final page = tester.widget<StepVideoGuidePage>(
+      find.byType(StepVideoGuidePage),
+    );
+    expect(page.recipe.code, 'RC-CFE-01');
+    expect(page.initialStepNumber, 1);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(
+      tester.widget<ElevatedButton>(find.byType(ElevatedButton)).onPressed,
+      isNotNull,
+    );
+  });
+
+  testWidgets('Thẻ tài liệu chỉ báo không có sau tra cứu và cho thử lại', (
+    tester,
+  ) async {
+    _ignoreOverflow();
+    final source = FakeRecipeSource();
+    await _pump(
+      tester,
+      testTrainingRepo(),
+      LearningTaskDetailPage(task: _recipeTask('KHONG-TON-TAI')),
+      recipes: source,
+      recipeLimit: 1,
+    );
+    await tester.tap(find.text('TÀI LIỆU & VIDEO CHUẨN LIÊN KẾT'));
+    await tester.pumpAndSettle();
+    expect(source.calls, 2);
+    expect(
+      find.text('Công thức này chưa có trong danh sách đã ban hành.'),
+      findsOneWidget,
+    );
+    expect(find.byType(StepVideoGuidePage), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.tap(find.text('Mở học ngay'));
+    await tester.pumpAndSettle();
+    expect(source.calls, 3);
+  });
+
+  testWidgets('Món có sẵn mở từ thẻ tài liệu mà không truy vấn thêm', (
+    tester,
+  ) async {
+    _ignoreOverflow();
+    final source = FakeRecipeSource();
+    await _pump(
+      tester,
+      testTrainingRepo(),
+      LearningTaskDetailPage(task: _recipeTask('RC-OOL-02')),
+      recipes: source,
+      recipeLimit: 1,
+    );
+    await tester.tap(find.text('TÀI LIỆU & VIDEO CHUẨN LIÊN KẾT'));
+    await tester.pumpAndSettle();
+    expect(source.calls, 1);
+    expect(find.byType(StepVideoGuidePage), findsOneWidget);
+  });
+
+  testWidgets(
+    'Rời trang trong lúc tải không điều hướng hay setState sau dispose',
+    (tester) async {
+      _ignoreOverflow();
+      final source = _DeferredRecipeSource();
+      await _pump(
+        tester,
+        testTrainingRepo(),
+        LearningTaskDetailPage(task: _recipeTask('RC-CFE-01')),
+        recipes: source,
+        recipeLimit: 1,
+      );
+      await tester.tap(find.text('Mở học ngay'));
+      await tester.pump();
+      expect(source.remoteReads, 1);
+      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+      source.pending.complete(
+        FakeRecipeSource.detail('r2', 'RC-CFE-01', 'Cà Phê Muối'),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(StepVideoGuidePage), findsNothing);
+    },
+  );
+
   testWidgets('SOP: lọc theo danh mục thật, mở chi tiết', (tester) async {
     _ignoreOverflow();
     await _pump(tester, testTrainingRepo(), const SopCatalogPage());
