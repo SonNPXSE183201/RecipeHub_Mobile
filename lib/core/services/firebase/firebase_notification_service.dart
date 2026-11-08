@@ -22,17 +22,14 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final uid = FirebaseAuth.instance.currentUser?.uid;
   // Tin nhận thuộc phiên hiện tại; không đưa sang tài khoản khác trên máy dùng chung.
   if (uid == null) return;
-  final key = '${_kPendingKey}_$uid';
-  final pending = prefs.getStringList(key) ?? <String>[];
-  pending.add(
-    jsonEncode(
-      FirebaseNotificationService.toAppNotification(
-        message,
-        NotificationOrigin.background,
-      ).toJson(),
+  await FirebaseNotificationService.saveScopedPending(
+    prefs,
+    uid,
+    FirebaseNotificationService.toAppNotification(
+      message,
+      NotificationOrigin.background,
     ),
   );
-  await prefs.setStringList(key, pending.take(100).toList());
 }
 
 /// Firebase Cloud Messaging – 3 trạng thái: foreground / background / terminated.
@@ -184,6 +181,21 @@ class FirebaseNotificationService implements INotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload(); // nhận dữ liệu do background isolate ghi
     return loadScopedHistory(prefs, scope);
+  }
+
+  /// Giữ 100 thông báo đến sau cùng trong lúc chờ tải lịch sử.
+  static Future<void> saveScopedPending(
+    SharedPreferences prefs,
+    String scope,
+    AppNotification item,
+  ) async {
+    final key = '${_kPendingKey}_$scope';
+    final pending = prefs.getStringList(key) ?? <String>[];
+    pending.add(jsonEncode(item.toJson()));
+    if (pending.length > 100) {
+      pending.removeRange(0, pending.length - 100);
+    }
+    await prefs.setStringList(key, pending);
   }
 
   /// Tách phần lưu trữ để kiểm chứng đổi tài khoản mà không khởi tạo FCM.
