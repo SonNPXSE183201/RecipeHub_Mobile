@@ -1,0 +1,359 @@
+/* RecipeHub Mobile - Lab 3 Report Print CSS */
+/* Target: A4 Standard (210mm x 297mm) */
+
+@page {
+  size: A4 portrait;
+  margin: 18mm 18mm 18mm 18mm;
+  @bottom-right {
+    content: counter(page);
+    font-family: 'Roboto', 'Noto Sans', sans-serif;
+    font-size: 9pt;
+    color: #78716C;
+  }
+}
+
+:root {
+  --primary-color: #8B5A2B;
+  --primary-dark: #664220;
+  --primary-sand: #C49A6C;
+  --bg-canvas: #FFFDF7;
+  --bg-surface: #FFFFFF;
+  --text-ink: #292524;
+  --text-secondary: #57534E;
+  --border-color: #E7E0D5;
+  --border-dark: #D6C7B2;
+  --code-bg: #F5EFEB;
+  --callout-bg: #FAF6F0;
+  --accent-forest: #166534;
+  --accent-ocean: #0891B2;
+  --accent-error: #DC2626;
+  --accent-warn: #CA8A04;
+}
+
+body {
+  font-family: 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.45;
+  color: var(--text-ink);
+  background-color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
+/* Page break rules */
+.page-break {
+  page-break-before: always;
+  break-before: page;
+}
+
+h1, h2, h3, h4 {
+  color: var(--primary-dark);
+  font-family: 'Roboto', 'Noto Sans', sans-serif;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h1 {
+  font-size: 19pt;
+  border-bottom: 2pt solid var(--primary-color);
+  padding-bottom: 6px;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 13pt;
+  border-bottom: 1pt solid var(--border-color);
+  padding-bottom: 3px;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* H2 đầu tiên hoặc ngay sau cover không ngắt trang */
+.no-break-top {
+  page-break-before: avoid !important;
+  break-before: avoid !important;
+}
+
+h3 {
+  font-size: 11.5pt;
+  color: var(--primary-color);
+  margin-top: 1.1em;
+}
+
+h4 {
+  font-size: 10.5pt;
+  color: var(--text-ink);
+}
+
+p, ul, ol {
+  margin-top: 0.4em;
+  margin-bottom: 0.6em;
+  text-align: justify;
+}
+
+ul, ol {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 0.25em;
+}
+
+/* Bìa báo cáo */
+.cover-page {
+  page-break-after: always;
+  break-after: page;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 90vh;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 30mm 15mm 20mm 15mm;
+  border: 2px solid var(--border-dark);
+  background: linear-gradient(180deg, #FFFDF7 0%, #FAF6F0 100%);
+  border-radius: 4px;
+}
+
+.cover-header {
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 15px;
+}
+
+.cover-university {
+  font-size: 13pt;
+  font-weight: 700;
+  color: var(--text-ink);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.cover-course {
+  font-size: 11pt;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+.cover-body {
+  margin: 40px 0;
+}
+
+.cover-title {
+  font-size: 24pt;
+  color: var(--primary-dark);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+}
+
+.cover-subtitle {
+  font-size: 14pt;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin: 0 0 25px 0;
+}
+
+.cover-badge {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: #FFFFFF;
+  padding: 5px 18px;
+  border-radius: 20px;
+  font-size: 10pt;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cover-meta {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px 24px;
+  display: inline-block;
+  text-align: left;
+  margin: 0 auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.cover-meta p {
+  margin: 4px 0;
+  font-size: 10.5pt;
+  text-align: left;
+}
+
+.cover-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+  font-size: 9.5pt;
+  color: var(--text-secondary);
+}
+
+/* Bảng biểu */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.7em 0 0.9em 0;
+  font-size: 9pt;
+  page-break-inside: auto;
+}
+
+tr {
+  page-break-inside: avoid;
+  page-break-after: auto;
+}
+
+thead {
+  display: table-header-group;
+}
+
+th, td {
+  border: 0.75pt solid var(--border-dark);
+  padding: 5.5pt 6.5pt;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+th {
+  background-color: #FAF4EB;
+  color: var(--primary-dark);
+  font-weight: 700;
+  border-bottom: 1.5pt solid var(--primary-color);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #FCFBF9;
+}
+
+/* Callout / Alerts */
+blockquote {
+  margin: 0.8em 0;
+  padding: 8pt 12pt;
+  border-left: 3.5pt solid var(--primary-color);
+  background-color: var(--callout-bg);
+  border-radius: 0 6px 6px 0;
+  font-size: 9.3pt;
+  color: var(--text-ink);
+}
+
+blockquote p {
+  margin: 0.2em 0;
+}
+
+blockquote strong {
+  color: var(--primary-dark);
+}
+
+/* Khối mã lệnh */
+pre {
+  background-color: var(--code-bg);
+  border: 0.75pt solid var(--border-color);
+  border-radius: 4px;
+  padding: 7pt 9pt;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 8.2pt;
+  line-height: 1.35;
+  overflow-x: auto;
+  page-break-inside: avoid;
+  margin: 0.6em 0;
+}
+
+code {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 8.5pt;
+  background-color: var(--code-bg);
+  padding: 1pt 3pt;
+  border-radius: 3px;
+  color: #7A3E1D;
+  border: 0.5pt solid #E7DDD4;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  color: var(--text-ink);
+  font-size: 8.2pt;
+}
+
+/* Hình ảnh */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.8em auto;
+  border: 0.75pt solid var(--border-color);
+  border-radius: 5px;
+  box-shadow: 0 1.5pt 4pt rgba(0, 0, 0, 0.05);
+  page-break-inside: avoid;
+}
+
+.figure-caption {
+  font-size: 8.5pt;
+  color: var(--text-secondary);
+  text-align: center;
+  font-style: italic;
+  margin-top: -0.4em;
+  margin-bottom: 0.8em;
+}
+
+/* Bố cục hàng ảnh */
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0.6em 0;
+  page-break-inside: avoid;
+}
+
+.row img {
+  max-height: 300px;
+  width: auto;
+  margin: 0 auto;
+}
+
+/* Mermaid Diagrams */
+.mermaid {
+  background-color: #FFFFFF;
+  border: 0.75pt solid var(--border-color);
+  border-radius: 6px;
+  padding: 8pt;
+  margin: 0.8em 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+/* Badges / Chips */
+.badge {
+  display: inline-block;
+  padding: 1pt 5pt;
+  font-size: 7.8pt;
+  font-weight: 600;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.badge-success { background-color: #DCFCE7; color: var(--accent-forest); }
+.badge-info { background-color: #F0F9FF; color: var(--accent-ocean); }
+.badge-warning { background-color: #FEF9C3; color: var(--accent-warn); }
+.badge-error { background-color: #FEE2E2; color: var(--accent-error); }
+
+/* In ấn tối ưu */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
