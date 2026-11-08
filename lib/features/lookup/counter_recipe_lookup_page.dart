@@ -10,7 +10,6 @@ import '../../core/navigation/app_keys.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
 import '../../core/viewmodels/app_config_viewmodel.dart';
-import '../../core/services/firebase/firestore_recipe_source.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/utils/navigation.dart';
 import 'recipe_detail_size_page.dart';
@@ -71,17 +70,14 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
     ];
     if (!categories.contains(_selectedCategory)) _selectedCategory = 'Tất cả';
     // Không phân biệt dấu: "bac xiu" tìm được "Bạc Xỉu".
-    final query = FirestoreRecipeSource.normalize(_searchCtrl.text.trim());
+    final query = _searchCtrl.text.trim();
     final browsing = query.isEmpty && _selectedCategory == 'Tất cả';
 
     final filtered = (browsing ? allRecipes.take(maxResults) : allRecipes)
         .where((r) {
           final matchesCategory =
               _selectedCategory == 'Tất cả' || r.category == _selectedCategory;
-          final matchesQuery =
-              query.isEmpty ||
-              FirestoreRecipeSource.normalize(r.name).contains(query) ||
-              r.code.toLowerCase().contains(query);
+          final matchesQuery = RecipeViewModel.matchesQuery(r, query);
           return matchesCategory && matchesQuery;
         })
         .toList();
