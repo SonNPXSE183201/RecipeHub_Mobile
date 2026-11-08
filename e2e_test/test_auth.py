@@ -71,7 +71,7 @@ async def test_tc24_change_password_and_logout(artemis: ArtemisClient, fresh_app
     email = required("RH_PASSWORD_TEST_EMAIL")
     old = secret(required("RH_PASSWORD_TEST_PASSWORD"))
     new = secret(secrets.token_urlsafe(18) + "aA1!")
-    result = None
+    test_error = None
     try:
         result = await run_case(artemis, "TC-24",
             f"At Login enter email {json.dumps(email)} and password {json.dumps(old)}; tap Đăng nhập. "
@@ -84,8 +84,12 @@ async def test_tc24_change_password_and_logout(artemis: ArtemisClient, fresh_app
         data = output(result)
         assert data == {"password_changed": True,
                         "logged_out": True, "current_screen": "login"}
+    except (Exception, pytest.fail.Exception) as exc:
+        test_error = exc
+        raise
     finally:
-        recovery = await execute(artemis,
+        try:
+            recovery = await execute(artemis,
                 "Recover the dedicated test account password. If logged out, try email " +
                 json.dumps(email) + f" with password {json.dumps(new)}; "
                 f"if rejected try {json.dumps(old)}. In Account change password back to "
@@ -93,5 +97,10 @@ async def test_tc24_change_password_and_logout(artemis: ArtemisClient, fresh_app
                 f"{json.dumps(new)}, both new and confirmation fields are {json.dumps(old)}. Verify success. "
                 "Verify restored credentials "
                 'by logging in, then log out. Return {"restored":true}.')
-        assert recovery.succeeded, recovery.error or recovery.status
-        assert output(recovery)["restored"] is True
+            assert recovery.succeeded, recovery.error or recovery.status
+            assert output(recovery)["restored"] is True
+        except (Exception, pytest.fail.Exception) as recovery_error:
+            if test_error is not None:
+                raise BaseExceptionGroup("TC-24: test and password recovery both failed",
+                                         [test_error, recovery_error]) from None
+            raise

@@ -23,7 +23,8 @@ async def test_tc14_sop_pdf(signed_in_viewer: ArtemisClient) -> None:
 
 async def test_tc15_complete_learning_task(signed_in_viewer: ArtemisClient) -> None:
     result = await run_case(signed_in_viewer, "TC-15",
-        "Start at Lookup, open 'Việc học', select a task marked 'Chưa học' (scroll the full list; fail clearly if none exists), and verify "
+        "Start at Lookup, open 'Việc học', select the 'Chưa học' tab, then select a task "
+        "(scroll the full list; fail clearly if none exists), and verify "
         "'Chi tiết nhiệm vụ học' with 'CÁC PHẦN CẦN HOÀN THÀNH'. Mark an incomplete section "
         "completed, complete remaining required read/watch sections and tap 'Hoàn thành'. "
         "Verify 'Đã xác nhận hoàn thành nội dung đọc/xem.' in the completion notice. "

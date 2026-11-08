@@ -85,5 +85,8 @@ Follow-up offline không chạy uv sync/pytest thiết bị. Đã thử Flutter 
 ## Tùy chọn ADB_LOGIN và E2E_REUSE_SESSION
 
 - `ADB_LOGIN=1`: nhập Viewer bằng ADB; toạ độ email `(400,660)`, password `(380,848)`, submit `(360,1134)` đo trên Redmi 7 **720×1520**. Thiết bị khác cần đo lại `_LOGIN_POINTS`. Mặc định tắt.
+- Mật khẩu (và email) khi dùng `ADB_LOGIN=1` chỉ hỗ trợ ASCII in được từ space đến `~`, **trừ `%`**: chữ `A–Z`, `a–z`, số `0–9`, khoảng trắng và dấu câu ASCII còn lại. Khoảng trắng được mã hóa thành `%s`, shell metacharacter được quote; `%` bị từ chối vì `input text` biến `%s` thành khoảng trắng. Unicode, emoji, tab, xuống dòng và ký tự điều khiển không được hỗ trợ. Fixture fail rõ ràng trước khi xóa dữ liệu app nếu credential không hợp lệ, không in mật khẩu. Dùng `ADB_LOGIN=0` để nhập credential ngoài tập này qua ARTEMIS.
 - `E2E_REUSE_SESSION=1`: chỉ có hiệu lực với `ADB_LOGIN=1`; tái dùng Viewer cùng tài khoản qua `results/.session`. TC-19/20/24 invalidate marker trước thao tác đổi phiên; `fresh_app` cũng xóa marker.
 - TC-24 dùng tài khoản password test riêng, nhập đủ ba ô và phục hồi mật khẩu gốc trong finally kể cả khi assertion lỗi.
+- TC-24 báo cả lỗi thân test và lỗi phục hồi bằng `BaseExceptionGroup` nếu cả hai cùng lỗi.
+- TC-21 vẫn chỉ chạy khi `RH_RC_OPERATOR=1`; chấp nhận giới hạn gốc là mọi số nguyên dương, kể cả 1 hoặc 2. Trước khi yêu cầu publish, lưu giá trị gốc vào `results/.tc21-original-limit` (không phụ thuộc `RUN_ID`). Nếu khôi phục timeout, giữ file này; vòng sau phải nhận xác nhận `tc21-restore-done` cho đúng giá trị gốc trước khi ghi baseline mới. Không xóa file pending để bỏ qua khôi phục. Các file ready/done vẫn có tiền tố `RUN_ID` như handshake hiện tại.

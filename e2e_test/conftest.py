@@ -247,13 +247,22 @@ async def sign_in(artemis: ArtemisClient, instruction: str) -> ArtemisClient:
 # Free-tier Gemini quota is tiny, and the agent types unreliably into Flutter text
 # fields. With ADB_LOGIN=1 the viewer fixtures sign in deterministically over adb
 # (coordinates measured on Redmi 7, 720x1520) so model calls go to the case under test.
+# Only printable ASCII (space through ~), excluding %, is supported: input text
+# rewrites %s as spaces and cannot reliably inject Unicode or control characters.
 # With E2E_REUSE_SESSION=1 a signed-in viewer session is kept between cases.
 _SESSION_FILE = ROOT / "results" / ".session"
 _LOGIN_POINTS = {"email": (400, 660), "password": (380, 848), "submit": (360, 1134)}
 
 
+def validate_adb_text(text: str) -> None:
+    if not re.fullmatch(r"[\x20-\x24\x26-\x7e]+", text):
+        pytest.fail("ADB_LOGIN=1 supports only printable ASCII (space through ~), excluding %. "
+                    "Use ADB_LOGIN=0 for other credentials.", pytrace=False)
+
+
 def adb_input_text(text: str) -> None:
     """Quote for the Android shell; adb joins shell arguments before execution."""
+    validate_adb_text(text)
     adb("shell", "input", "text", shlex.quote(text.replace(" ", "%s")))
 
 
@@ -267,13 +276,18 @@ def _type_field(point: tuple[int, int], text: str) -> None:
 
 
 def adb_viewer_login(suffix: str = "") -> None:
+    email = required(f"RH_VIEWER{suffix}_EMAIL")
+    password = required(f"RH_VIEWER{suffix}_PASSWORD")
+    # Fail without printing credentials, before clearing app data or typing fields.
+    validate_adb_text(email)
+    validate_adb_text(password)
     package = app_package()
     adb("shell", "am", "force-stop", package)
     adb("shell", "pm", "clear", package)
     adb("shell", "monkey", "-p", package, "1")
     time.sleep(8)
-    _type_field(_LOGIN_POINTS["email"], required(f"RH_VIEWER{suffix}_EMAIL"))
-    _type_field(_LOGIN_POINTS["password"], required(f"RH_VIEWER{suffix}_PASSWORD"))
+    _type_field(_LOGIN_POINTS["email"], email)
+    _type_field(_LOGIN_POINTS["password"], password)
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     time.sleep(1)
     tx, ty = _LOGIN_POINTS["submit"]

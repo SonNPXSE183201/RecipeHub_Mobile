@@ -99,8 +99,7 @@ def frame(recipe, idx, step, remaining, total, step_count):
     chips = []
     if step.get("temperatureCelsius") is not None:
         chips.append((f'{step["temperatureCelsius"]:g}°C', OCEAN))
-    if step.get("durationSeconds"):
-        chips.append((f'{step["durationSeconds"]} giây', OCEAN))
+    chips.append((f'{total} giây', OCEAN))
     if step.get("equipment"):
         chips.append((step["equipment"][:40], SAND_DARK))
     x = 60

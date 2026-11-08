@@ -3,7 +3,7 @@ import os
 import pytest
 from artemis_client import ArtemisClient
 
-from conftest import output, run_case, wait_operator_signal
+from conftest import ROOT, output, run_case, wait_operator_signal
 
 pytestmark = pytest.mark.slow
 
@@ -12,6 +12,15 @@ pytestmark = pytest.mark.slow
 @pytest.mark.skipif(os.getenv("RH_RC_OPERATOR") != "1",
                     reason="Changes production Remote Config; run only with an operator (RH_RC_OPERATOR=1)")
 async def test_tc21_remote_config_live_limit(signed_in_viewer: ArtemisClient) -> None:
+    # Persist across RUN_IDs/processes: a timed-out restore must not become a new baseline.
+    pending = ROOT / "results" / ".tc21-original-limit"
+    if pending.exists():
+        original = int(pending.read_text(encoding="utf-8"))
+        assert original > 0
+        await wait_operator_signal("tc21-restore",
+            f"Restore the EXACT original max_lookup_results={original}, publish, "
+            "then confirm in tc21-restore-done before recording another baseline.")
+        pending.unlink()
     # Record the actual Console value for EACH run, rather than assuming a default.
     recorded = await wait_operator_signal("tc21-baseline",
         "Read current max_lookup_results in Firebase Console. Write its positive integer "
@@ -28,6 +37,9 @@ async def test_tc21_remote_config_live_limit(signed_in_viewer: ArtemisClient) ->
     assert result.succeeded, result.error or result.status
     baseline = output(result)["baseline_count"]
     assert baseline > 0 and baseline != target, "Need a distinct visible baseline"
+    pending.parent.mkdir(exist_ok=True)
+    with pending.open("x", encoding="utf-8") as stream:
+        stream.write(str(initial_limit))
     try:
         await wait_operator_signal("tc21",
             f"Publish max_lookup_results={target} NOW. Keep app foreground; confirm in tc21-done.")
@@ -41,6 +53,7 @@ async def test_tc21_remote_config_live_limit(signed_in_viewer: ArtemisClient) ->
         await wait_operator_signal("tc21-restore",
             f"Restore the EXACT original max_lookup_results={initial_limit}, publish, "
             f"then confirm in tc21-restore-done before the next round.")
+        pending.unlink()
 
 
 async def test_tc22_admin_personal_features_hidden(signed_in_admin: ArtemisClient) -> None:

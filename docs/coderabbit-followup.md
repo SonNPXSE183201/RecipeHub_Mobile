@@ -1,6 +1,8 @@
-# Theo dõi CodeRabbit PR #3–#6
+# Theo dõi CodeRabbit PR #3–#7
 
 Đối chiếu tại worktree `fix/lab3-coderabbit-findings`, ngày 08/11/2026. Đề bài không phân bổ từng phát hiện cho PR cụ thể, nên cột PR giữ phạm vi #3–#6, không đoán số PR. Dòng là vị trí hiện tại sau sửa; nội dung review chỉ được dùng làm dữ liệu đối chiếu. Không commit/push, không cài dependency hoặc truy cập mạng.
+
+Bổ sung ngày 09/11/2026: đối chiếu 9 mục trong tóm tắt PR #7; các dòng mới ghi PR = #7. Không có bản comment PR #7 đầy đủ trong repo.
 
 | PR | File@dòng | Phát hiện | Quyết định (Đã sửa / Bỏ qua) | Lý do |
 | --- | --- | --- | --- | --- |
@@ -36,16 +38,33 @@
 | #3–#6 | `docs/architecture.md@52` | Mock dùng cho E2E | Đã sửa | AppServices.mock() dùng unit/widget Flutter; ARTEMIS dùng Firebase thật. |
 | #3–#6 | `docs/mobile-backend-api-gaps.md@5` | Khẳng định đã bỏ toàn bộ Gateway | Đã sửa | AppServices.firebase() mặc định firestore, vẫn chọn Gateway cho công thức qua RECIPE_SOURCE=gateway; phần lịch sử được ghi rõ. |
 | #3–#6 | `README.md@38` | Thiếu SHA-1, client id, nguồn vai trò | Đã sửa | Thêm signingReport cho debug/release, placeholder Web client ID đầy đủ; mô tả claim role và fallback users/{uid}.role đúng FirebaseUserProfileService/AuthViewModel. |
-| #3–#6 | `README.md@9` | Deliverable và kiểm tra đã/chưa làm | Đã sửa | Ghi test-plan/report/slides đã có; code-review chưa có; ARTEMIS chưa chạy; PDF chưa tái xuất và log Analytics chưa có trong checkout. |
+| #3–#6 | `README.md@9` | Deliverable và kiểm tra đã/chưa làm | Đã sửa | Test-plan/report/slides và docs/code-review.md đã có (19 phát hiện, 15 đã sửa); report/slides đã xuất PDF; slides hiện là slides/Lab03_SE183201_slides.pptx + .pdf, bản HTML đã bỏ. ARTEMIS chưa chạy; log Analytics chưa có trong checkout. |
 | #3–#6 | `report/Lab03_SE183201.md@268` | Suy hành vi người dùng từ Analytics kiểm thử | Đã sửa | Phần caveat đã có từ trước; bỏ các suy luận về flow, đối chiếu crash từng event và hành vi tại quầy còn sót. |
 | #3–#6 | `slides/Lab03_SE183201_slides.html@618` | Nhãn login/logout suy tỷ lệ thoát ca | Đã sửa | Đổi sang dữ liệu kiểm thử; đồng bộ các nhãn thống kê khác, nêu không suy hành vi tại quầy. |
-| #3–#6 | `report/Lab03_SE183201.md@375` | Khẳng định mọi thay đổi đã kiểm đầy đủ | Đã sửa | Giới hạn theo ảnh/bằng chứng có trong checkout; Flutter chưa xác nhận lại, ARTEMIS giữ TODO. Slide nguồn cũng sửa; chưa tái xuất PDF. |
+| #3–#6 | `report/Lab03_SE183201.md@375` | Khẳng định mọi thay đổi đã kiểm đầy đủ | Đã sửa | Giới hạn theo ảnh/bằng chứng có trong checkout; Flutter chưa xác nhận lại, ARTEMIS giữ TODO. Report/slides đã xuất PDF; slide nguồn hiện là PPTX. |
+| #7 | `docs/coderabbit-followup.md` | Trạng thái deliverable lỗi thời | Đã sửa | Đối chiếu docs/code-review.md: 19 phát hiện, 15 đã sửa; có report PDF và slides PPTX/PDF, không còn slide HTML. Cập nhật cả ghi chú PDF còn sót. |
+| #7 | `docs/test-plan.md@45` | TC-11 thiếu tìm Latte Đá trước khi mở thẻ | Đã sửa | Thêm bước tìm ở Tra cứu, khớp test_detail.py. |
+| #7 | `docs/test-plan.md@49`, `e2e_test/test_practice_export.py` | TC-15 thiếu chọn tab Chưa học | Đã sửa | MyLearningPage mặc định tab Đang học; thêm chọn Chưa học trước chọn nhiệm vụ trong cả tài liệu và script. |
+| #7 | `e2e_test/conftest.py`, `e2e_test/README.md` | Giới hạn ký tự mật khẩu ADB_LOGIN=1 chưa rõ | Đã sửa | Ghi ASCII in được trừ %, từ chối Unicode/control/% trước khi xóa app hoặc nhập credential; fail không chứa mật khẩu. |
+| #7 | `e2e_test/test_auth.py` | TC-24 lỗi finally che lỗi chính | Đã sửa | Giữ lỗi thân test; nếu phục hồi cũng lỗi thì báo cả hai bằng BaseExceptionGroup, gồm cả pytest.fail. |
+| #7 | `e2e_test/test_profile_remote_config.py` | TC-21 mất baseline khi khôi phục timeout | Đã sửa | Lưu giá trị gốc qua RUN_ID/process, chỉ xóa sau xác nhận restore; vòng sau restore trước baseline mới. Chấp nhận gốc 1 hoặc 2; giữ RH_RC_OPERATOR=1. |
+| #7 | `tools/video/make_videos.py` | Nhãn duration khác thời lượng hiệu lực | Đã sửa | Chip dùng total được build truyền từ step_duration, kể cả fallback 10 giây khi thiếu/không dương. |
+| #7 | `slides/Lab03_SE183201_slides.html` | Review slide HTML cũ | Bỏ qua: file đã thay thế | HTML không còn; đã thay bằng slides/Lab03_SE183201_slides.pptx và .pdf. |
+| #7 | Không xác định | Phát hiện còn lại bị cắt khỏi tóm tắt | Không đủ thông tin | Tìm trong repo chỉ thấy review PR #2 và bảng follow-up trước; không có comment PR #7 đầy đủ để đối chiếu. Sandbox không mạng; không đoán nội dung. |
 
-## Kiểm tra và việc còn lại
+## Kiểm tra và việc còn lại của lượt PR #3–#6
 
 - `git diff --check`: đạt. Kiểm tra offline bằng Node: 61 món; 63 câu quiz giữ tập đáp án, đáp án đúng, explanation/reviewSection sau shuffle; thứ tự SHA-256 ổn định khi chạy lại; đủ 24 mã E2E duy nhất. QZ-SUCTRA q9 là ngoại lệ nội dung được sửa theo SOP như bảng.
 - Đã thêm `tools/test_review_helpers.py` (unittest chuẩn, không cần Pillow/ARTEMIS) cho wrap, duration, font, CLI, quoting ADB, biến rỗng và shuffle. Chưa chạy được: Python trên PATH là uv trampoline báo permission denied; Python của venv cũng không khởi chạy được. Chưa có bằng chứng RED/GREEN runtime.
 - `tools/seed/shuffle_quizzes.py` đã viết nhưng chưa thực thi được bằng Python. File seed được tạo bằng cùng thuật toán SHA-256 trong Node và kiểm tra bảo toàn dữ liệu; cần chạy lại `python tools/seed/shuffle_quizzes.py` và unittest khi có Python khả dụng. Đây chưa phải xác nhận runtime của script Python.
 - Đã thử `flutter analyze --no-pub` và `flutter test --no-pub`; không có output/kết quả, đã dừng tiến trình. Checkout chưa có `.dart_tool`; không chạy pub get theo yêu cầu. Không khẳng định analyze 0 issue hoặc test pass cho lượt này.
 - ARTEMIS/ADB/Firebase không chạy trong sandbox offline. TC-04 manual/skip vì thiếu UI; TC-09 manual/skip vì mở app sau pm clear offline mất Auth. Cần giải quyết setup Auth không có cache trước khi kiểm tải/retry thật.
-- Chỉ sửa nguồn report Markdown và slide HTML; hai PDF có sẵn chưa được tái xuất/kiểm render. Cần tái xuất trước khi nộp để tránh khác nội dung nguồn. TODO kết quả ARTEMIS được giữ nguyên.
+- Report/slides đã xuất PDF; slide nguồn hiện là `slides/Lab03_SE183201_slides.pptx` và PDF tương ứng, bản HTML đã bỏ. Lượt PR #7 chỉ kiểm sự tồn tại của artifact, không xác nhận lại render/nội dung PDF. TODO kết quả ARTEMIS được giữ nguyên.
+
+## Kiểm tra lượt PR #7 (09/11/2026)
+
+- `git diff --check`: đạt.
+- Bổ sung regression test vào `tools/test_review_helpers.py`: credential ADB bị từ chối trước khi xóa app; TC-24 giữ cả hai lỗi (bao gồm pytest.fail); TC-21 giữ baseline qua timeout/vòng sau và chỉ ghi baseline mới sau restore, với giá trị gốc 1, 2, 20; nhãn duration dùng thời lượng hiệu lực. Dữ liệu giả chỉ ở test.
+- Đã thử `python -m unittest discover -s tools -p test_review_helpers.py` và `python -m py_compile` cho 6 file Python đã sửa: không chạy được vì `python` không có trên PATH; thử interpreter của venv cũng báo `uv trampoline failed to spawn Python child process: permission denied (os error 5)`. Chưa có bằng chứng RED/GREEN hoặc coverage runtime; chỉ rà soát code offline.
+- Đã thử `flutter analyze --no-pub` và `flutter test --no-pub`: không ra kết quả, đã dừng tiến trình. Chạy lại cả hai qua Flutter snapshot có sẵn báo không thể đọc/ghi `C:\Users\nguyen.son\AppData\Roaming\.flutter_tool_state` ngoài workspace. Chưa xác nhận analyze 0 issue/test pass; không tải dependency hoặc dùng mạng.
+- Chưa chạy ARTEMIS/ADB/Firebase hay publish Remote Config. Không commit/push.
