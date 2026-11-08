@@ -184,6 +184,7 @@ def fresh_app() -> None:
     adb("shell", "am", "force-stop", package)
     cleared = adb("shell", "pm", "clear", package)
     assert "Success" in cleared, "pm clear did not succeed"
+    (ROOT / "results" / ".session").unlink(missing_ok=True)
     adb("shell", "monkey", "-p", package, "1")
 
 
@@ -213,14 +214,66 @@ async def sign_in(artemis: ArtemisClient, instruction: str) -> ArtemisClient:
     return artemis
 
 
-@pytest.fixture
-async def signed_in_viewer(artemis: ArtemisClient, fresh_app: None) -> ArtemisClient:
-    return await sign_in(artemis, viewer_login())
+# Free-tier Gemini quota is tiny, and the agent types unreliably into Flutter text
+# fields. With ADB_LOGIN=1 the viewer fixtures sign in deterministically over adb
+# (coordinates measured on Redmi 7, 720x1520) so model calls go to the case under test.
+# With E2E_REUSE_SESSION=1 a signed-in viewer session is kept between cases.
+_SESSION_FILE = ROOT / "results" / ".session"
+_LOGIN_POINTS = {"email": (400, 660), "password": (380, 848), "submit": (360, 1134)}
+
+
+def _type_field(point: tuple[int, int], text: str) -> None:
+    adb("shell", "input", "tap", str(point[0]), str(point[1]))
+    time.sleep(0.5)
+    adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
+    for _ in range(45):
+        adb("shell", "input", "keyevent", "KEYCODE_DEL")
+    adb("shell", "input", "text", text)
+
+
+def adb_viewer_login(suffix: str = "") -> None:
+    package = app_package()
+    adb("shell", "am", "force-stop", package)
+    adb("shell", "pm", "clear", package)
+    adb("shell", "monkey", "-p", package, "1")
+    time.sleep(8)
+    _type_field(_LOGIN_POINTS["email"], required(f"RH_VIEWER{suffix}_EMAIL"))
+    _type_field(_LOGIN_POINTS["password"], required(f"RH_VIEWER{suffix}_PASSWORD"))
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    time.sleep(1)
+    tx, ty = _LOGIN_POINTS["submit"]
+    adb("shell", "input", "tap", str(tx), str(ty))
+    time.sleep(8)
+
+
+async def _viewer(artemis: ArtemisClient, suffix: str) -> ArtemisClient:
+    package = app_package()
+    if os.getenv("ADB_LOGIN") == "1":
+        tag = f"viewer{suffix}"
+        reuse = os.getenv("E2E_REUSE_SESSION") == "1"
+        if reuse and _SESSION_FILE.exists() and _SESSION_FILE.read_text() == tag:
+            adb("shell", "am", "force-stop", package)
+            adb("shell", "monkey", "-p", package, "1")
+            time.sleep(6)
+        else:
+            adb_viewer_login(suffix)
+            _SESSION_FILE.parent.mkdir(exist_ok=True)
+            _SESSION_FILE.write_text(tag)
+        return artemis
+    adb("shell", "am", "force-stop", package)
+    adb("shell", "pm", "clear", package)
+    adb("shell", "monkey", "-p", package, "1")
+    return await sign_in(artemis, viewer_login(suffix))
 
 
 @pytest.fixture
-async def signed_in_viewer_b(artemis: ArtemisClient, fresh_app: None) -> ArtemisClient:
-    return await sign_in(artemis, viewer_login("_B"))
+async def signed_in_viewer(artemis: ArtemisClient) -> ArtemisClient:
+    return await _viewer(artemis, "")
+
+
+@pytest.fixture
+async def signed_in_viewer_b(artemis: ArtemisClient) -> ArtemisClient:
+    return await _viewer(artemis, "_B")
 
 
 @pytest.fixture
