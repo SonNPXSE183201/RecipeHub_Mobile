@@ -255,7 +255,7 @@ async def sign_in(artemis: ArtemisClient, instruction: str) -> ArtemisClient:
 # rewrites %s as spaces and cannot reliably inject Unicode or control characters.
 # With E2E_REUSE_SESSION=1 a signed-in viewer session is kept between cases.
 _SESSION_FILE = ROOT / "results" / ".session"
-_LOGIN_POINTS = {"email": (400, 660), "password": (380, 848), "submit": (360, 1134)}
+_LOGIN_POINTS = {"email": (400, 790)}
 
 
 def validate_adb_text(text: str) -> None:
@@ -265,9 +265,15 @@ def validate_adb_text(text: str) -> None:
 
 
 def adb_input_text(text: str) -> None:
-    """Quote for the Android shell; adb joins shell arguments before execution."""
+    """Quote for the Android shell; adb joins shell arguments before execution.
+
+    Sent in short chunks: one long `input text` call dropped characters on Redmi 7.
+    """
     validate_adb_text(text)
-    adb("shell", "input", "text", shlex.quote(text.replace(" ", "%s")))
+    for start in range(0, len(text), 4):
+        chunk = text[start:start + 4]
+        adb("shell", "input", "text", shlex.quote(chunk.replace(" ", "%s")))
+        time.sleep(0.15)
 
 
 def _type_field(point: tuple[int, int], text: str) -> None:
@@ -290,20 +296,35 @@ def adb_viewer_login(suffix: str = "") -> None:
     adb("shell", "pm", "clear", package)
     adb("shell", "monkey", "-p", package, "1")
     time.sleep(8)
-    _type_field(_LOGIN_POINTS["email"], email)
-    _type_field(_LOGIN_POINTS["password"], password)
-    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    # Fresh login screen on Redmi 7 (720x1520): the Email field sits at y=790. Typing, then
+    # Tab to the password field and Enter to submit, avoids coordinates that move once the
+    # keyboard opens (verified on device 09/11/2026).
+    ex, ey = _LOGIN_POINTS["email"]
+    adb("shell", "input", "tap", str(ex), str(ey))
     time.sleep(1)
-    tx, ty = _LOGIN_POINTS["submit"]
-    adb("shell", "input", "tap", str(tx), str(ty))
-    time.sleep(8)
+    adb_input_text(email)
+    time.sleep(0.5)
+    adb("shell", "input", "keyevent", "KEYCODE_TAB")
+    time.sleep(0.5)
+    adb_input_text(password)
+    time.sleep(0.5)
+    adb("shell", "input", "keyevent", "KEYCODE_ENTER")
+    time.sleep(9)
+    if "com.recipehub.mobile" not in adb("shell", "dumpsys", "window"):
+        pytest.fail("adb login left the RecipeHub app", pytrace=False)
+    # Still on the login screen means the credentials did not go through.
+    ui = adb("shell", "uiautomator", "dump", "/dev/tty")
+    if "Đăng nhập với Google" in ui or "Quên mật khẩu" in ui:
+        pytest.fail(f"adb login for viewer{suffix} did not reach the app shell", pytrace=False)
 
 
 async def _viewer(artemis: ArtemisClient, suffix: str) -> ArtemisClient:
     package = app_package()
     if os.getenv("ADB_LOGIN") == "1":
         tag = f"viewer{suffix}"
-        reuse = os.getenv("E2E_REUSE_SESSION") == "1"
+        # Reusing a session broke when an earlier case had signed out (the agent then tried to
+        # type credentials itself and looped). Reuse only when explicitly forced.
+        reuse = os.getenv("E2E_REUSE_SESSION") == "force"
         if reuse and _SESSION_FILE.exists() and _SESSION_FILE.read_text() == tag:
             adb("shell", "am", "force-stop", package)
             adb("shell", "monkey", "-p", package, "1")
