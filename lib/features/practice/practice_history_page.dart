@@ -23,7 +23,7 @@ class PracticeHistoryPage extends StatelessWidget {
       records: records,
       traineeLabel: label,
     );
-    if (!context.mounted) return;
+    if (!context.mounted || ModalRoute.of(context)?.isCurrent == false) return;
     final messenger = ScaffoldMessenger.of(context);
     final saved = storage.savedFile;
     final saveError = storage.saveError;
@@ -60,18 +60,31 @@ class PracticeHistoryPage extends StatelessWidget {
     } else {
       message = 'Đã xuất báo cáo PDF và lưu lên Cloud Storage.';
     }
+    messenger.clearSnackBars();
     messenger.showSnackBar(
       SnackBar(
         content: Text(message, key: success ? AppKeys.reportUrl : null),
         backgroundColor: success ? NomadKit.forest : NomadKit.error,
         action: action,
-        duration: const Duration(seconds: 8),
+        // Flutter 3.47 mặc định giữ SnackBar có action cho tới khi người dùng đóng.
+        persist: false,
+        duration: const Duration(seconds: 5),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+    return PopScope<void>(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) messenger.clearSnackBars();
+      },
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     if (!context.watch<AuthViewModel>().hasPersonalLearning) {
       return const PersonalLearningBlocked();
     }

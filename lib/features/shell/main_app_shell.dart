@@ -32,7 +32,8 @@ class MainAppShellState extends State<MainAppShell> {
   }
 
   void switchTab(int index) {
-    if (mounted) {
+    if (mounted && index != _currentIndex) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       setState(() => _currentIndex = index);
     }
   }
@@ -182,7 +183,7 @@ class MainAppShellState extends State<MainAppShell> {
           ),
           child: NavigationBar(
             selectedIndex: _currentIndex,
-            onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
+            onDestinationSelected: switchTab,
             backgroundColor: Colors.white,
             indicatorColor: Colors.transparent,
             overlayColor: WidgetStateProperty.all(Colors.transparent),
