@@ -88,7 +88,7 @@ void main() {
         );
         expect(
           vm.errorMessage,
-          'Tài khoản đăng nhập bằng Google không dùng mật khẩu RecipeHub',
+          'Tài khoản này không đăng nhập bằng mật khẩu nên không thể đổi mật khẩu.',
         );
         expect(service.passwordChangeCount, 0);
       },
