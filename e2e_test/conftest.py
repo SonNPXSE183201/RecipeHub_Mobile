@@ -267,13 +267,17 @@ def validate_adb_text(text: str) -> None:
 def adb_input_text(text: str) -> None:
     """Quote for the Android shell; adb joins shell arguments before execution.
 
-    Sent in short chunks: one long `input text` call dropped characters on Redmi 7.
+    Sent one character at a time: longer `input text` calls dropped letters on Redmi 7
+    (vuonglam → vunglam) and '@' came out as '#', so '@' and '.' use key events.
     """
     validate_adb_text(text)
-    for start in range(0, len(text), 4):
-        chunk = text[start:start + 4]
-        adb("shell", "input", "text", shlex.quote(chunk.replace(" ", "%s")))
-        time.sleep(0.15)
+    keys = {"@": "KEYCODE_AT", ".": "KEYCODE_PERIOD", " ": "KEYCODE_SPACE"}
+    for char in text:
+        if char in keys:
+            adb("shell", "input", "keyevent", keys[char])
+        else:
+            adb("shell", "input", "text", shlex.quote(char))
+        time.sleep(0.08)
 
 
 def _type_field(point: tuple[int, int], text: str) -> None:
