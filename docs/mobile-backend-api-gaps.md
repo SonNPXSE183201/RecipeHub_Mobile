@@ -2,12 +2,12 @@
 
 > [!WARNING]
 > **TÀI LIỆU ĐÃ LỖI THỜI (LƯU VẾT LỊCH SỬ)**  
-> Ứng dụng RecipeHub Mobile hiện tại đã chuyển toàn bộ nguồn dữ liệu sang **Cloud Firestore (real-time)** và **Firebase Storage** (do backend .NET chưa deploy và yêu cầu Final cấm server riêng). Toàn bộ dữ liệu công thức, SOP, nhiệm vụ học, quiz, chấm thực hành, phản hồi và sự cố đều hoạt động trực tiếp qua Firestore (`AppServices.firebase()`). Nội dung phân tích Gateway .NET bên dưới được lưu lại để phục vụ truy vết lịch sử giai đoạn trước.
+> Ứng dụng RecipeHub Mobile hiện tại mặc định dùng **Cloud Firestore (real-time)** và **Firebase Storage** (do backend .NET chưa deploy và yêu cầu Final cấm server riêng). Toàn bộ dữ liệu công thức, SOP, nhiệm vụ học, quiz, chấm thực hành, phản hồi và sự cố đều hoạt động trực tiếp qua Firestore (`AppServices.firebase()`). Riêng nguồn công thức vẫn có thể chọn Gateway qua `--dart-define=RECIPE_SOURCE=gateway` trong `AppServices.firebase()`; mặc định là `firestore`. Nội dung phân tích Gateway .NET bên dưới được lưu lại để phục vụ truy vết lịch sử giai đoạn trước.
 
-Mobile gọi Gateway YARP `http://<host>:5000` (Android emulator: `10.0.2.2`; máy thật: `--dart-define=API_BASE_URL=http://<ip>:5000`).
+Khi chọn `RECIPE_SOURCE=gateway`, mobile gọi Gateway YARP `http://<host>:5000` (Android emulator: `10.0.2.2`; máy thật: `--dart-define=API_BASE_URL=http://<ip>:5000`).
 Không sửa `src/backend/`; mục thiếu ghi lại ở đây để nhóm backend bổ sung.
 
-## Đang dùng API thật
+## API Gateway tùy chọn
 
 | Chức năng mobile | Endpoint | Ghi chú |
 | :--- | :--- | :--- |
@@ -17,7 +17,7 @@ Không sửa `src/backend/`; mục thiếu ghi lại ở đây để nhóm backe
 `RecipeMapper` đổi `RecipeDetailResponse` → `RecipeItem` của UI. Không còn mock fallback (`AppConfig.enableOfflineMockFallback = false`);
 lỗi mạng hiển thị màn "Không tải được công thức" + nút Thử lại.
 
-## Backend chưa có → mobile giữ dữ liệu cục bộ trong phiên
+## Khoảng trống Gateway ở giai đoạn cũ (không mô tả Firestore hiện tại)
 
 | Nhu cầu | API còn thiếu | Hiện trạng trên mobile |
 | :--- | :--- | :--- |

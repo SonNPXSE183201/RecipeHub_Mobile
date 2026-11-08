@@ -20,50 +20,53 @@ String _hex(String s) =>
 int _pages(String pdf) => RegExp(r'/Type /Page\s').allMatches(pdf).length;
 String _pdf(Uint8List bytes) => latin1.decode(bytes);
 
-RecipeItem _recipe(int index, {String description = 'Trà thơm, hậu vị dịu.'}) =>
-    RecipeItem(
-      id: 'private-$index',
-      code: 'CODE-$index',
-      name: 'Trà sữa ô long $index',
-      category: 'Trà sữa',
-      version: '1.0',
-      status: 'Ban hành',
-      publishedDate: '',
-      publisher: '',
-      description: description,
-      standardTime: '60 giây',
-      standardTemp: '85°C',
-      sizes: const [
-        RecipeSizeOption(
-          sizeCode: 'M',
-          label: 'Vừa',
-          servingNotes: 'Ít đá; yêu cầu đặc biệt: không đường.',
-          ingredients: [
-            IngredientPortion(name: 'Trà ô long', amount: 120, unit: 'ml'),
-          ],
-        ),
-        RecipeSizeOption(
-          sizeCode: 'L',
-          label: 'Lớn',
-          servingNotes: 'Dùng ngay.',
-          ingredients: [
-            IngredientPortion(name: 'Trà ô long', amount: 180, unit: 'ml'),
-          ],
-        ),
+RecipeItem _recipe(
+  int index, {
+  String description = 'Trà thơm, hậu vị dịu.',
+  String? code,
+}) => RecipeItem(
+  id: 'private-$index',
+  code: code ?? 'CODE-$index',
+  name: 'Trà sữa ô long $index',
+  category: 'Trà sữa',
+  version: '1.0',
+  status: 'Ban hành',
+  publishedDate: '',
+  publisher: '',
+  description: description,
+  standardTime: '60 giây',
+  standardTemp: '85°C',
+  sizes: const [
+    RecipeSizeOption(
+      sizeCode: 'M',
+      label: 'Vừa',
+      servingNotes: 'Ít đá; yêu cầu đặc biệt: không đường.',
+      ingredients: [
+        IngredientPortion(name: 'Trà ô long', amount: 120, unit: 'ml'),
       ],
-      steps: const [
-        RecipeStepItem(
-          stepNumber: 1,
-          title: 'Ủ trà',
-          instruction: 'Ủ trà rồi lọc.',
-          videoStartSeconds: 0,
-          videoEndSeconds: 30,
-          temperature: '85°C',
-          durationText: '30 giây',
-        ),
+    ),
+    RecipeSizeOption(
+      sizeCode: 'L',
+      label: 'Lớn',
+      servingNotes: 'Dùng ngay.',
+      ingredients: [
+        IngredientPortion(name: 'Trà ô long', amount: 180, unit: 'ml'),
       ],
-      videoUrl: '',
-    );
+    ),
+  ],
+  steps: const [
+    RecipeStepItem(
+      stepNumber: 1,
+      title: 'Ủ trà',
+      instruction: 'Ủ trà rồi lọc.',
+      videoStartSeconds: 0,
+      videoEndSeconds: 30,
+      temperature: '85°C',
+      durationText: '30 giây',
+    ),
+  ],
+  videoUrl: '',
+);
 
 const _sop = SopItem(
   id: 'private-sop',
@@ -91,6 +94,52 @@ void main() {
     font = await ReportFont.load();
   });
   final at = DateTime(2026, 11, 8, 9, 5);
+
+  test('PDF sổ tay và lịch sử ẩn mã món, giữ thông tin hiển thị', () {
+    const codes = ['CF-PHELANN', 'CF-AMERICANON'];
+    final book = _pdf(
+      SopBookPdf.build(
+        fontBytes: font,
+        recipes: [
+          for (var i = 0; i < codes.length; i++) _recipe(i, code: codes[i]),
+        ],
+        sops: [],
+        generatedAt: at,
+      ),
+    );
+    final history = _pdf(
+      PracticeReportPdf.build(
+        fontBytes: font,
+        storeLabel: 'Quận 1',
+        traineeLabel: 'Nguyễn Ánh',
+        records: [
+          for (var i = 0; i < codes.length; i++)
+            SelfPracticeRecord(
+              id: 'private-$i',
+              recipeCode: codes[i],
+              recipeName: 'Trà sữa ô long $i',
+              size: 'Vừa',
+              durationSeconds: 45,
+              targetSeconds: 60,
+              notes: '',
+              practicedAt: '2026-11-08T09:00:00+07:00',
+            ),
+        ],
+        generatedAt: at,
+      ),
+    );
+    for (final pdf in [book, history]) {
+      for (final code in codes) {
+        expect(pdf, isNot(contains(_hex(code))));
+        expect(pdf, isNot(contains(code)));
+      }
+      for (var i = 0; i < codes.length; i++) {
+        expect(pdf, contains(_hex('Trà sữa ô long $i')));
+      }
+      expect(pdf, contains(_hex('Vừa')));
+    }
+    expect(book, contains(_hex('Trà sữa · Phiên bản 1.0')));
+  });
 
   test('Lịch sử: Unicode, A4, tiêu đề, mọi lượt sau lượt 30 và chân trang', () {
     final bytes = PracticeReportPdf.build(

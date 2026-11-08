@@ -49,7 +49,7 @@ lib
 - **ViewModel (`lib/core/viewmodels/*`)**: Kế thừa `ChangeNotifier`, quản lý toàn bộ trạng thái UI (loading, ready, empty, error), xử lý logic nghiệp vụ và giao tiếp với tầng dữ liệu thông qua interface.
 - **Service Interfaces (`lib/core/services/interfaces/*`)**: Định nghĩa hợp đồng trừu tượng (abstraction contract), tách biệt hoàn toàn mã nguồn nghiệp vụ khỏi các thư viện cụ thể.
 - **Service Implementations (`lib/core/services/firebase/*`, `device/*`, `report/*`)**: Cung cấp triển khai thực tế trên Firebase (Firestore, Storage, Auth, Messaging, Remote Config, Crashlytics, Analytics) hoặc phần cứng thiết bị.
-- **Composition Root (`lib/core/di/app_services.dart`)**: Khởi tạo và liên kết các service dependency injection (`AppServices.firebase()` cho môi trường thực tế, `AppServices.mock()` cho kiểm thử tự động E2E).
+- **Composition Root (`lib/core/di/app_services.dart`)**: Khởi tạo và liên kết các service dependency injection (`AppServices.firebase()` cho môi trường thực tế, `AppServices.mock()` cho unit/widget test Flutter; ARTEMIS E2E dùng Firebase thật).
 
 ---
 
@@ -237,8 +237,8 @@ sequenceDiagram
     Note over TimerView: Đồng hồ đếm giây thao tác thực tế...
     Barista ->> TimerView: Hoàn thành pha, bấm "Lưu lần luyện tập"
     TimerView ->> HistoryVM: add(record)
-    HistoryVM ->> HistoryStore: save(uid, records)
-    HistoryStore -->> HistoryVM: Lưu Firestore: users/{uid}/practiceRecords
+    HistoryVM -) HistoryStore: save(uid, records) bất đồng bộ
+    Note over HistoryVM,HistoryStore: Cập nhật bộ nhớ và UI ngay; không chờ Firestore xác nhận. Lỗi lưu báo qua Crashlytics.
     TimerView ->> Analytics: logCompleteBrewTimer(recipeCode, actual, deviation, ok)
     TimerView ->> HistoryView: Chuyển hướng sang màn Lịch sử tự luyện
 
@@ -278,7 +278,7 @@ sequenceDiagram
 | 7 | `FeedbackListViewModel` | `core/viewmodels/feedback_viewmodel.dart` | `IFeedbackRepository`<br>`ICrashReporter` | `FirestoreFeedbackRepository`<br>`FirebaseCrashReporter` | Lắng nghe real-time danh sách phản hồi: Barista chỉ thấy phản hồi của mình, Admin thấy toàn bộ phản hồi; lọc theo trạng thái (`open`, `waitingInfo`, `resolved`). |
 | 8 | `FeedbackDetailViewModel` | `core/viewmodels/feedback_viewmodel.dart` | `IFeedbackRepository`<br>`ICrashReporter` | `FirestoreFeedbackRepository`<br>`FirebaseCrashReporter` | Chi tiết phản hồi và luồng hội thoại 2 chiều (`feedback/{id}/replies`); Admin gửi trả lời và cập nhật trạng thái phản hồi. |
 | 9 | `StorageViewModel` | `core/viewmodels/storage_viewmodel.dart` | `IStorageService`<br>`IMediaPickerService`<br>`IAuthService`<br>`IAnalyticsService`<br>`ICrashReporter`<br>`IFileSaveService?` | `FirebaseStorageService`<br>`ImagePickerMediaService`<br>`FirebaseAuthService`<br>`FirebaseAnalyticsService`<br>`FirebaseCrashReporter`<br>`AndroidFileSaveService` | Chọn ảnh máy ảnh/thư viện (giới hạn < 5MB), upload ảnh đính kèm feedback lên `feedback/{uid}/`; tạo file PDF báo cáo tự luyện, lưu máy tại `Download/RecipeHub` và upload `reports/{uid}/`. |
-| 10 | `NotificationViewModel` | `core/viewmodels/notification_viewmodel.dart` | `INotificationService`<br>`ICrashReporter`<br>`IDeviceRegistry` | `FirebaseNotificationService`<br>`FirebaseCrashReporter`<br>`FirestoreDeviceRegistry` | Tiếp nhận thông báo FCM (foreground, background, terminated); đăng ký FCM token lên Firestore `users/{uid}/devices/{token}`; xử lý điều hướng sâu (deep link). |
+| 10 | `NotificationViewModel` | `core/viewmodels/notification_viewmodel.dart` | `INotificationService`<br>`ICrashReporter`<br>`IDeviceRegistry` | `FirebaseNotificationService`<br>`FirebaseCrashReporter`<br>`FirestoreDeviceRegistry` | Tiếp nhận thông báo FCM (foreground, background, terminated); đăng ký FCM token lên Firestore `users/{uid}/devices/{sha256(token)[0:32]} (32 ký tự đầu của SHA-256; token nằm trong field `token`)`; xử lý điều hướng sâu (deep link). |
 | 11 | `SopBookViewModel` | `core/viewmodels/sop_book_viewmodel.dart` | `IRecipeSource`<br>`IFileSaveService?` | `FirestoreRecipeSource`<br>`AndroidFileSaveService` | Nạp toàn bộ công thức và SOP ban hành để dựng sổ tay điện tử; lưu số trang đang đọc vào SharedPreferences; xuất toàn bộ sổ tay ra file PDF lưu về máy. |
 | 12 | `StepVideoViewModel` | `core/viewmodels/step_video_viewmodel.dart` | Plugin `VideoPlayerController` | `video_player` native | Phát video kỹ thuật chuẩn (URL từ Firestore `recipe.videoUrl`), đồng bộ timeline bước pha chế với video, hỗ trợ chế độ toàn màn hình landscape. |
 

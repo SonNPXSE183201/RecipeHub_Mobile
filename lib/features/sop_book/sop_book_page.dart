@@ -569,7 +569,7 @@ class _SearchSheetState extends State<_SearchSheet> {
                         return ListTile(
                           minTileHeight: 48,
                           title: Text(p.title),
-                          subtitle: Text('${p.recipe!.code} · ${p.group}'),
+                          subtitle: Text(p.group),
                           trailing: Text('Tr. ${idx + 1}'),
                           onTap: () => Navigator.pop(context, idx),
                         );

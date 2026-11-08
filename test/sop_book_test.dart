@@ -10,6 +10,7 @@ import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dar
 import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_page.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_pages.dart';
+import 'package:recipehub_mobile/features/sop_book/sop_book_views.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/fake_recipe_source.dart';
@@ -141,6 +142,49 @@ void main() {
   });
 
   group('SopBookPage', () {
+    testWidgets('trang món giữ tên, danh mục, phiên bản và ẩn mã', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RecipeBookPage(
+              recipe: _r('CF-PHELANN', 'Cà phê phin', 'Cà phê'),
+            ),
+          ),
+        ),
+      );
+      expect(find.textContaining('CF-PHELANN'), findsNothing);
+      expect(find.text('Cà phê phin'), findsOneWidget);
+      expect(find.text('Cà phê'), findsOneWidget);
+      expect(find.text('Phiên bản 1.0'), findsOneWidget);
+    });
+
+    testWidgets('tìm món giữ danh mục, ẩn mã và vẫn nhảy đúng trang', (
+      tester,
+    ) async {
+      await _pump(tester, FakeRecipeSource());
+      await tester.tap(find.byTooltip('Tìm món'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Cà Phê Muối');
+      await tester.pumpAndSettle();
+      expect(find.textContaining('RC-CFE-01'), findsNothing);
+      expect(find.text('Cà phê & Cold Brew'), findsOneWidget);
+      // Ô tìm kiếm cũng chứa cùng chuỗi; chạm vào dòng kết quả.
+      await tester.tap(find.text('Cà Phê Muối').last);
+      await tester.pumpAndSettle();
+      expect(find.byType(RecipeBookPage), findsWidgets);
+      expect(
+        tester
+            .widget<RecipeBookPage>(find.byType(RecipeBookPage).last)
+            .recipe
+            .code,
+        'RC-CFE-01',
+      );
+      expect(find.text('Cà Phê Muối'), findsWidgets);
+      expect(find.textContaining('RC-CFE-01'), findsNothing);
+    });
+
     testWidgets('lật trang bằng nút và nhảy qua mục lục', (tester) async {
       await _pump(tester, FakeRecipeSource());
       expect(find.text('Sổ tay công thức & SOP'), findsWidgets);
@@ -155,7 +199,9 @@ void main() {
       await tester.tap(find.text('Trà Sữa Oolong').first);
       await tester.pumpAndSettle();
       expect(find.textContaining('Trang 3/'), findsOneWidget);
-      expect(find.text('RC-OOL-02'), findsOneWidget);
+      expect(find.textContaining('RC-OOL-02'), findsNothing);
+      expect(find.text('Trà Sữa Oolong'), findsWidgets);
+      expect(find.textContaining('Phiên bản'), findsWidgets);
 
       await tester.tap(find.text('Trước'));
       await tester.pumpAndSettle();

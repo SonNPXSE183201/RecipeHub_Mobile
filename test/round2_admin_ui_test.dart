@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:recipehub_mobile/core/di/app_services.dart';
+import 'package:recipehub_mobile/core/models/app_models.dart';
 import 'package:recipehub_mobile/core/navigation/app_keys.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_auth_service.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_user_profile_service.dart';
@@ -102,6 +103,30 @@ Future<AuthViewModel> _pump(
 }
 
 void main() {
+  testWidgets('Lịch sử tự luyện giữ tên và size, ẩn mã món', (tester) async {
+    await _pump(tester, const PracticeHistoryPage(), admin: false);
+    final history = tester
+        .element(find.byType(PracticeHistoryPage))
+        .read<PracticeHistoryViewModel>();
+    await history.add(
+      const SelfPracticeRecord(
+        id: 'private-record',
+        recipeCode: 'CF-AMERICANON',
+        recipeName: 'Cà phê Americano',
+        size: 'Khổng lồ',
+        durationSeconds: 45,
+        targetSeconds: 60,
+        notes: '',
+        practicedAt: '08/11/2026',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cà phê Americano'), findsOneWidget);
+    expect(find.text('Khổng lồ'), findsOneWidget);
+    expect(find.textContaining('CF-AMERICANON'), findsNothing);
+    expect(history.records.single.recipeCode, 'CF-AMERICANON');
+  });
+
   testWidgets(
     'Feedback attachment card matches input width and splits actions evenly',
     (tester) async {
