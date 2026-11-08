@@ -13,19 +13,19 @@ pytestmark = pytest.mark.slow
 
 async def test_tc11_recipe_detail(signed_in_viewer: ArtemisClient) -> None:
     result = await run_case(signed_in_viewer, "TC-11",
-        "Start at Lookup. Search 'Trà Sữa Oolong' and open that exact card. Verify recipe name, "
+        "Start at Lookup. Search 'Latte Đá' and open that exact card. Verify recipe name, "
         "'ĐỊNH LƯỢNG NGUYÊN LIỆU', nonempty ingredients for the selected size and "
         "'Quy cách phục vụ chuẩn:'. Switch size if available and verify amounts update. "
-        'Return {"recipe_name":"Trà Sữa Oolong","detail_opened":true,"ingredients_count":0,"serving_note_shown":true} with observed count.')
+        'Return {"recipe_name":"Latte Đá","detail_opened":true,"ingredients_count":0,"serving_note_shown":true} with observed count.')
     assert result.succeeded, result.error or result.status
     data = output(result)
-    assert data["recipe_name"] == "Trà Sữa Oolong" and data["detail_opened"] is True
+    assert data["recipe_name"] == "Latte Đá" and data["detail_opened"] is True
     assert data["ingredients_count"] > 0 and data["serving_note_shown"] is True
 
 
 async def test_tc12_step_video(signed_in_viewer: ArtemisClient) -> None:
     result = await run_case(signed_in_viewer, "TC-12",
-        "Start at Lookup, search and open 'Trà Sữa Oolong' detail, then 'Xem video chuẩn'. "
+        "Start at Lookup, search and open 'Latte Đá' detail, then 'Xem video chuẩn'. "
         "Verify loaded playable video and timeline 'Bước 1', 'Bước 2'. Select step 1, then tap "
         "'Bước tiếp theo'. Verify active step 2 and video seeks to its timeline position. "
         'Return {"video_guide_opened":true,"player_loaded":true,"active_step":2,"timeline_synced":true}.')
@@ -37,11 +37,11 @@ async def test_tc12_step_video(signed_in_viewer: ArtemisClient) -> None:
 async def test_tc13_view_recipe_analytics(analytics_debug: None, signed_in_viewer: ArtemisClient) -> None:
     adb("logcat", "-c")
     result = await run_case(signed_in_viewer, "TC-13",
-        "Start at Lookup. Search 'Cà Phê Muối' and open that recipe detail. Verify its name "
+        "Start at Lookup. Search 'Americano Nóng' and open that recipe detail. Verify its name "
         "and ingredients. The host, not the UI agent, checks Analytics logcat. "
-        'Return {"recipe_name":"Cà Phê Muối","detail_opened":true}.')
+        'Return {"recipe_name":"Americano Nóng","detail_opened":true}.')
     assert result.succeeded, result.error or result.status
-    assert output(result) == {"recipe_name": "Cà Phê Muối", "detail_opened": True}
+    assert output(result) == {"recipe_name": "Americano Nóng", "detail_opened": True}
     deadline = time.monotonic() + 30
     event = ""
     while time.monotonic() < deadline:

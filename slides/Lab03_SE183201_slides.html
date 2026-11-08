@@ -595,7 +595,7 @@
     </div>
 
     <div class="key-message">
-      Thông điệp: "DebugView không hiện thiết bị nên sử dụng Báo cáo Sự kiện GA4 và Logcat FA-SVC làm minh chứng trung thực 100%."
+      Thông điệp: "Dùng báo cáo Events GA4; log FA-SVC được tài liệu cũ nhắc tới nhưng chưa có trong checkout."
     </div>
 
     <div class="slide-content" style="gap: 20px;">
@@ -611,12 +611,12 @@
             <tr style="border-bottom: 1px solid #E7E0D5;">
               <td style="padding: 4px;"><code>view_recipe</code></td>
               <td style="text-align: right; font-weight: 700; color: #8B5A2B;">45 lượt</td>
-              <td style="text-align: right; color: #78716C;">(Top nghiệp vụ)</td>
+              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
             </tr>
             <tr style="border-bottom: 1px solid #E7E0D5;">
               <td style="padding: 4px;"><code>login</code> / <code>logout</code></td>
               <td style="text-align: right; font-weight: 700;">39 / 34 lượt</td>
-              <td style="text-align: right; color: #78716C;">(Tỷ lệ thoát ca cao)</td>
+              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
             </tr>
             <tr style="border-bottom: 1px solid #E7E0D5;">
               <td style="padding: 4px;">FCM receive / open</td>
@@ -626,10 +626,10 @@
             <tr>
               <td style="padding: 4px;"><code>submit_feedback</code></td>
               <td style="text-align: right; font-weight: 700;">13 lượt</td>
-              <td style="text-align: right; color: #78716C;">(Phản hồi quầy)</td>
+              <td style="text-align: right; color: #78716C;">(dữ liệu kiểm thử)</td>
             </tr>
           </table>
-          <p style="font-size: 12px; color: #57534E; margin-top: 8px;"><strong>Tổng cộng:</strong> 511 sự kiện • 8 người dùng kiểm thử</p>
+          <p style="font-size: 12px; color: #57534E; margin-top: 8px;"><strong>Tổng cộng:</strong> 511 sự kiện • 8 người dùng kiểm thử; không suy ra hành vi tại quầy.</p>
         </div>
 
         <div class="card" style="padding: 14px;">
@@ -862,7 +862,7 @@
           <div class="card-title">CodeRabbit & ARTEMIS</div>
           <span class="badge badge-sand" style="margin-bottom: 8px;">Review & E2E Agent</span>
           <p style="font-size: 13px;"><strong>CodeRabbit:</strong> Tự động phân tích các Pull Request, kiểm tra bảo mật và đảm bảo <code>flutter analyze</code> đạt 0 issue.</p>
-          <p style="font-size: 13px; margin-top: 6px;"><strong>ARTEMIS (Gemini):</strong> Thực thi kịch bản kiểm thử E2E tự động qua ngôn ngữ tự nhiên trên Redmi 7.</p>
+          <p style="font-size: 13px; margin-top: 6px;"><strong>ARTEMIS (Gemini):</strong> Kế hoạch chạy kịch bản E2E qua ngôn ngữ tự nhiên trên Redmi 7; chưa có kết quả.</p>
         </div>
       </div>
     </div>
@@ -887,10 +887,10 @@
 
     <div style="background: #FFFFFF; border: 1px solid #E7E0D5; border-radius: 16px; padding: 22px 40px; display: inline-block; margin: 0 auto; box-shadow: 0 4px 14px rgba(0,0,0,0.05); text-align: left; max-width: 600px;">
       <div style="font-size: 15px; color: #292524; line-height: 1.6;">
-        <p><strong>Cam kết chất lượng:</strong></p>
-        <p>✓ <code>flutter analyze</code>: 0 issue</p>
-        <p>✓ <code>flutter test</code>: 161 unit & widget tests passed</p>
-        <p>✓ 100% dữ liệu thật trên Cloud Firestore (61 công thức, 25 SOP)</p>
+        <p><strong>Phạm vi kiểm chứng:</strong></p>
+        <p><code>flutter analyze</code>: chưa xác nhận lại trong follow-up offline</p>
+        <p><code>flutter test</code>: chưa xác nhận lại; ARTEMIS: TODO</p>
+        <p>Seed có 61 công thức, 25 SOP; ảnh Firebase trong evidence/lab3/06-firebase-console/</p>
       </div>
     </div>
 

@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import re
+import shlex
 import subprocess
 import time
 from collections.abc import Generator, Iterator
@@ -31,7 +32,7 @@ _active: dict[str, Any] | None = None
 def required(name: str) -> str:
     value = os.getenv(name, "")
     if not value.strip():
-        pytest.skip(f"Missing environment variable: {name}")
+        pytest.fail(f"Missing or empty environment variable: {name}", pytrace=False)
     return value
 
 
@@ -109,6 +110,8 @@ async def execute(artemis: ArtemisClient, instruction: str) -> TaskResult:
 async def run_case(artemis: ArtemisClient, tc_id: str, instruction: str) -> TaskResult:
     """Run and write a row, updated after assertions/teardown without duplicate rows."""
     assert _active is not None and _active["tc_id"] == tc_id
+    if tc_id in {"TC-19", "TC-20", "TC-24"}:
+        _SESSION_FILE.unlink(missing_ok=True)
     result = await execute(artemis, instruction)
     _active["trace_id"] = result.trace_id
     _active["traces"].append(result.trace_id)
@@ -222,13 +225,18 @@ _SESSION_FILE = ROOT / "results" / ".session"
 _LOGIN_POINTS = {"email": (400, 660), "password": (380, 848), "submit": (360, 1134)}
 
 
+def adb_input_text(text: str) -> None:
+    """Quote for the Android shell; adb joins shell arguments before execution."""
+    adb("shell", "input", "text", shlex.quote(text.replace(" ", "%s")))
+
+
 def _type_field(point: tuple[int, int], text: str) -> None:
     adb("shell", "input", "tap", str(point[0]), str(point[1]))
     time.sleep(0.5)
     adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
     for _ in range(45):
         adb("shell", "input", "keyevent", "KEYCODE_DEL")
-    adb("shell", "input", "text", text)
+    adb_input_text(text)
 
 
 def adb_viewer_login(suffix: str = "") -> None:
@@ -303,7 +311,7 @@ def offline() -> Iterator[None]:
             adb("shell", "svc", "data", "enable")
 
 
-async def wait_operator_signal(case: str, detail: str, timeout: float = 180) -> None:
+async def wait_operator_signal(case: str, detail: str, timeout: float = 180) -> str:
     """Wait for a Console operator after writing a ready file; never simulate a publish."""
     directory = ROOT / "results"
     directory.mkdir(exist_ok=True)
@@ -317,6 +325,7 @@ async def wait_operator_signal(case: str, detail: str, timeout: float = 180) -> 
             if time.monotonic() >= deadline:
                 pytest.fail(f"Operator did not confirm {case} within {timeout:g}s; see {ready.name}", pytrace=False)
             await asyncio.sleep(1)
+        return done.read_text(encoding="utf-8")
     finally:
         ready.unlink(missing_ok=True)
         done.unlink(missing_ok=True)

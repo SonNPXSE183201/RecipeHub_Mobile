@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 import tempfile
-import textwrap
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -24,12 +24,23 @@ BORDER = (231, 224, 213)
 OCEAN = (8, 145, 178)
 WARN = (202, 138, 4)
 LIQUID = [(214, 184, 150), (196, 154, 108), (176, 132, 90), (150, 110, 72)]
-FONT = "C:/Windows/Fonts/segoeui.ttf"
-FONT_B = "C:/Windows/Fonts/segoeuib.ttf"
+def find_font(bold=False):
+    variable = "RH_FONT_BOLD" if bold else "RH_FONT"
+    candidates = [os.getenv(variable)]
+    candidates += (["C:/Windows/Fonts/segoeuib.ttf",
+                    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"] if bold else
+                   ["C:/Windows/Fonts/segoeui.ttf",
+                    "/System/Library/Fonts/Supplemental/Arial.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"])
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file():
+            return candidate
+    raise RuntimeError(f"Không tìm thấy font; đặt {variable} tới file font TrueType hợp lệ.")
 
 
 def font(size, bold=False):
-    return ImageFont.truetype(FONT_B if bold else FONT, size)
+    return ImageFont.truetype(find_font(bold), size)
 
 
 def wrap(draw, text, fnt, width):
@@ -41,9 +52,11 @@ def wrap(draw, text, fnt, width):
             if draw.textlength(t, font=fnt) <= width:
                 cur = t
             else:
-                lines.append(cur)
+                if cur:
+                    lines.append(cur)
                 cur = w
-        lines.append(cur)
+        if cur:
+            lines.append(cur)
     return lines
 
 
@@ -116,12 +129,17 @@ def frame(recipe, idx, step, remaining, total, step_count):
     return img
 
 
+def step_duration(step):
+    duration = step.get("durationSeconds") or 0
+    return duration if duration > 0 else 10
+
+
 def build(recipe, out_path):
     steps = recipe["steps"]
     with tempfile.TemporaryDirectory() as tmp:
         k = 0
         for i, st in enumerate(steps):
-            dur = st.get("durationSeconds") or 10
+            dur = step_duration(st)
             for s in range(dur):
                 frame(recipe, i, st, dur - s, dur, len(steps)).save(os.path.join(tmp, f"f{k:05d}.png"))
                 k += 1
@@ -135,8 +153,16 @@ def build(recipe, out_path):
 
 
 def main():
+    if len(sys.argv) < 4:
+        sys.exit("Usage: python make_videos.py <recipes.json> <out_dir> CODE [CODE...]")
     src, out_dir, codes = sys.argv[1], sys.argv[2], sys.argv[3:]
-    recipes = {r["code"]: r for r in json.load(open(src, encoding="utf-8"))}
+    with open(src, encoding="utf-8") as source:
+        recipes = {r["code"]: r for r in json.load(source)}
+    missing = [code for code in codes if code not in recipes]
+    if missing:
+        sys.exit("Mã món không tồn tại: " + ", ".join(missing))
+    find_font()
+    find_font(True)
     os.makedirs(out_dir, exist_ok=True)
     for c in codes:
         secs = build(recipes[c], os.path.join(out_dir, f"{c}.mp4"))
