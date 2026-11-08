@@ -170,7 +170,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('RC-CFE-01'), findsNothing);
       expect(find.text('Cà phê & Cold Brew'), findsOneWidget);
-      await tester.tap(find.text('Cà Phê Muối'));
+      // Ô tìm kiếm cũng chứa cùng chuỗi; chạm vào dòng kết quả.
+      await tester.tap(find.text('Cà Phê Muối').last);
       await tester.pumpAndSettle();
       expect(find.byType(RecipeBookPage), findsWidgets);
       expect(
