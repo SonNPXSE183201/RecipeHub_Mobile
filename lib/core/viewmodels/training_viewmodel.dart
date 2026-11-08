@@ -320,6 +320,7 @@ class AdminTrainingViewModel extends ChangeNotifier {
   final List<StreamSubscription<dynamic>> _subs = [];
   bool _disposed = false;
   bool _started = false;
+  int _generation = 0;
 
   List<StaffMember> _staff = const [];
   List<LearningTaskItem> _tasks = const [];
@@ -383,18 +384,43 @@ class AdminTrainingViewModel extends ChangeNotifier {
   }
 
   void start() {
-    if (_started) return;
+    if (_started || _disposed) return;
     _started = true;
     _subscribe();
   }
 
-  void retry() => _subscribe();
+  void retry() {
+    if (_started && !_disposed) _subscribe();
+  }
 
-  void _subscribe() {
+  /// End the Admin session and discard all privileged data before reuse.
+  void clear() {
+    _started = false;
+    _cancel();
+    _staff = const [];
+    _tasks = const [];
+    _evaluations = const [];
+    _criteria = const [];
+    _progress.clear();
+    _state = LoadState.loading;
+    _error = null;
+    _notify();
+  }
+
+  void _cancel() {
+    _generation++;
     for (final s in _subs) {
       s.cancel();
     }
     _subs.clear();
+  }
+
+  bool _isCurrent(int generation) =>
+      !_disposed && _started && generation == _generation;
+
+  void _subscribe() {
+    _cancel();
+    final generation = _generation;
     _state = LoadState.loading;
     _error = null;
     _notify();
@@ -403,7 +429,7 @@ class AdminTrainingViewModel extends ChangeNotifier {
         _staff = v;
         _state = LoadState.ready;
         _notify();
-        _loadProgress();
+        _loadProgress(generation);
       }, onError: _fail),
     );
     _subs.add(
@@ -426,15 +452,19 @@ class AdminTrainingViewModel extends ChangeNotifier {
     );
   }
 
-  Future<void> _loadProgress() async {
+  Future<void> _loadProgress(int generation) async {
     for (final m in _staff) {
+      if (!_isCurrent(generation)) return;
       try {
-        _progress[m.uid] = await _repo.progressOf(m.uid);
+        final progress = await _repo.progressOf(m.uid);
+        if (!_isCurrent(generation)) return;
+        _progress[m.uid] = progress;
       } catch (e, s) {
+        if (!_isCurrent(generation)) return;
         await _crash.recordError(e, s, reason: 'admin_staff_progress');
       }
     }
-    _notify();
+    if (_isCurrent(generation)) _notify();
   }
 
   /// Lưu phiếu chấm; trả về thông điệp lỗi hoặc null.
@@ -467,9 +497,7 @@ class AdminTrainingViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    for (final s in _subs) {
-      s.cancel();
-    }
+    clear();
     super.dispose();
   }
 }
