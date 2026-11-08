@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/nomad_kit.dart';
 
 class RecipeHubLogo extends StatelessWidget {
@@ -21,11 +22,8 @@ class RecipeHubLogo extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.medium,
-      errorBuilder: (ctx, err, stack) => Icon(
-        Icons.coffee_rounded,
-        color: NomadKit.sand,
-        size: iconSize,
-      ),
+      errorBuilder: (ctx, err, stack) =>
+          Icon(Icons.coffee_rounded, color: NomadKit.sand, size: iconSize),
     );
   }
 }

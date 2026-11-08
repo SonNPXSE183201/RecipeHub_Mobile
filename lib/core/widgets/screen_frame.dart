@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/nomad_kit.dart';
 import 'recipe_hub_logo.dart';
 
@@ -29,7 +30,11 @@ class ScreenFrame extends StatelessWidget {
         centerTitle: false,
         leading: showBack
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18,
+                  color: NomadKit.ink,
+                ),
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);

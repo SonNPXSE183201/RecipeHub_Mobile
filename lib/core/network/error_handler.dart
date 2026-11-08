@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
 import '../theme/nomad_kit.dart';
 
 class ErrorHandler {
@@ -22,7 +24,8 @@ class ErrorHandler {
 
           // Check if backend returned an error message in body
           if (responseData is Map<String, dynamic>) {
-            final msg = responseData['errorMessage'] ??
+            final msg =
+                responseData['errorMessage'] ??
                 responseData['detail'] ??
                 responseData['title'] ??
                 responseData['message'];
@@ -85,12 +88,20 @@ class ErrorHandler {
         ),
         content: Row(
           children: [
-            const Icon(Icons.error_outline_rounded, color: NomadKit.warning, size: 20),
+            const Icon(
+              Icons.error_outline_rounded,
+              color: NomadKit.warning,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -113,12 +124,20 @@ class ErrorHandler {
         ),
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outline_rounded, color: NomadKit.forest, size: 20),
+            const Icon(
+              Icons.check_circle_outline_rounded,
+              color: NomadKit.forest,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/nomad_kit.dart';
-import '../../core/models/app_models.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/navigation/app_keys.dart';
 import '../../core/viewmodels/notification_viewmodel.dart';
 import '../../core/widgets/recipe_hub_logo.dart';
@@ -39,7 +39,8 @@ class MainAppShellState extends State<MainAppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final isRoleAdmin = MockDataService.instance.currentRole == UserRole.admin;
+    final auth = context.watch<AuthViewModel>();
+    final isRoleAdmin = auth.isAdmin;
     final unreadNotifs = context.watch<NotificationViewModel>().unreadCount;
 
     final List<Widget> pages = isRoleAdmin
@@ -82,9 +83,14 @@ class MainAppShellState extends State<MainAppShell> {
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: isRoleAdmin ? NomadKit.sandLight : NomadKit.forestLight,
+                        color: isRoleAdmin
+                            ? NomadKit.sandLight
+                            : NomadKit.forestLight,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -92,15 +98,13 @@ class MainAppShellState extends State<MainAppShell> {
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
-                          color: isRoleAdmin ? NomadKit.sandDark : NomadKit.forest,
+                          color: isRoleAdmin
+                              ? NomadKit.sandDark
+                              : NomadKit.forest,
                         ),
                       ),
                     ),
                   ],
-                ),
-                Text(
-                  isRoleAdmin ? 'Quản lý đào tạo & Tiêu chuẩn' : 'Tra cứu quầy bar · Landmark 81',
-                  style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
                 ),
               ],
             ),
@@ -113,16 +117,21 @@ class MainAppShellState extends State<MainAppShell> {
                 key: AppKeys.notificationBell,
                 tooltip: 'Thông báo & Thay đổi',
                 icon: Image.asset(
-                  unreadNotifs > 0 ? 'assets/icons/nav_bell_active.png' : 'assets/icons/nav_bell.png',
+                  unreadNotifs > 0
+                      ? 'assets/icons/nav_bell_active.png'
+                      : 'assets/icons/nav_bell.png',
                   width: 26,
                   height: 26,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) => const Icon(Icons.notifications_none_rounded, size: 22),
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.notifications_none_rounded, size: 22),
                 ),
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const NotificationsPage()),
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsPage(),
+                    ),
                   );
                   // Shell có thể đã bị gỡ (đăng xuất/bị khóa khi đang ở trang Thông báo).
                   if (mounted) setState(() {});
@@ -146,10 +155,7 @@ class MainAppShellState extends State<MainAppShell> {
           const SizedBox(width: 4),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: pages),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -183,35 +189,91 @@ class MainAppShellState extends State<MainAppShell> {
             elevation: 0,
             destinations: [
               NavigationDestination(
-                icon: Image.asset('assets/icons/nav_home.png', width: 26, height: 26, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.search_rounded, size: 24)),
-                selectedIcon: Image.asset('assets/icons/nav_home_active.png', width: 28, height: 28, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.search_rounded, size: 24)),
+                icon: Image.asset(
+                  'assets/icons/nav_home.png',
+                  width: 26,
+                  height: 26,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.search_rounded, size: 24),
+                ),
+                selectedIcon: Image.asset(
+                  'assets/icons/nav_home_active.png',
+                  width: 28,
+                  height: 28,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.search_rounded, size: 24),
+                ),
                 label: 'Tra cứu',
               ),
               NavigationDestination(
                 icon: Image.asset(
-                  isRoleAdmin ? 'assets/icons/nav_training.png' : 'assets/icons/nav_learning.png',
+                  isRoleAdmin
+                      ? 'assets/icons/nav_training.png'
+                      : 'assets/icons/nav_learning.png',
                   width: 26,
                   height: 26,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) => Icon(isRoleAdmin ? Icons.storefront_rounded : Icons.school_outlined, size: 24),
+                  errorBuilder: (ctx, err, stack) => Icon(
+                    isRoleAdmin
+                        ? Icons.storefront_rounded
+                        : Icons.school_outlined,
+                    size: 24,
+                  ),
                 ),
                 selectedIcon: Image.asset(
-                  isRoleAdmin ? 'assets/icons/nav_training_active.png' : 'assets/icons/nav_learning_active.png',
+                  isRoleAdmin
+                      ? 'assets/icons/nav_training_active.png'
+                      : 'assets/icons/nav_learning_active.png',
                   width: 28,
                   height: 28,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) => Icon(isRoleAdmin ? Icons.storefront_rounded : Icons.school_rounded, size: 24),
+                  errorBuilder: (ctx, err, stack) => Icon(
+                    isRoleAdmin
+                        ? Icons.storefront_rounded
+                        : Icons.school_rounded,
+                    size: 24,
+                  ),
                 ),
                 label: isRoleAdmin ? 'Đào tạo' : 'Việc học',
               ),
               NavigationDestination(
-                icon: Image.asset('assets/icons/nav_feedback.png', width: 26, height: 26, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.forum_outlined, size: 24)),
-                selectedIcon: Image.asset('assets/icons/nav_feedback_active.png', width: 28, height: 28, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.forum_rounded, size: 24)),
+                icon: Image.asset(
+                  'assets/icons/nav_feedback.png',
+                  width: 26,
+                  height: 26,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.forum_outlined, size: 24),
+                ),
+                selectedIcon: Image.asset(
+                  'assets/icons/nav_feedback_active.png',
+                  width: 28,
+                  height: 28,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.forum_rounded, size: 24),
+                ),
                 label: 'Phản hồi',
               ),
               NavigationDestination(
-                icon: Image.asset('assets/icons/nav_account.png', width: 26, height: 26, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.person_outline_rounded, size: 24)),
-                selectedIcon: Image.asset('assets/icons/nav_account_active.png', width: 28, height: 28, filterQuality: FilterQuality.medium, errorBuilder: (ctx, err, stack) => const Icon(Icons.person_rounded, size: 24)),
+                icon: Image.asset(
+                  'assets/icons/nav_account.png',
+                  width: 26,
+                  height: 26,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.person_outline_rounded, size: 24),
+                ),
+                selectedIcon: Image.asset(
+                  'assets/icons/nav_account_active.png',
+                  width: 28,
+                  height: 28,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.person_rounded, size: 24),
+                ),
                 label: 'Tài khoản',
               ),
             ],

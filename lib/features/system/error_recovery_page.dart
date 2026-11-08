@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/widgets/screen_frame.dart';
 
@@ -7,134 +8,169 @@ class ErrorRecoveryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ScreenFrame(
-        title: 'Connection Diagnostics',
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
+    title: 'Connection Diagnostics',
+    child: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: NomadKit.warningLight,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: NomadKit.warning.withValues(alpha: 0.3),
+                  width: 2,
+                ),
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/illustrations/offline_recovery_2k.png',
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
-                    color: NomadKit.warningLight,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: NomadKit.warning.withValues(alpha: 0.3), width: 2),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.cloud_off_rounded,
+                    color: NomadKit.warning,
+                    size: 40,
                   ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/illustrations/offline_recovery_2k.png',
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.cloud_off_rounded,
-                        color: NomadKit.warning,
-                        size: 40,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Temporary Network Disconnection',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: NomadKit.ink,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Unable to reach the central Gateway server. Your active changes and draft formulas are safely encrypted and preserved in local offline storage.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: NomadKit.secondary,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: NomadKit.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: NomadKit.border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: NomadKit.forestLight,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.shield_outlined,
+                      color: NomadKit.forest,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Offline Data Protection',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: NomadKit.ink,
+                          ),
+                        ),
+                        Text(
+                          'Active recipe drafts safely persisted locally.',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: NomadKit.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: NomadKit.ink,
+                      side: const BorderSide(
+                        color: NomadKit.border,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () => Navigator.maybePop(context),
+                    child: const Text(
+                      'View Offline Drafts',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Temporary Network Disconnection',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: NomadKit.ink,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Unable to reach the central Gateway server. Your active changes and draft formulas are safely encrypted and preserved in local offline storage.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: NomadKit.secondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: NomadKit.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: NomadKit.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: NomadKit.forestLight,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.shield_outlined, color: NomadKit.forest, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: NomadKit.sand,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Offline Data Protection',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: NomadKit.ink),
-                            ),
-                            Text(
-                              'Active recipe drafts safely persisted locally.',
-                              style: TextStyle(fontSize: 11, color: NomadKit.secondary),
-                            ),
-                          ],
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Re-attempting connection to RecipeHub Gateway...',
+                          ),
+                          duration: Duration(seconds: 2),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: NomadKit.ink,
-                          side: const BorderSide(color: NomadKit.border, width: 1.5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: () => Navigator.maybePop(context),
-                        child: const Text('View Offline Drafts', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      );
+                    },
+                    child: const Text(
+                      'Retry Connection',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: NomadKit.sand,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Re-attempting connection to RecipeHub Gateway...'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: const Text('Retry Connection', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
+
 import '../config/app_config.dart';
 
 class ApiClient {
@@ -11,7 +12,8 @@ class ApiClient {
 
   /// Session state
   String? authToken;
-  String currentUserId = '2c124cb1-5d9c-4860-934c-6d8174548000'; // Default Dev R&D User ID
+  String currentUserId =
+      '2c124cb1-5d9c-4860-934c-6d8174548000'; // Default Dev R&D User ID
 
   Dio get client => _dio;
 

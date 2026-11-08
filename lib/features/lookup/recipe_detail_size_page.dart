@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/di/app_services.dart';
 import '../../core/models/app_models.dart';
@@ -8,7 +9,7 @@ import 'step_video_guide_page.dart';
 import '../practice/self_practice_timer_page.dart';
 import '../feedback/create_feedback_page.dart';
 import '../sop/sop_detail_page.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/viewmodels/training_viewmodel.dart';
 
 class RecipeDetailSizePage extends StatefulWidget {
   const RecipeDetailSizePage({
@@ -35,7 +36,9 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
   void initState() {
     super.initState();
     if (widget.initialSizeCode != null) {
-      final idx = widget.recipe.sizes.indexWhere((s) => s.sizeCode == widget.initialSizeCode);
+      final idx = widget.recipe.sizes.indexWhere(
+        (s) => s.sizeCode == widget.initialSizeCode,
+      );
       _selectedSizeIndex = idx >= 0 ? idx : 0;
     } else {
       // Default to M or first
@@ -45,11 +48,11 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<AppServices>().analytics.logViewRecipe(
-            recipeCode: widget.recipe.code,
-            category: widget.recipe.category,
-            size: widget.recipe.sizes[_selectedSizeIndex].sizeCode,
-            source: widget.source,
-          );
+        recipeCode: widget.recipe.code,
+        category: widget.recipe.category,
+        size: widget.recipe.sizes[_selectedSizeIndex].sizeCode,
+        source: widget.source,
+      );
     });
   }
 
@@ -65,12 +68,20 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: NomadKit.ink,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           recipe.name,
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: NomadKit.ink),
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: NomadKit.ink,
+          ),
         ),
         actions: [
           IconButton(
@@ -80,7 +91,11 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               width: 22,
               height: 22,
               filterQuality: FilterQuality.medium,
-              errorBuilder: (ctx, err, stack) => const Icon(Icons.feedback_outlined, size: 20, color: NomadKit.sandDark),
+              errorBuilder: (ctx, err, stack) => const Icon(
+                Icons.feedback_outlined,
+                size: 20,
+                color: NomadKit.sandDark,
+              ),
             ),
             onPressed: () {
               go(
@@ -108,28 +123,24 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: NomadKit.forestLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '${recipe.status} · ${recipe.version}',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.forest),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: NomadKit.forest,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: NomadKit.sandLight,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          recipe.code,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, fontFamily: 'monospace', color: NomadKit.sandDark),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(width: 8),
@@ -139,7 +150,10 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
-                      style: const TextStyle(fontSize: 12, color: NomadKit.secondary),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: NomadKit.secondary,
+                      ),
                     ),
                   ),
                 ],
@@ -154,12 +168,18 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                   decoration: BoxDecoration(
                     color: NomadKit.warningLight,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: NomadKit.warning.withOpacity(0.3)),
+                    border: Border.all(
+                      color: NomadKit.warning.withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_outline_rounded, color: NomadKit.warning, size: 20),
+                      const Icon(
+                        Icons.info_outline_rounded,
+                        color: NomadKit.warning,
+                        size: 20,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -167,12 +187,20 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                           children: [
                             const Text(
                               'Đã có phiên bản cập nhật',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: NomadKit.warning),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: NomadKit.warning,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               recipe.newerVersionNotice!,
-                              style: const TextStyle(fontSize: 12, color: NomadKit.ink, height: 1.3),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: NomadKit.ink,
+                                height: 1.3,
+                              ),
                             ),
                           ],
                         ),
@@ -184,49 +212,72 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               // Title & Description
               Text(
                 recipe.name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: NomadKit.ink),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: NomadKit.ink,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 recipe.description,
-                style: const TextStyle(fontSize: 13, color: NomadKit.secondary, height: 1.4),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: NomadKit.secondary,
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Người ban hành: ${recipe.publisher}',
-                style: const TextStyle(fontSize: 11, color: NomadKit.secondary, fontStyle: FontStyle.italic),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: NomadKit.secondary,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               const SizedBox(height: 20),
 
               // Standard Serving Yield Note (Không dùng Size) — ẩn khi chưa có quy cách
               if (currentSize.servingNotes.trim().isNotEmpty) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: NomadKit.sandLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/icons/icon_beaker_ratio.png',
-                      width: 22,
-                      height: 22,
-                      filterQuality: FilterQuality.medium,
-                      errorBuilder: (ctx, err, stack) => const Icon(Icons.local_cafe_outlined, size: 18, color: NomadKit.sandDark),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Quy cách phục vụ chuẩn: ${currentSize.servingNotes}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: NomadKit.sandDark),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: NomadKit.sandLight,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/icons/icon_beaker_ratio.png',
+                        width: 22,
+                        height: 22,
+                        filterQuality: FilterQuality.medium,
+                        errorBuilder: (ctx, err, stack) => const Icon(
+                          Icons.local_cafe_outlined,
+                          size: 18,
+                          color: NomadKit.sandDark,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Quy cách phục vụ chuẩn: ${currentSize.servingNotes}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: NomadKit.sandDark,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
               ],
 
               // Ingredients Portion Table
@@ -235,11 +286,19 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                 children: [
                   const Text(
                     'ĐỊNH LƯỢNG NGUYÊN LIỆU',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: NomadKit.sandDark,
+                      letterSpacing: 0.7,
+                    ),
                   ),
                   Text(
                     '${currentSize.ingredients.length} thành phần',
-                    style: const TextStyle(fontSize: 12, color: NomadKit.secondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: NomadKit.secondary,
+                    ),
                   ),
                 ],
               ),
@@ -251,18 +310,26 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: NomadKit.border),
                   boxShadow: const [
-                    BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
+                    BoxShadow(
+                      color: Color(0x06000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
                 child: ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: currentSize.ingredients.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1, color: NomadKit.border),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, color: NomadKit.border),
                   itemBuilder: (context, idx) {
                     final ing = currentSize.ingredients[idx];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Row(
                         children: [
                           Container(
@@ -275,7 +342,11 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                             child: Center(
                               child: Text(
                                 '${idx + 1}',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.secondary),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: NomadKit.secondary,
+                                ),
                               ),
                             ),
                           ),
@@ -286,20 +357,31 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                               children: [
                                 Text(
                                   ing.name,
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: NomadKit.ink),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: NomadKit.ink,
+                                  ),
                                 ),
                                 if (ing.note != null) ...[
                                   const SizedBox(height: 2),
                                   Text(
                                     ing.note!,
-                                    style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: NomadKit.secondary,
+                                    ),
                                   ),
                                 ],
                                 if (ing.warning != null) ...[
                                   const SizedBox(height: 2),
                                   Text(
                                     '⚠ ${ing.warning!}',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: NomadKit.error),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: NomadKit.error,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -307,7 +389,10 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                           ),
                           // Exact Amount & Unit
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: NomadKit.sandLight,
                               borderRadius: BorderRadius.circular(10),
@@ -333,12 +418,22 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'CÁC BƯỚC PHA CHẾ & MỐC VIDEO',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7),
+                  Text(
+                    recipe.videoUrl.isEmpty
+                        ? 'CÁC BƯỚC PHA CHẾ'
+                        : 'CÁC BƯỚC PHA CHẾ & MỐC VIDEO',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: NomadKit.sandDark,
+                      letterSpacing: 0.7,
+                    ),
                   ),
                   GestureDetector(
-                    onTap: () => go(context, StepVideoGuidePage(recipe: recipe, initialStepNumber: 1)),
+                    onTap: () => go(
+                      context,
+                      StepVideoGuidePage(recipe: recipe, initialStepNumber: 1),
+                    ),
                     child: Row(
                       children: [
                         Image.asset(
@@ -346,10 +441,21 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                           width: 20,
                           height: 20,
                           filterQuality: FilterQuality.medium,
-                          errorBuilder: (ctx, err, stack) => const Icon(Icons.play_circle_fill_rounded, size: 16, color: NomadKit.sand),
+                          errorBuilder: (ctx, err, stack) => const Icon(
+                            Icons.play_circle_fill_rounded,
+                            size: 16,
+                            color: NomadKit.sand,
+                          ),
                         ),
                         const SizedBox(width: 4),
-                        const Text('Xem video chuẩn', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.sandDark)),
+                        const Text(
+                          'Xem video chuẩn',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: NomadKit.sandDark,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -373,14 +479,21 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: NomadKit.sand,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               'Bước ${st.stepNumber}',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -390,12 +503,20 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                               children: [
                                 Text(
                                   st.title,
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: NomadKit.ink),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: NomadKit.ink,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   st.instruction,
-                                  style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.35),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: NomadKit.ink,
+                                    height: 1.35,
+                                  ),
                                 ),
                               ],
                             ),
@@ -407,44 +528,84 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                       // Step Metadata & Video Jump Link
                       Row(
                         children: [
-                          // Video timestamp button
-                          InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () {
-                              go(context, StepVideoGuidePage(recipe: recipe, initialStepNumber: st.stepNumber));
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: NomadKit.oceanLight,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: NomadKit.ocean.withOpacity(0.3)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.play_arrow_rounded, size: 14, color: NomadKit.ocean),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Mốc video: 00:${st.videoStartSeconds.toString().padLeft(2, '0')}',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: NomadKit.ocean),
+                          // Mốc video chỉ hiện khi món có video thật.
+                          if (recipe.videoUrl.isNotEmpty)
+                            InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () {
+                                go(
+                                  context,
+                                  StepVideoGuidePage(
+                                    recipe: recipe,
+                                    initialStepNumber: st.stepNumber,
                                   ),
-                                ],
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: NomadKit.oceanLight,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: NomadKit.ocean.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.play_arrow_rounded,
+                                      size: 14,
+                                      color: NomadKit.ocean,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Mốc video: 00:${st.videoStartSeconds.toString().padLeft(2, '0')}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: NomadKit.ocean,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                           const Spacer(),
 
                           if (st.temperature != null) ...[
-                            const Icon(Icons.thermostat_rounded, size: 14, color: NomadKit.secondary),
+                            const Icon(
+                              Icons.thermostat_rounded,
+                              size: 14,
+                              color: NomadKit.secondary,
+                            ),
                             const SizedBox(width: 2),
-                            Text(st.temperature!, style: const TextStyle(fontSize: 11, color: NomadKit.secondary)),
+                            Text(
+                              st.temperature!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: NomadKit.secondary,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                           ],
                           if (st.durationText != null) ...[
-                            const Icon(Icons.timer_outlined, size: 14, color: NomadKit.secondary),
+                            const Icon(
+                              Icons.timer_outlined,
+                              size: 14,
+                              color: NomadKit.secondary,
+                            ),
                             const SizedBox(width: 2),
-                            Text(st.durationText!, style: const TextStyle(fontSize: 11, color: NomadKit.secondary)),
+                            Text(
+                              st.durationText!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: NomadKit.secondary,
+                              ),
+                            ),
                           ],
                         ],
                       ),
@@ -455,15 +616,27 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                         InkWell(
                           borderRadius: BorderRadius.circular(8),
                           onTap: () {
-                            final sop = MockDataService.instance.sops.firstWhere(
-                              (s) => s.id == st.linkedSopId,
-                              orElse: () => MockDataService.instance.sops.first,
-                            );
+                            final sop = context
+                                .read<TrainingViewModel>()
+                                .sopByCode(st.linkedSopId ?? '');
+                            if (sop == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'SOP liên kết chưa có trong thư viện.',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
                             go(context, SopDetailPage(sop: sop));
                           },
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: NomadKit.sandLight,
                               borderRadius: BorderRadius.circular(10),
@@ -471,16 +644,29 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.menu_book_rounded, size: 16, color: NomadKit.sandDark),
+                                const Icon(
+                                  Icons.menu_book_rounded,
+                                  size: 16,
+                                  color: NomadKit.sandDark,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    st.linkedSopTitle ?? 'Mở hướng dẫn kỹ thuật SOP',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.sandDark),
+                                    st.linkedSopTitle ??
+                                        'Mở hướng dẫn kỹ thuật SOP',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: NomadKit.sandDark,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const Icon(Icons.arrow_forward_ios_rounded, size: 11, color: NomadKit.sandDark),
+                                const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 11,
+                                  color: NomadKit.sandDark,
+                                ),
                               ],
                             ),
                           ),
@@ -499,7 +685,9 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         side: const BorderSide(color: NomadKit.sandDark),
                         foregroundColor: NomadKit.sandDark,
                       ),
@@ -513,7 +701,10 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                         );
                       },
                       icon: const Icon(Icons.timer_outlined, size: 18),
-                      label: const Text('Tự luyện món này', style: TextStyle(fontWeight: FontWeight.w700)),
+                      label: const Text(
+                        'Tự luyện món này',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -523,14 +714,28 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                         backgroundColor: NomadKit.sand,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         elevation: 0,
                       ),
                       onPressed: () {
-                        go(context, StepVideoGuidePage(recipe: recipe, initialStepNumber: 1));
+                        go(
+                          context,
+                          StepVideoGuidePage(
+                            recipe: recipe,
+                            initialStepNumber: 1,
+                          ),
+                        );
                       },
-                      icon: const Icon(Icons.play_circle_fill_rounded, size: 18),
-                      label: const Text('Xem video chuẩn', style: TextStyle(fontWeight: FontWeight.w800)),
+                      icon: const Icon(
+                        Icons.play_circle_fill_rounded,
+                        size: 18,
+                      ),
+                      label: const Text(
+                        'Xem video chuẩn',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ),
                 ],

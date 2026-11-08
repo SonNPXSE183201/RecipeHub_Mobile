@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/session_models.dart';
 import '../../core/navigation/app_keys.dart';
@@ -15,7 +16,12 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   String _selectedFilter = 'Tất cả';
 
-  final List<String> _filters = ['Tất cả', 'Việc học', 'Đổi phiên bản', 'Phản hồi'];
+  final List<String> _filters = [
+    'Tất cả',
+    'Việc học',
+    'Đổi phiên bản',
+    'Phản hồi',
+  ];
 
   static String _ago(DateTime t) {
     final d = DateTime.now().difference(t);
@@ -40,21 +46,25 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     final vm = context.watch<NotificationViewModel>();
     final notifs = vm.items
-        .map((n) => <String, dynamic>{
-              'n': n,
-              'id': n.id,
-              'title': n.title,
-              'body': n.body,
-              'time': _ago(n.receivedAt),
-              'isRead': n.isRead,
-              'type': _typeOf(n.kind),
-            })
+        .map(
+          (n) => <String, dynamic>{
+            'n': n,
+            'id': n.id,
+            'title': n.title,
+            'body': n.body,
+            'time': _ago(n.receivedAt),
+            'isRead': n.isRead,
+            'type': _typeOf(n.kind),
+          },
+        )
         .toList();
 
     final filtered = notifs.where((n) {
       if (_selectedFilter == 'Tất cả') return true;
       if (_selectedFilter == 'Việc học') return n['type'] == 'task_assigned';
-      if (_selectedFilter == 'Đổi phiên bản') return n['type'] == 'version_update';
+      if (_selectedFilter == 'Đổi phiên bản') {
+        return n['type'] == 'version_update';
+      }
       if (_selectedFilter == 'Phản hồi') return n['type'] == 'feedback_reply';
       return true;
     }).toList();
@@ -65,18 +75,33 @@ class _NotificationsPageState extends State<NotificationsPage> {
         backgroundColor: NomadKit.canvas,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: NomadKit.ink,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Thông báo & Thay đổi',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: NomadKit.ink),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: NomadKit.ink,
+          ),
         ),
         actions: [
           TextButton(
             key: AppKeys.markAllRead,
             onPressed: () => vm.markAllRead(),
-            child: const Text('Đã đọc tất cả', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.sandDark)),
+            child: const Text(
+              'Đã đọc tất cả',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: NomadKit.sandDark,
+              ),
+            ),
           ),
         ],
       ),
@@ -98,14 +123,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           f,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                             color: isSelected ? Colors.white : NomadKit.ink,
                           ),
                         ),
                         selected: isSelected,
                         selectedColor: NomadKit.sand,
                         backgroundColor: NomadKit.surface,
-                        side: BorderSide(color: isSelected ? NomadKit.sand : NomadKit.border),
+                        side: BorderSide(
+                          color: isSelected ? NomadKit.sand : NomadKit.border,
+                        ),
                         showCheckmark: false,
                         onSelected: (val) {
                           if (val) setState(() => _selectedFilter = f);
@@ -122,7 +151,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
             Expanded(
               child: filtered.isEmpty
                   ? const Center(
-                      child: Text('Không có thông báo nào', style: TextStyle(fontSize: 14, color: NomadKit.secondary)),
+                      child: Text(
+                        'Không có thông báo nào',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: NomadKit.secondary,
+                        ),
+                      ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(20),
@@ -156,12 +191,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             color: isRead ? NomadKit.surface : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isRead ? NomadKit.border : NomadKit.sand.withOpacity(0.5),
+                              color: isRead
+                                  ? NomadKit.border
+                                  : NomadKit.sand.withOpacity(0.5),
                               width: isRead ? 1 : 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: isRead ? const Color(0x04000000) : const Color(0x0C000000),
+                                color: isRead
+                                    ? const Color(0x04000000)
+                                    : const Color(0x0C000000),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -171,56 +210,72 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            leading: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
-                              child: Icon(icon, color: iconColor, size: 20),
-                            ),
-                            title: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    item['title'] as String,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: isRead ? FontWeight.w700 : FontWeight.w900,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              leading: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: iconBg,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(icon, color: iconColor, size: 20),
+                              ),
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      item['title'] as String,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: isRead
+                                            ? FontWeight.w700
+                                            : FontWeight.w900,
+                                        color: NomadKit.ink,
+                                      ),
+                                    ),
+                                  ),
+                                  if (!isRead)
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: NomadKit.sand,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    item['body'] as String,
+                                    style: const TextStyle(
+                                      fontSize: 12,
                                       color: NomadKit.ink,
+                                      height: 1.3,
                                     ),
                                   ),
-                                ),
-                                if (!isRead)
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: NomadKit.sand,
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    item['time'] as String,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: NomadKit.secondary,
                                     ),
                                   ),
-                              ],
+                                ],
+                              ),
+                              key: Key('notification_tile_${item['id']}'),
+                              onTap: () =>
+                                  vm.open(item['n'] as AppNotification),
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                Text(
-                                  item['body'] as String,
-                                  style: const TextStyle(fontSize: 12, color: NomadKit.ink, height: 1.3),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  item['time'] as String,
-                                  style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
-                                ),
-                              ],
-                            ),
-                            key: Key('notification_tile_${item['id']}'),
-                            onTap: () => vm.open(item['n'] as AppNotification),
                           ),
-                        ),
-                      );
+                        );
                       },
                     ),
             ),

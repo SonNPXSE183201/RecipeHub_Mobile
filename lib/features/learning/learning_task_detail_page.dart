@@ -1,9 +1,16 @@
+import '../../core/viewmodels/auth_viewmodel.dart';
+import '../../core/widgets/personal_learning_blocked.dart';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
-import '../../core/services/mock_data_service.dart';
 import '../../core/utils/navigation.dart';
+import '../../core/viewmodels/recipe_viewmodel.dart';
+import '../../core/viewmodels/training_viewmodel.dart';
 import '../lookup/step_video_guide_page.dart';
+import '../practice/quiz_exam_page.dart';
 import '../sop/sop_detail_page.dart';
 
 class LearningTaskDetailPage extends StatefulWidget {
@@ -16,68 +23,71 @@ class LearningTaskDetailPage extends StatefulWidget {
 }
 
 class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
-  late List<bool> _sectionCompleted;
+  bool _saving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _sectionCompleted = List.generate(
-      widget.task.sections.length,
-      (idx) => (widget.task.progress >= ((idx + 1) / widget.task.sections.length)),
+  void _snack(String msg, {Color color = NomadKit.error}) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+  }
+
+  Future<void> _toggleSection(LearningTaskItem task, int idx, bool done) async {
+    final err = await context.read<TrainingViewModel>().toggleSection(
+      task,
+      idx,
+      done,
     );
+    if (err != null && mounted) _snack(err);
   }
 
-  void _toggleSection(int idx) {
-    setState(() {
-      _sectionCompleted[idx] = !_sectionCompleted[idx];
-      final completedCount = _sectionCompleted.where((c) => c).length;
-      widget.task.progress = completedCount / widget.task.sections.length;
-      if (widget.task.progress >= 1.0) {
-        widget.task.status = TaskStatus.completed;
-      } else if (widget.task.progress > 0) {
-        widget.task.status = TaskStatus.inProgress;
-      } else {
-        widget.task.status = TaskStatus.notStarted;
-      }
-    });
-  }
-
-  void _markAllCompleted() {
-    setState(() {
-      for (int i = 0; i < _sectionCompleted.length; i++) {
-        _sectionCompleted[i] = true;
-      }
-      widget.task.progress = 1.0;
-      widget.task.status = TaskStatus.completed;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã xác nhận hoàn thành nội dung đọc/xem. Kết quả thực hành cần được Admin đánh giá riêng.'),
-        backgroundColor: NomadKit.forest,
-      ),
-    );
-  }
-
-  void _openRelatedContent() {
-    if (widget.task.type == 'Công thức') {
-      final recipe = MockDataService.instance.recipes.firstWhere(
-        (r) => r.code == widget.task.targetCode,
-        orElse: () => MockDataService.instance.recipes.first,
+  Future<void> _markAllCompleted(LearningTaskItem task) async {
+    if (_saving) return;
+    final vm = context.read<TrainingViewModel>();
+    setState(() => _saving = true);
+    final failure = await vm.completeAll(task);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (failure != null) {
+      _snack(failure);
+    } else {
+      _snack(
+        'Đã xác nhận hoàn thành nội dung đọc/xem. Kết quả thực hành cần được Admin đánh giá riêng.',
+        color: NomadKit.forest,
       );
+    }
+  }
+
+  void _openRelatedContent(LearningTaskItem task) {
+    if (task.type == 'Công thức') {
+      final recipe = context
+          .read<RecipeViewModel>()
+          .items
+          .where((r) => r.code == task.targetCode)
+          .firstOrNull;
+      if (recipe == null) {
+        _snack('Công thức này chưa có trong danh sách đã ban hành.');
+        return;
+      }
       go(context, StepVideoGuidePage(recipe: recipe, initialStepNumber: 1));
     } else {
-      final sop = MockDataService.instance.sops.firstWhere(
-        (s) => s.code == widget.task.targetCode,
-        orElse: () => MockDataService.instance.sops.first,
-      );
+      final sop = context.read<TrainingViewModel>().sopByCode(task.targetCode);
+      if (sop == null) {
+        _snack('SOP này chưa có trong thư viện.');
+        return;
+      }
       go(context, SopDetailPage(sop: sop));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final task = widget.task;
+    if (!context.watch<AuthViewModel>().hasPersonalLearning) {
+      return const PersonalLearningBlocked();
+    }
+    final training = context.watch<TrainingViewModel>();
+    final task = training.taskById(widget.task.id) ?? widget.task;
+    final completed = training.completedSectionsOf(task.id);
+    final quiz = training.quizFor(task.targetCode);
+    bool done(int idx) => completed.contains(idx);
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
@@ -85,12 +95,20 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
         backgroundColor: NomadKit.canvas,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: NomadKit.ink,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Chi tiết nhiệm vụ học',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: NomadKit.ink),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: NomadKit.ink,
+          ),
         ),
       ),
       body: SafeArea(
@@ -98,7 +116,10 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -110,7 +131,11 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: NomadKit.border),
                         boxShadow: const [
-                          BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
+                          BoxShadow(
+                            color: Color(0x06000000),
+                            blurRadius: 10,
+                            offset: Offset(0, 2),
+                          ),
                         ],
                       ),
                       child: Column(
@@ -119,44 +144,75 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: task.type == 'Công thức' ? NomadKit.sandLight : NomadKit.oceanLight,
+                                  color: task.type == 'Công thức'
+                                      ? NomadKit.sandLight
+                                      : NomadKit.oceanLight,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  '${task.type}: ${task.targetCode}',
+                                  task.type,
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
                                     fontFamily: 'monospace',
-                                    color: task.type == 'Công thức' ? NomadKit.sandDark : NomadKit.ocean,
+                                    color: task.type == 'Công thức'
+                                        ? NomadKit.sandDark
+                                        : NomadKit.ocean,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 task.version,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.secondary),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: NomadKit.secondary,
+                                ),
                               ),
                               const Spacer(),
                               if (task.isOverdue)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFFEE2E2),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text('Quá hạn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.error)),
+                                  child: const Text(
+                                    'Quá hạn',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: NomadKit.error,
+                                    ),
+                                  ),
                                 )
                               else if (task.isRelearnRequired)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: NomadKit.warningLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text('Cần học lại', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.warning)),
+                                  child: const Text(
+                                    'Cần học lại',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: NomadKit.warning,
+                                    ),
+                                  ),
                                 ),
                             ],
                           ),
@@ -164,18 +220,36 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
 
                           Text(
                             task.title,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: NomadKit.ink),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: NomadKit.ink,
+                            ),
                           ),
                           const SizedBox(height: 8),
 
-                          Text('Người giao: ${task.assignedBy}', style: const TextStyle(fontSize: 12, color: NomadKit.secondary)),
-                          Text('Ngày giao: ${task.assignedDate}', style: const TextStyle(fontSize: 12, color: NomadKit.secondary)),
+                          Text(
+                            'Người giao: ${task.assignedBy}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: NomadKit.secondary,
+                            ),
+                          ),
+                          Text(
+                            'Ngày giao: ${task.assignedDate}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: NomadKit.secondary,
+                            ),
+                          ),
                           Text(
                             'Hạn chót: ${task.dueDate}',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: task.isOverdue ? NomadKit.error : NomadKit.secondary,
+                              color: task.isOverdue
+                                  ? NomadKit.error
+                                  : NomadKit.secondary,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -184,10 +258,21 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Tiến độ đọc/xem:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.ink)),
+                              const Text(
+                                'Tiến độ đọc/xem:',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: NomadKit.ink,
+                                ),
+                              ),
                               Text(
                                 '${(task.progress * 100).toInt()}%',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: NomadKit.sandDark),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  color: NomadKit.sandDark,
+                                ),
                               ),
                             ],
                           ),
@@ -199,7 +284,9 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                               minHeight: 8,
                               backgroundColor: NomadKit.canvas,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                task.progress >= 1.0 ? NomadKit.forest : NomadKit.sand,
+                                task.progress >= 1.0
+                                    ? NomadKit.forest
+                                    : NomadKit.sand,
                               ),
                             ),
                           ),
@@ -208,48 +295,33 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Rule Alert Banner (BR-01)
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: NomadKit.forestLight,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: NomadKit.forest.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.verified_rounded, size: 20, color: NomadKit.forest),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Nguyên tắc đào tạo chuẩn: Đọc & xem video là bằng chứng tiếp nhận nội dung. Kỹ năng thực hành tại quầy bar sẽ do Admin quan sát và đánh giá checklist riêng.',
-                              style: TextStyle(fontSize: 12, color: NomadKit.forest.withOpacity(0.95), height: 1.4),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
                     // Sections Checklist
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'CÁC PHẦN CẦN HOÀN THÀNH',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.sandDark, letterSpacing: 0.7),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: NomadKit.sandDark,
+                            letterSpacing: 0.7,
+                          ),
                         ),
                         Text(
-                          '${_sectionCompleted.where((c) => c).length}/${task.sections.length} mục',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.secondary),
+                          '${completed.where((i) => i < task.sections.length).length}/${task.sections.length} mục',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: NomadKit.secondary,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 10),
 
                     ...List.generate(task.sections.length, (idx) {
-                      final isDone = _sectionCompleted[idx];
+                      final isDone = done(idx);
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
@@ -262,22 +334,36 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                           borderRadius: BorderRadius.circular(16),
                           child: CheckboxListTile(
                             activeColor: NomadKit.sand,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                             title: Text(
                               task.sections[idx],
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: isDone ? NomadKit.secondary : NomadKit.ink,
-                                decoration: isDone ? TextDecoration.lineThrough : null,
+                                color: isDone
+                                    ? NomadKit.secondary
+                                    : NomadKit.ink,
+                                decoration: isDone
+                                    ? TextDecoration.lineThrough
+                                    : null,
                               ),
                             ),
                             subtitle: Text(
-                              isDone ? 'Đã hoàn thành phần này' : 'Chưa hoàn tất',
-                              style: TextStyle(fontSize: 11, color: isDone ? NomadKit.forest : NomadKit.secondary),
+                              isDone
+                                  ? 'Đã hoàn thành phần này'
+                                  : 'Chưa hoàn tất',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isDone
+                                    ? NomadKit.forest
+                                    : NomadKit.secondary,
+                              ),
                             ),
                             value: isDone,
-                            onChanged: (_) => _toggleSection(idx),
+                            onChanged: (v) =>
+                                _toggleSection(task, idx, v ?? !isDone),
                           ),
                         ),
                       );
@@ -287,13 +373,15 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                     // Linked Material Summary Card
                     InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: _openRelatedContent,
+                      onTap: () => _openRelatedContent(task),
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: NomadKit.sandLight,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: NomadKit.sand.withOpacity(0.35)),
+                          border: Border.all(
+                            color: NomadKit.sand.withOpacity(0.35),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -321,7 +409,7 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${task.targetCode} · Phiên bản ${task.version}',
+                                    '${task.title} · Phiên bản ${task.version}',
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w800,
@@ -331,7 +419,11 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right_rounded, size: 20, color: NomadKit.sandDark),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 20,
+                              color: NomadKit.sandDark,
+                            ),
                           ],
                         ),
                       ),
@@ -340,6 +432,34 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                 ),
               ),
             ),
+
+            if (quiz != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                color: NomadKit.surface,
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: NomadKit.sandDark,
+                      side: const BorderSide(color: NomadKit.sandDark),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () => go(context, QuizExamPage(quiz: quiz)),
+                    icon: const Icon(Icons.quiz_outlined, size: 18),
+                    label: const Text(
+                      'Làm quiz',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             // Bottom Action Bar: Side-by-Side Concise Buttons
             Container(
@@ -356,16 +476,31 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: NomadKit.forest,
-                          backgroundColor: NomadKit.forestLight.withOpacity(0.45),
-                          side: const BorderSide(color: NomadKit.forest, width: 1.2),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          backgroundColor: NomadKit.forestLight.withOpacity(
+                            0.45,
+                          ),
+                          side: const BorderSide(
+                            color: NomadKit.forest,
+                            width: 1.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        onPressed: _markAllCompleted,
-                        icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                        onPressed: _saving
+                            ? null
+                            : () => _markAllCompleted(task),
+                        icon: const Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 18,
+                        ),
                         label: const Text(
                           'Hoàn thành',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -378,15 +513,23 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: NomadKit.sand,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           elevation: 0,
                         ),
-                        onPressed: _openRelatedContent,
-                        icon: const Icon(Icons.play_circle_fill_rounded, size: 19),
+                        onPressed: () => _openRelatedContent(task),
+                        icon: const Icon(
+                          Icons.play_circle_fill_rounded,
+                          size: 19,
+                        ),
                         label: const Text(
                           'Mở học ngay',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),

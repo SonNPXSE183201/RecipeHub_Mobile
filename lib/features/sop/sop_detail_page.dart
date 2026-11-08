@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
 import '../feedback/create_feedback_page.dart';
 import '../lookup/recipe_detail_size_page.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/viewmodels/recipe_viewmodel.dart';
 
 class SopDetailPage extends StatelessWidget {
   const SopDetailPage({super.key, required this.sop});
@@ -20,21 +21,37 @@ class SopDetailPage extends StatelessWidget {
         backgroundColor: NomadKit.canvas,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: NomadKit.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: NomadKit.ink,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           sop.code,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: NomadKit.ink),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: NomadKit.ink,
+          ),
         ),
         actions: [
           IconButton(
             tooltip: 'Gửi phản hồi SOP này',
-            icon: const Icon(Icons.feedback_outlined, size: 20, color: NomadKit.sandDark),
+            icon: const Icon(
+              Icons.feedback_outlined,
+              size: 20,
+              color: NomadKit.sandDark,
+            ),
             onPressed: () {
               go(
                 context,
-                CreateFeedbackPage(initialSopCode: sop.code, initialSopTitle: sop.title, initialVersion: sop.version),
+                CreateFeedbackPage(
+                  initialSopCode: sop.code,
+                  initialSopTitle: sop.title,
+                  initialVersion: sop.version,
+                ),
               );
             },
           ),
@@ -50,8 +67,14 @@ class SopDetailPage extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: NomadKit.oceanLight, borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NomadKit.oceanLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Text(
                       sop.code,
                       style: const TextStyle(
@@ -64,15 +87,31 @@ class SopDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: NomadKit.forestLight, borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NomadKit.forestLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Text(
                       'Ban hành · ${sop.version}',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: NomadKit.forest),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: NomadKit.forest,
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  Text('Ngày: ${sop.publishedDate}', style: const TextStyle(fontSize: 12, color: NomadKit.secondary)),
+                  Text(
+                    'Ngày: ${sop.publishedDate}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: NomadKit.secondary,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -80,12 +119,20 @@ class SopDetailPage extends StatelessWidget {
               // Title & Category
               Text(
                 sop.title,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: NomadKit.ink),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: NomadKit.ink,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Phân loại: ${sop.category}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: NomadKit.secondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: NomadKit.secondary,
+                ),
               ),
               const SizedBox(height: 14),
 
@@ -100,10 +147,21 @@ class SopDetailPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline_rounded, size: 20, color: NomadKit.sandDark),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 20,
+                      color: NomadKit.sandDark,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(sop.summary, style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4)),
+                      child: Text(
+                        sop.summary,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: NomadKit.ink,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -130,7 +188,13 @@ class SopDetailPage extends StatelessWidget {
                     color: NomadKit.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: NomadKit.border),
-                    boxShadow: const [BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2))],
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x06000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,9 +202,16 @@ class SopDetailPage extends StatelessWidget {
                       Container(
                         width: 36,
                         height: 36,
-                        decoration: BoxDecoration(color: NomadKit.oceanLight, borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(
+                          color: NomadKit.oceanLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Center(
-                          child: Icon(st.icon ?? Icons.check_circle_outline_rounded, color: NomadKit.ocean, size: 20),
+                          child: Icon(
+                            st.icon ?? Icons.check_circle_outline_rounded,
+                            color: NomadKit.ocean,
+                            size: 20,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -150,18 +221,35 @@ class SopDetailPage extends StatelessWidget {
                           children: [
                             Text(
                               'Bước ${st.stepNumber}: ${st.title}',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: NomadKit.ink),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: NomadKit.ink,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            Text(st.content, style: const TextStyle(fontSize: 13, color: NomadKit.ink, height: 1.4)),
+                            Text(
+                              st.content,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: NomadKit.ink,
+                                height: 1.4,
+                              ),
+                            ),
                             if (st.note != null) ...[
                               const SizedBox(height: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 7,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFEF3C7),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                                  border: Border.all(
+                                    color: const Color(0xFFF59E0B)
+                                        .withOpacity(0.3),
+                                  ),
                                 ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +260,11 @@ class SopDetailPage extends StatelessWidget {
                                       height: 16,
                                       filterQuality: FilterQuality.medium,
                                       errorBuilder: (ctx, err, stack) =>
-                                          const Icon(Icons.warning_amber_rounded, size: 15, color: Color(0xFF92400E)),
+                                          const Icon(
+                                            Icons.warning_amber_rounded,
+                                            size: 15,
+                                            color: Color(0xFF92400E),
+                                          ),
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
@@ -216,7 +308,13 @@ class SopDetailPage extends StatelessWidget {
                 runSpacing: 8,
                 // Mã SOP liên kết không có trong danh sách món hiện tại → không hiện (trước đây rơi về món đầu tiên).
                 children: sop.linkedRecipeCodes
-                    .map((code) => MockDataService.instance.recipes.where((r) => r.code == code).firstOrNull)
+                    .map(
+                      (code) => context
+                          .read<RecipeViewModel>()
+                          .items
+                          .where((r) => r.code == code)
+                          .firstOrNull,
+                    )
                     .whereType<RecipeItem>()
                     .map((recipe) {
                       return ActionChip(
@@ -225,17 +323,29 @@ class SopDetailPage extends StatelessWidget {
                           width: 18,
                           height: 18,
                           filterQuality: FilterQuality.medium,
-                          errorBuilder: (ctx, err, stack) =>
-                              const Icon(Icons.coffee_rounded, size: 16, color: NomadKit.sandDark),
+                          errorBuilder: (ctx, err, stack) => const Icon(
+                            Icons.coffee_rounded,
+                            size: 16,
+                            color: NomadKit.sandDark,
+                          ),
                         ),
                         label: Text(
-                          '${recipe.name} (${recipe.code})',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NomadKit.ink),
+                          recipe.name,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: NomadKit.ink,
+                          ),
                         ),
                         backgroundColor: NomadKit.surface,
                         side: const BorderSide(color: NomadKit.border),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        onPressed: () => go(context, RecipeDetailSizePage(recipe: recipe, source: 'sop')),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onPressed: () => go(
+                          context,
+                          RecipeDetailSizePage(recipe: recipe, source: 'sop'),
+                        ),
                       );
                     })
                     .toList(),
@@ -249,7 +359,9 @@ class SopDetailPage extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: const BorderSide(color: NomadKit.sandDark),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     foregroundColor: NomadKit.sandDark,
                   ),
                   onPressed: () {
@@ -263,7 +375,10 @@ class SopDetailPage extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.feedback_outlined, size: 18),
-                  label: const Text('Gửi phản hồi cho SOP này', style: TextStyle(fontWeight: FontWeight.w800)),
+                  label: const Text(
+                    'Gửi phản hồi cho SOP này',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
