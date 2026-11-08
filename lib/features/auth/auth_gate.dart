@@ -67,17 +67,21 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   /// Admin (theo vai trò server) mới nạp dữ liệu giám sát toàn bộ Barista.
-  void _startAdminData() {
-    if (_auth.serverRole == UserRole.admin) {
-      context.read<AdminTrainingViewModel>().start();
+  void _syncAdminData() {
+    final training = context.read<AdminTrainingViewModel>();
+    if (_auth.status == AuthStatus.authenticated &&
+        _auth.serverRole == UserRole.admin) {
+      training.start();
+    } else {
+      training.clear();
     }
   }
 
   void _onAuthChanged() {
     if (!mounted) return;
+    _syncAdminData();
     if (_auth.status == AuthStatus.authenticated) {
       unawaited(_notif.updateRole(_auth.roleCode));
-      _startAdminData();
     }
     final notice = _auth.notice;
     if (notice != null) {

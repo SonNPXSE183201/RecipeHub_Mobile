@@ -29,6 +29,7 @@ class NotificationViewModel extends ChangeNotifier {
 
   List<AppNotification> _items = [];
   NotificationPermission _permission = NotificationPermission.notDetermined;
+  bool _permissionLoaded = false;
   String? _token;
   DeepLink? _pendingDeepLink;
   AppNotification? _pendingBanner;
@@ -54,6 +55,7 @@ class NotificationViewModel extends ChangeNotifier {
   /// Hiển thị primer xin quyền khi chưa từng hỏi (Android 13+).
   bool get shouldShowPermissionPrimer =>
       _started &&
+      _permissionLoaded &&
       !_permissionPromptDismissed &&
       _permission == NotificationPermission.notDetermined;
 
@@ -83,7 +85,9 @@ class NotificationViewModel extends ChangeNotifier {
         _service.onForegroundMessage.listen((n) {
           if (stale()) return;
           _upsert(n);
-          _pendingBanner = n;
+          if (n.origin == NotificationOrigin.foreground) {
+            _pendingBanner = n;
+          }
           _persist();
           _notify();
         }),
@@ -126,8 +130,13 @@ class NotificationViewModel extends ChangeNotifier {
         _upsert(initial..isRead = true);
         _pendingDeepLink = initial.deepLink;
       }
-      _permission = await _service.getPermissionStatus();
+      // FCM có thể phát sự kiện trong lúc khởi động. Chỉ hiện primer sau khi
+      // đọc quyền thật, không dùng notDetermined mặc định (Android < 13 không
+      // có quyền runtime; FCM trả granted/denied theo cài đặt thông báo).
+      final permission = await _service.getPermissionStatus();
       if (stale()) return;
+      _permission = permission;
+      _permissionLoaded = true;
       _notify();
 
       // 2. Phần cần mạng: chạy nền, có timeout, kiểm tra thế hệ trước khi ghi vào state.
@@ -228,6 +237,7 @@ class NotificationViewModel extends ChangeNotifier {
 
   Future<NotificationPermission> requestPermission() async {
     _permission = await _service.requestPermission();
+    _permissionLoaded = true;
     _permissionPromptDismissed = true;
     if (_permission == NotificationPermission.granted) {
       _token = await _service.getToken();
@@ -295,6 +305,7 @@ class NotificationViewModel extends ChangeNotifier {
     _pendingDeepLink = null;
     _pendingBanner = null;
     _started = false;
+    _permissionLoaded = false;
     _permissionPromptDismissed = false;
     _notify();
     for (final s in subs) {

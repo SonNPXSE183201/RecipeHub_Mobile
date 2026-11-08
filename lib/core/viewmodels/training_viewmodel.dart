@@ -30,6 +30,8 @@ class TrainingViewModel extends ChangeNotifier {
 
   LoadState _sopState = LoadState.loading;
   LoadState _taskState = LoadState.loading;
+  LoadState _progressState = LoadState.loading;
+  LoadState _attemptsState = LoadState.loading;
   LoadState _quizState = LoadState.loading;
   LoadState _evalState = LoadState.loading;
   String? _error;
@@ -38,6 +40,8 @@ class TrainingViewModel extends ChangeNotifier {
   List<SopItem> get sops => _sops;
   LoadState get sopState => _sopState;
   LoadState get taskState => _taskState;
+  LoadState get progressState => _progressState;
+  LoadState get attemptsState => _attemptsState;
   LoadState get quizState => _quizState;
   LoadState get evaluationState => _evalState;
   String? get error => _error;
@@ -134,6 +138,8 @@ class TrainingViewModel extends ChangeNotifier {
     _attempts = const [];
     _evaluations = const [];
     _sopState = _taskState = _quizState = _evalState = LoadState.loading;
+    _progressState = _attemptsState = LoadState.loading;
+    _error = null;
     _notify();
   }
 
@@ -143,6 +149,7 @@ class TrainingViewModel extends ChangeNotifier {
     _cancel();
     _error = null;
     _sopState = _taskState = _quizState = _evalState = LoadState.loading;
+    _progressState = _attemptsState = LoadState.loading;
     _notify();
     _subs.add(
       _repo.watchSops().listen(
@@ -167,10 +174,15 @@ class TrainingViewModel extends ChangeNotifier {
       ),
     );
     _subs.add(
-      _repo.watchProgress(uid).listen((v) {
-        _progress = v;
-        _notify();
-      }, onError: (Object e, StackTrace s) => _fail(e, s, 'progress', () {})),
+      _repo.watchProgress(uid).listen(
+        (v) {
+          _progress = v;
+          _progressState = LoadState.ready;
+          _notify();
+        },
+        onError: (Object e, StackTrace s) =>
+            _fail(e, s, 'progress', () => _progressState = LoadState.error),
+      ),
     );
     _subs.add(
       _repo.watchQuizzes().listen(
@@ -184,10 +196,15 @@ class TrainingViewModel extends ChangeNotifier {
       ),
     );
     _subs.add(
-      _repo.watchMyAttempts(uid).listen((v) {
-        _attempts = v;
-        _notify();
-      }, onError: (Object e, StackTrace s) => _fail(e, s, 'attempts', () {})),
+      _repo.watchMyAttempts(uid).listen(
+        (v) {
+          _attempts = v;
+          _attemptsState = LoadState.ready;
+          _notify();
+        },
+        onError: (Object e, StackTrace s) =>
+            _fail(e, s, 'attempts', () => _attemptsState = LoadState.error),
+      ),
     );
     _subs.add(
       _repo.watchMyEvaluations(uid).listen(
@@ -219,6 +236,11 @@ class TrainingViewModel extends ChangeNotifier {
   ) async {
     final uid = _uid;
     if (uid == null) return 'Phiên đăng nhập đã hết.';
+    if (_progressState != LoadState.ready) {
+      return _progressState == LoadState.error
+          ? 'Không tải được tiến độ. Vui lòng thử lại trước khi lưu.'
+          : 'Đang tải tiến độ. Vui lòng đợi trước khi lưu.';
+    }
     try {
       await _repo.setSectionDone(
         uid: uid,
@@ -239,6 +261,11 @@ class TrainingViewModel extends ChangeNotifier {
   Future<String?> completeAll(LearningTaskItem task) async {
     final uid = _uid;
     if (uid == null) return 'Phiên đăng nhập đã hết.';
+    if (_progressState != LoadState.ready) {
+      return _progressState == LoadState.error
+          ? 'Không tải được tiến độ. Vui lòng thử lại trước khi lưu.'
+          : 'Đang tải tiến độ. Vui lòng đợi trước khi lưu.';
+    }
     final n = task.sections.length;
     if (n == 0) return null;
     try {
@@ -265,6 +292,13 @@ class TrainingViewModel extends ChangeNotifier {
   }) {
     final uid = _uid;
     if (uid == null) throw const TrainingFailure('Phiên đăng nhập đã hết.');
+    if (_attemptsState != LoadState.ready) {
+      throw TrainingFailure(
+        _attemptsState == LoadState.error
+            ? 'Không tải được lịch sử làm bài. Vui lòng thử lại trước khi nộp.'
+            : 'Đang tải lịch sử làm bài. Vui lòng đợi trước khi nộp.',
+      );
+    }
     final next =
         attemptsOf(quiz.id)
             .fold<int>(0, (m, a) => a.attemptNo > m ? a.attemptNo : m) +
@@ -318,8 +352,11 @@ class AdminTrainingViewModel extends ChangeNotifier {
   final ITrainingRepository _repo;
   final ICrashReporter _crash;
   final List<StreamSubscription<dynamic>> _subs = [];
+  final Map<String, StreamSubscription<Map<String, TaskProgress>>>
+  _progressSubs = {};
   bool _disposed = false;
   bool _started = false;
+  int _generation = 0;
 
   List<StaffMember> _staff = const [];
   List<LearningTaskItem> _tasks = const [];
@@ -383,27 +420,57 @@ class AdminTrainingViewModel extends ChangeNotifier {
   }
 
   void start() {
-    if (_started) return;
+    if (_started || _disposed) return;
     _started = true;
     _subscribe();
   }
 
-  void retry() => _subscribe();
+  void retry() {
+    if (_started && !_disposed) _subscribe();
+  }
 
-  void _subscribe() {
+  /// End the Admin session and discard all privileged data before reuse.
+  void clear() {
+    _started = false;
+    _cancel();
+    _staff = const [];
+    _tasks = const [];
+    _evaluations = const [];
+    _criteria = const [];
+    _progress.clear();
+    _state = LoadState.loading;
+    _error = null;
+    _notify();
+  }
+
+  void _cancel() {
+    _generation++;
     for (final s in _subs) {
       s.cancel();
     }
     _subs.clear();
+    for (final s in _progressSubs.values) {
+      s.cancel();
+    }
+    _progressSubs.clear();
+  }
+
+  bool _isCurrent(int generation) =>
+      !_disposed && _started && generation == _generation;
+
+  void _subscribe() {
+    _cancel();
+    final generation = _generation;
     _state = LoadState.loading;
     _error = null;
     _notify();
     _subs.add(
       _repo.watchStaff().listen((v) {
+        if (!_isCurrent(generation)) return;
         _staff = v;
+        _syncProgress(generation);
         _state = LoadState.ready;
         _notify();
-        _loadProgress();
       }, onError: _fail),
     );
     _subs.add(
@@ -426,15 +493,29 @@ class AdminTrainingViewModel extends ChangeNotifier {
     );
   }
 
-  Future<void> _loadProgress() async {
-    for (final m in _staff) {
-      try {
-        _progress[m.uid] = await _repo.progressOf(m.uid);
-      } catch (e, s) {
-        await _crash.recordError(e, s, reason: 'admin_staff_progress');
-      }
+  void _syncProgress(int generation) {
+    final uids = _staff.map((m) => m.uid).toSet();
+    for (final uid in _progressSubs.keys.toList()) {
+      if (uids.contains(uid)) continue;
+      _progressSubs.remove(uid)?.cancel();
     }
-    _notify();
+    _progress.removeWhere((uid, _) => !uids.contains(uid));
+    for (final uid in uids) {
+      if (_progressSubs.containsKey(uid)) continue;
+      _progressSubs[uid] = _repo
+          .watchProgress(uid)
+          .listen(
+            (progress) {
+              if (!_isCurrent(generation)) return;
+              _progress[uid] = progress;
+              _notify();
+            },
+            onError: (Object e, StackTrace s) {
+              if (!_isCurrent(generation)) return;
+              _crash.recordError(e, s, reason: 'admin_staff_progress');
+            },
+          );
+    }
   }
 
   /// Lưu phiếu chấm; trả về thông điệp lỗi hoặc null.
@@ -467,9 +548,7 @@ class AdminTrainingViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    for (final s in _subs) {
-      s.cancel();
-    }
+    clear();
     super.dispose();
   }
 }

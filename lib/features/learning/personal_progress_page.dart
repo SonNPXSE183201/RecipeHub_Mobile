@@ -22,8 +22,14 @@ class PersonalProgressPage extends StatelessWidget {
     final tasks = training.tasks;
     final evaluations = training.myEvaluations;
     final attempts = training.attempts;
-    final loading = training.taskState == LoadState.loading && tasks.isEmpty;
-    final failed = training.taskState == LoadState.error && tasks.isEmpty;
+    final loading =
+        (training.taskState == LoadState.loading && tasks.isEmpty) ||
+        training.progressState == LoadState.loading ||
+        training.attemptsState == LoadState.loading;
+    final failed =
+        (training.taskState == LoadState.error && tasks.isEmpty) ||
+        training.progressState == LoadState.error ||
+        training.attemptsState == LoadState.error;
 
     final completedCount = tasks
         .where((t) => t.status == TaskStatus.completed)
@@ -59,13 +65,13 @@ class PersonalProgressPage extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: loading
-            ? const LoadStateView.loading()
-            : failed
+        child: failed
             ? LoadStateView.error(
                 message: training.error ?? 'Không tải được tiến độ đào tạo.',
                 onRetry: training.retry,
               )
+            : loading
+            ? const LoadStateView.loading()
             : ListView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,

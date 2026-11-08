@@ -1,0 +1,33 @@
+# codex review --base origin/dev (Codex CLI 0.167.0, gpt-6.1-sol), 2026-11-08
+
+codex
+Admin training state is not cleaned up between sessions, and staff progress becomes stale after loading. Remote search and assigned-recipe navigation also produce incorrect behavior for supported inputs.
+
+Full review comments:
+
+- [P1] Reset admin training subscriptions when the session ends — lib/features/auth/auth_gate.dart:110-114
+  After an Admin signs out, the app-scoped `AdminTrainingViewModel` retains its subscriptions, staff data, and `_started` flag. The protected listeners can terminate with permission errors, and the next Admin login cannot restart them because `start()` immediately returns. Add session cleanup that cancels subscriptions, clears privileged data, and resets `_started`, including when Admin access is revoked.
+
+- [P2] Subscribe to staff progress changes — lib/core/viewmodels/training_viewmodel.dart:429-432
+  When a Barista completes learning sections after the Admin dashboard has loaded, the dashboard continues showing the old completion percentage and overdue tasks. `_loadProgress()` performs one-time reads and is only invoked by `watchStaff()`; writes to `users/{uid}/taskProgress` do not change the parent user documents. Subscribe through `watchProgress(uid)` for each staff member and manage those subscriptions as the staff list changes.
+
+- [P2] Apply the complete search query to remote results — lib/features/lookup/counter_recipe_lookup_page.dart:90-95
+  For a multiword search, `FirestoreRecipeSource.searchApproved()` filters only on the first normalized word. These remote results are appended without the full-query check applied to local results, so searching for a specific drink also displays unrelated drinks sharing its first word. Apply the same normalized name/code predicate before appending remote results.
+
+- [P2] Fetch assigned recipes outside the initial lookup limit — lib/features/learning/learning_task_detail_page.dart:61-65
+  When an active learning task targets a published recipe outside `max_lookup_results`, opening its related content incorrectly reports that the recipe is unavailable. Training tasks are loaded independently of that recipe limit, so searching only `RecipeViewModel.items` prevents valid assignments from being opened. Fetch the missing recipe by target code, using the existing `findForDeepLink()` fallback or equivalent.
+Admin training state is not cleaned up between sessions, and staff progress becomes stale after loading. Remote search and assigned-recipe navigation also produce incorrect behavior for supported inputs.
+
+Full review comments:
+
+- [P1] Reset admin training subscriptions when the session ends — lib/features/auth/auth_gate.dart:110-114
+  After an Admin signs out, the app-scoped `AdminTrainingViewModel` retains its subscriptions, staff data, and `_started` flag. The protected listeners can terminate with permission errors, and the next Admin login cannot restart them because `start()` immediately returns. Add session cleanup that cancels subscriptions, clears privileged data, and resets `_started`, including when Admin access is revoked.
+
+- [P2] Subscribe to staff progress changes — lib/core/viewmodels/training_viewmodel.dart:429-432
+  When a Barista completes learning sections after the Admin dashboard has loaded, the dashboard continues showing the old completion percentage and overdue tasks. `_loadProgress()` performs one-time reads and is only invoked by `watchStaff()`; writes to `users/{uid}/taskProgress` do not change the parent user documents. Subscribe through `watchProgress(uid)` for each staff member and manage those subscriptions as the staff list changes.
+
+- [P2] Apply the complete search query to remote results — lib/features/lookup/counter_recipe_lookup_page.dart:90-95
+  For a multiword search, `FirestoreRecipeSource.searchApproved()` filters only on the first normalized word. These remote results are appended without the full-query check applied to local results, so searching for a specific drink also displays unrelated drinks sharing its first word. Apply the same normalized name/code predicate before appending remote results.
+
+- [P2] Fetch assigned recipes outside the initial lookup limit — lib/features/learning/learning_task_detail_page.dart:61-65
+  When an active learning task targets a published recipe outside `max_lookup_results`, opening its related content incorrectly reports that the recipe is unavailable. Training tasks are loaded independently of that recipe limit, so searching only `RecipeViewModel.items` prevents valid assignments from being opened. Fetch the missing recipe by target code, using the existing `findForDeepLink()` fallback or equivalent.

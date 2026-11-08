@@ -105,11 +105,21 @@ class AuthViewModel extends ChangeNotifier {
 
   String get roleLabel => _role == UserRole.admin ? 'Store Admin' : 'Barista';
 
-  /// Lắng nghe authStateChanges – điều hướng Splash → Login/Shell.
-  /// Người dùng hủy hoặc mất mạng là tình huống dự kiến (đã báo bằng thông điệp) — không ghi Crashlytics.
-  static bool _isUnexpected(AuthFailure f) =>
-      f.code != AuthFailureCode.cancelled && f.code != AuthFailureCode.network;
+  /// Chỉ lỗi cấu hình hoặc chưa xác định mới cần ghi Crashlytics.
+  static bool _isUnexpected(AuthFailure f) => switch (f.code) {
+    AuthFailureCode.configuration || AuthFailureCode.unknown => true,
+    AuthFailureCode.cancelled ||
+    AuthFailureCode.network ||
+    AuthFailureCode.disabled ||
+    AuthFailureCode.invalidCredentials ||
+    AuthFailureCode.tooManyRequests ||
+    AuthFailureCode.passwordDisabled ||
+    AuthFailureCode.weakPassword ||
+    AuthFailureCode.requiresRecentLogin ||
+    AuthFailureCode.passwordNotApplicable => false,
+  };
 
+  /// Lắng nghe authStateChanges – điều hướng Splash → Login/Shell.
   void start() {
     _sub ??= _auth.authStateChanges().listen(
       _onAuthState,

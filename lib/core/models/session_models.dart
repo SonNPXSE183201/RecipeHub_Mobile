@@ -79,7 +79,7 @@ class AuthFailure implements Exception {
       case AuthFailureCode.requiresRecentLogin:
         return 'Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi đổi mật khẩu.';
       case AuthFailureCode.passwordNotApplicable:
-        return 'Tài khoản đăng nhập bằng Google không dùng mật khẩu RecipeHub';
+        return 'Tài khoản này không đăng nhập bằng mật khẩu nên không thể đổi mật khẩu.';
       case AuthFailureCode.unknown:
         return 'Không thể đăng nhập lúc này. Vui lòng thử lại.';
     }

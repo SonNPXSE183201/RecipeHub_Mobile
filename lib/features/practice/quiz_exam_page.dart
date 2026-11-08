@@ -179,6 +179,22 @@ class _QuizExamPageState extends State<QuizExamPage> {
       return const PersonalLearningBlocked();
     }
     final training = context.watch<TrainingViewModel>();
+    if (training.attemptsState != LoadState.ready) {
+      return Scaffold(
+        backgroundColor: NomadKit.canvas,
+        appBar: _appBar(),
+        body: SafeArea(
+          child: training.attemptsState == LoadState.error
+              ? LoadStateView.error(
+                  message: training.error ?? 'Không tải được lịch sử làm bài.',
+                  onRetry: training.retry,
+                )
+              : const LoadStateView.loading(
+                  message: 'Đang tải lịch sử làm bài...',
+                ),
+        ),
+      );
+    }
     final quiz = widget.quiz ?? _picked;
     if (quiz == null) return _picker(training);
 

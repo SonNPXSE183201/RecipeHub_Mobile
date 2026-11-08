@@ -68,6 +68,7 @@ void main() {
       notifications.simulateForeground(
         AppNotification(
           id: 'fg-1',
+          origin: NotificationOrigin.foreground,
           title: 'Họp ca tối',
           body: 'Kiểm tra Cà Phê Muối',
           receivedAt: DateTime(2026, 11, 5, 16, 27),
@@ -88,6 +89,52 @@ void main() {
       );
     },
   );
+
+  for (final origin in [
+    NotificationOrigin.background,
+    NotificationOrigin.terminated,
+  ]) {
+    testWidgets('Mở từ khay ($origin) không hiện SnackBar trùng', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final notification = AppNotification(
+        id: 'tray-${origin.name}',
+        title: 'Thông báo mới',
+        body: 'Nội dung cập nhật',
+        receivedAt: DateTime(2026, 11, 8),
+        origin: origin,
+      );
+      final notifications = MockNotificationService(
+        permission: NotificationPermission.granted,
+        initialNotification: origin == NotificationOrigin.terminated
+            ? notification
+            : null,
+      );
+      final services = AppServices.mock(
+        recipes: FakeRecipeSource(),
+        notifications: notifications,
+      );
+      await tester.pumpWidget(RecipeHubApp(services: services));
+      await _frames(tester);
+      await tester.tap(find.byKey(AppKeys.guestSignIn));
+      await _frames(tester, 4);
+      if (origin == NotificationOrigin.background) {
+        notifications.simulateOpened(notification);
+        await _frames(tester, 3);
+      }
+
+      expect(find.byType(NotificationsPage), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(AppKeys.bannerOpen), findsNothing);
+      final context = tester.element(find.byType(NotificationsPage));
+      final vm = context.read<NotificationViewModel>();
+      expect(vm.items.single.id, notification.id);
+      expect(vm.items.single.isRead, isTrue);
+    });
+  }
 
   testWidgets('E2E-02 Thư viện SOP không tràn ngang trên màn 720px', (
     tester,

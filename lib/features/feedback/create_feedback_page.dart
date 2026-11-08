@@ -111,6 +111,9 @@ class _RecipePickerSheetState extends State<_RecipePickerSheet> {
 }
 
 class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
+  // Giữ đồng bộ với validNewFeedback trong firebase/firestore.rules.
+  static const int _maxContentLength = 2000;
+
   FeedbackType _selectedType = FeedbackType.issue;
   String _selectedTopic = 'Định lượng nguyên liệu';
   late TextEditingController _contentCtrl;
@@ -185,6 +188,18 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vui lòng nhập nội dung phản hồi chi tiết.'),
+          backgroundColor: NomadKit.error,
+        ),
+      );
+      return;
+    }
+
+    if (text.length > _maxContentLength) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Nội dung phản hồi không được vượt quá $_maxContentLength ký tự.',
+          ),
           backgroundColor: NomadKit.error,
         ),
       );
@@ -596,6 +611,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
 
                     TextField(
                       controller: _contentCtrl,
+                      maxLength: _maxContentLength,
                       maxLines: 6,
                       style: const TextStyle(fontSize: 14, color: NomadKit.ink),
                       decoration: InputDecoration(

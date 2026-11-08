@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../models/app_models.dart';
 import '../models/recipe_models.dart';
 import '../models/session_models.dart';
+import '../services/firebase/firestore_recipe_source.dart';
 import '../services/i_recipe_source.dart';
 import '../services/interfaces/i_crash_reporter.dart';
 import '../services/recipe_mapper.dart';
@@ -117,6 +118,14 @@ class RecipeViewModel extends ChangeNotifier {
     }
   }
 
+  /// Cùng điều kiện tìm theo tên không dấu hoặc mã cho kết quả cục bộ và server.
+  static bool matchesQuery(RecipeItem recipe, String query) {
+    final normalized = FirestoreRecipeSource.normalize(query.trim());
+    return normalized.isEmpty ||
+        FirestoreRecipeSource.normalize(recipe.name).contains(normalized) ||
+        recipe.code.toLowerCase().contains(normalized);
+  }
+
   /// Tìm trên server các món ngoài danh sách đã tải (bị giới hạn bởi Remote Config `max_lookup_results`).
   /// Lỗi mạng → danh sách rỗng (màn vẫn hiện kết quả cục bộ).
   Future<List<RecipeItem>> searchAll(String query, {int limit = 20}) async {
@@ -129,7 +138,9 @@ class RecipeViewModel extends ChangeNotifier {
       for (final s in page.items) {
         if (known.contains(s.code)) continue;
         try {
-          out.add(RecipeMapper.fromDetail(await _source.getRecipe(s.id)));
+          final recipe = RecipeMapper.fromDetail(await _source.getRecipe(s.id));
+          // Server có thể chỉ khớp từ đầu tiên; kiểm tra lại toàn bộ query.
+          if (matchesQuery(recipe, q)) out.add(recipe);
         } catch (_) {
           // Món vừa bị ẩn: bỏ qua.
         }
