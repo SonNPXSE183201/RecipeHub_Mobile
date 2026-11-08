@@ -136,7 +136,7 @@ void main() {
     );
     expect(page.recipe.code, 'RC-CFE-01');
     expect(page.initialStepNumber, 1);
-    await tester.pageBack();
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
     await tester.pumpAndSettle();
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(
@@ -166,6 +166,9 @@ void main() {
     );
     expect(find.byType(StepVideoGuidePage), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    ScaffoldMessenger.of(tester.element(find.byType(LearningTaskDetailPage)))
+        .removeCurrentSnackBar();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Mở học ngay'));
     await tester.pumpAndSettle();
     expect(source.calls, 3);
