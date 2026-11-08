@@ -7,7 +7,7 @@ class ErrorRecoveryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ScreenFrame(
-        title: 'Chẩn đoán kết nối',
+        title: 'Connection Diagnostics',
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -22,15 +22,24 @@ class ErrorRecoveryPage extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: NomadKit.warning.withValues(alpha: 0.3), width: 2),
                   ),
-                  child: const Icon(
-                    Icons.wifi_off_rounded,
-                    color: NomadKit.warning,
-                    size: 38,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/illustrations/offline_recovery_2k.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.cloud_off_rounded,
+                        color: NomadKit.warning,
+                        size: 40,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Mất kết nối mạng tạm thời',
+                  'Temporary Network Disconnection',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -40,7 +49,7 @@ class ErrorRecoveryPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Không thể kết nối đến máy chủ trung tâm. Mọi thay đổi và bản nháp công thức của bạn đã được mã hóa và lưu trữ an toàn trong bộ nhớ ngoại tuyến cục bộ.',
+                  'Unable to reach the central Gateway server. Your active changes and draft formulas are safely encrypted and preserved in local offline storage.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -72,11 +81,11 @@ class ErrorRecoveryPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
                             Text(
-                              'Bảo vệ dữ liệu nháp',
+                              'Offline Data Protection',
                               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: NomadKit.ink),
                             ),
                             Text(
-                              '2 công thức đang sửa đã tự động lưu trữ an toàn',
+                              'Active recipe drafts safely persisted locally.',
                               style: TextStyle(fontSize: 11, color: NomadKit.secondary),
                             ),
                           ],
@@ -97,7 +106,7 @@ class ErrorRecoveryPage extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () => Navigator.maybePop(context),
-                        child: const Text('Xem nháp ngoại tuyến', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                        child: const Text('View Offline Drafts', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -113,12 +122,12 @@ class ErrorRecoveryPage extends StatelessWidget {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Đang thử lại kết nối đến máy chủ RecipeHub...'),
+                              content: Text('Re-attempting connection to RecipeHub Gateway...'),
                               duration: Duration(seconds: 2),
                             ),
                           );
                         },
-                        child: const Text('Thử lại kết nối', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                        child: const Text('Retry Connection', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                       ),
                     ),
                   ],

@@ -1,0 +1,23 @@
+{
+  "parameters": {
+    "enable_ai_assist": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "max_lookup_results": {
+      "defaultValue": {
+        "value": "50"
+      },
+      "valueType": "NUMBER"
+    },
+    "show_crash_demo": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN",
+      "description": "Hiện ô Kiểm thử sự cố (nút Gây crash) ở màn Tài khoản"
+    }
+  }
+}

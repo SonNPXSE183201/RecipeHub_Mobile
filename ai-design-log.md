@@ -1,5 +1,7 @@
 # RecipeHub Mobile — Nhật Ký Thiết Kế & Phản Biện AI (AI Design Log)
 
+> **Tài liệu lịch sử (vòng thiết kế Lab 2).** Nội dung mô tả bản 3 vai trò (R&D, Barista, Admin) và PDF/E-Booklet. Mobile hiện chỉ còn 2 vai trò Viewer và Admin; xem `README.md`, `DESIGN.md`, `ux/user-flow.md` và `design-decisions.md` (mục 4) để biết trạng thái hiện hành.
+
 Tài liệu này ghi lại toàn bộ chuỗi quyết định thiết kế có hỗ trợ của AI (Analyze → Generate → Critique → Refine → Prototype → Handoff) theo đúng chuẩn đánh giá PRM323 Lab 2.
 
 ---

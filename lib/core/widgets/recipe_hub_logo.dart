@@ -15,15 +15,16 @@ class RecipeHubLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Image.asset(
+      'assets/icons/app_logo_hero_2k.png',
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (ctx, err, stack) => Icon(
+        Icons.coffee_rounded,
         color: NomadKit.sand,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Center(
-        child: Icon(Icons.coffee_rounded, color: Colors.white, size: iconSize),
+        size: iconSize,
       ),
     );
   }
