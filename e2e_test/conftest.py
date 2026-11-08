@@ -73,6 +73,28 @@ def app_package() -> str:
     return os.getenv("RH_APP_PACKAGE", "com.recipehub.mobile")
 
 
+_REPORT = re.compile(r"report_task_status\(\{'explanation': '(\{.*?\})', 'status': '(\w+)'")
+
+
+def _trace_output(task_id: str) -> Any:
+    """The ARTEMIS session API does not return the Flash agent's final report.
+
+    The agent writes it with report_task_status into traces/<task_id>/stdout.log on the
+    same machine as the server; read the last JSON explanation from there.
+    """
+    root = Path(os.getenv("ARTEMIS_TRACES_DIR", "D:/PRM393/artemis/traces"))
+    log = root / task_id / "stdout.log"
+    if not log.is_file():
+        return None
+    matches = _REPORT.findall(log.read_text(encoding="utf-8", errors="replace"))
+    if not matches:
+        return None
+    try:
+        return json.loads(matches[-1][0])
+    except ValueError:
+        return None
+
+
 def output(result: TaskResult) -> dict[str, Any]:
     value = result.output
     if isinstance(value, str):
@@ -102,6 +124,8 @@ async def execute(artemis: ArtemisClient, instruction: str) -> TaskResult:
         )
     except Exception as exc:
         pytest.fail(redact(f"ARTEMIS {type(exc).__name__}: {exc}"), pytrace=False)
+    if result.output is None and result.task_id:
+        result = replace(result, output=_trace_output(result.task_id))
     # A failed pytest assertion must not expose the original goal through dataclass repr.
     return replace(result, goal=redact(result.goal), output=redact(result.output),
                    error=redact(result.error), raw={})
