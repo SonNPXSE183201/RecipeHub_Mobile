@@ -51,3 +51,11 @@ app.*.map.json
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
 /lib/firebase_options.dart
+
+# Local secrets & tooling (never commit)
+/env/
+.env
+*.jks
+*.keystore
+/firebase/hosting/
+/firebase/functions/

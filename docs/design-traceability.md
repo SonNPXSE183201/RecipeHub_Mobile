@@ -1,6 +1,6 @@
 # Truy vết thiết kế – yêu cầu → màn hình → MVVM → dịch vụ → kiểm thử
 
-Nguồn yêu cầu: `requirements-draft.md` mục 10 (M-01 → M-17). Thiết kế UI: `DESIGN.md`, `ux/`.
+Nguồn yêu cầu: `requirements-draft.md` mục 10 (M-01 → M-17). Thiết kế UI: `docs/lab2/DESIGN.md`, `docs/lab2/ux/`.
 Mã ca kiểm thử: `TC-xx` = test Flutter trong `test/artemis_e2e_test.dart`; `ART-xx` = ca ARTEMIS chạy trên thiết bị, xem `docs/artemis-test-plan.md`.
 
 ## Ma trận truy vết
