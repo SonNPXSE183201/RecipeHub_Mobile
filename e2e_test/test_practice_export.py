@@ -52,7 +52,9 @@ async def test_tc17_timer_and_report(signed_in_viewer: ArtemisClient) -> None:
         "tap 'Bấm giờ', wait at least 5 seconds, tap 'Tạm dừng', enter notes 'Test thực hành chuẩn', "
         "tap 'Lưu lần luyện tập'. Verify saved notice and open history using 'Lịch sử' or toolbar "
         "'Lịch sử tự luyện' if it does not open automatically. Verify the new entry and notes. "
-        "Tap 'Xuất báo cáo PDF'; verify SnackBar 'Đã lưu: Download/RecipeHub/...'. "
+        "Tap the PDF icon in the history toolbar. A SnackBar appears that starts with 'Đã lưu: '. "
+        "Copy the text after 'Đã lưu: ' exactly as displayed (for example Download/RecipeHub/luyen-tap_....pdf) "
+        "into path; do not shorten it or invent a file name. "
         'Return {"timer_saved":true,"elapsed_seconds":0,"notes_verified":true,"report_exported":true,"path":""} with observed duration/path.')
     assert result.succeeded, result.error or result.status
     data = output(result)
