@@ -8,6 +8,9 @@ from conftest import output, run_case, wait_operator_signal
 pytestmark = pytest.mark.slow
 
 
+@pytest.mark.manual
+@pytest.mark.skipif(os.getenv("RH_RC_OPERATOR") != "1",
+                    reason="Changes production Remote Config; run only with an operator (RH_RC_OPERATOR=1)")
 async def test_tc21_remote_config_live_limit(signed_in_viewer: ArtemisClient) -> None:
     # Record the actual Console value for EACH run, rather than assuming a default.
     recorded = await wait_operator_signal("tc21-baseline",
