@@ -116,8 +116,12 @@ async def execute(artemis: ArtemisClient, instruction: str) -> TaskResult:
     """Only SDK-supported output options; this client has no JSON-schema argument."""
     try:
         result = await artemis.run(
-            instruction + " Return only the requested JSON object. Report only observed evidence; "
-            "never invent success, data or missing controls. Never return credentials.",
+            instruction + " Stay inside the RecipeHub app (com.recipehub.mobile); never open, launch "
+            "or type into any other app. Return only the requested JSON object. Report only observed "
+            "evidence; never invent success, data or missing controls. Never return credentials.",
+            # Without this lock a lite model once launched another app on the shared phone and
+            # typed the test password into its login form.
+            locked_app_package=app_package(),
             enable_outputter=True,
             expected_output="A JSON object with the fields explicitly requested in the goal; "
                             "booleans as JSON booleans, counts as integers, no Markdown or secrets.",
