@@ -1,17 +1,49 @@
-# recipehub_mobile
+# RecipeHub Mobile
 
-A new Flutter project.
+Ứng dụng Flutter (`recipehub_mobile`) cho barista và quản lý cửa hàng: tra cứu công thức tại quầy, học và thực hành theo SOP, gửi phản hồi chất lượng. Môn PRM393.
 
-## Getting Started
+Thiết kế Figma: https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub (key `FycUpbP0PtH6Q4sg6IvZr6`).
 
-This project is a starting point for a Flutter application.
+## Phạm vi
+- 2 vai trò: **Barista (Viewer)** và **Quản lý cửa hàng (Admin)**. Soạn công thức, duyệt, xuất PDF, quản lý người dùng nằm ở web (R&D), không có trên mobile.
+- 20 màn hình: `M-01` đến `M-17`, `AdminStoreTrainingPage` (tab Đào tạo của Admin) và 2 màn hình hệ thống (Loading, Error recovery). Chi tiết: `ux/user-flow.md`.
+- Công thức lấy từ Firestore `recipes/` (Admin quản lý trên web `src/admin_web`); `--dart-define=RECIPE_SOURCE=gateway` để dùng API .NET. SOP, việc học, phản hồi còn là dữ liệu mẫu trong `lib/core/services/mock_data_service.dart`.
+- Nối web Admin: vai trò theo custom claim, FCM token lên `users/{uid}/devices`, sự cố lên `incidents/`, nút "Gây crash" ở màn Tài khoản (Remote Config `show_crash_demo`). Xem `docs/architecture.md`.
 
-A few resources to get you started if this is your first Flutter project:
+## Cấu trúc
+```
+lib/
+  main.dart                      Khởi chạy app; có máy chủ automation cổng 8888 để chụp màn hình (dev)
+  core/models/                   app_models.dart (đang dùng), content_models.dart, recipe_models.dart
+  core/services/mock_data_service.dart
+  core/theme/nomad_kit.dart      Token NomadKit
+  core/widgets/                  recipe_hub_logo.dart, screen_frame.dart
+  features/                      auth, shell, lookup, sop, learning, feedback, practice, account, admin_training, system
+assets/icons, assets/illustrations   PNG đang được code tham chiếu (không giữ ảnh thừa)
+ux/                              persona.md, user-flow.md
+DESIGN.md, design-decisions.md, flutter-handoff.md
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Firebase (Lab 3)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**Đã cấu hình trên Console:** project `recipehub-mobile` (Blaze); app Android `com.recipehub.mobile` với SHA-1 và SHA-256; Authentication bật Google Sign-In và Anonymous; Cloud Storage đã publish `storage.rules` (giới hạn 5 MB, kiểm MIME ảnh); FCM API (V1) bật; Remote Config có `enable_ai_assist` (bool, mặc định `false`) và `max_lookup_results` (số, mặc định `50`).
+**Trong repo (đã tích hợp):** `google-services.json` được `.gitignore` (không commit); plugin Gradle `google-services` + Crashlytics; `provider` và 6 gói `firebase_*` trong `pubspec.yaml`; kiến trúc MVVM (`lib/core/viewmodels`, `lib/core/services/{interfaces,firebase,mock}`, `lib/core/di/app_services.dart`); `src/firebase/` (rules, Remote Config, Functions – dùng chung với web Admin); `docs/analytics-plan.md`, `docs/architecture.md`.
+**Dữ liệu:** công thức lấy từ Firestore (mặc định) hoặc Gateway thật (`RECIPE_SOURCE=gateway`), không còn mock fallback; phần chưa có API backend nằm trong `docs/mobile-backend-api-gaps.md`.
+**Test:** `test/artemis_e2e_test.dart` (TC-01 → TC-13), `test/admin_link_test.dart` (TC-14 → TC-22) và `test/widget_test.dart`.
+
+## Chạy
+```
+flutter pub get
+flutter analyze
+flutter test
+adb reverse tcp:5000 tcp:5000      # máy thật gọi Gateway trên máy tính
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:5000 --dart-define=GOOGLE_SERVER_CLIENT_ID=<web-client-id>.apps.googleusercontent.com
+```
+Món mặc định lấy từ Firestore (nạp bằng nút "Nạp món mẫu" trên web Admin). Chỉ cần backend Gateway `:5000` khi build với `--dart-define=RECIPE_SOURCE=gateway`. `GOOGLE_SERVER_CLIENT_ID` là OAuth client Web (`client_type: 3`) trong `google-services.json`; không ghi vào file.
+
+## Tài liệu
+- `DESIGN.md`: token và thành phần NomadKit.
+- `flutter-handoff.md`: ánh xạ token sang `ThemeData`, cấu trúc mã nguồn, danh sách asset.
+- `design-decisions.md`: quyết định thiết kế và đánh giá UX/WCAG.
+- `ai-design-log.md`: nhật ký AI của vòng thiết kế Lab 2 (tài liệu lịch sử, mô tả bản 3 vai trò cũ).
+- `ux/persona.md`, `ux/user-flow.md`: persona, luồng, danh mục màn hình.
