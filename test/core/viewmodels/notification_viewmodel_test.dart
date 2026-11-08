@@ -35,6 +35,72 @@ void main() {
   Future<void> start() =>
       vm.start(roleCode: 'viewer', storeCode: 'Q1', uid: 'user');
 
+  for (final origin in NotificationOrigin.values) {
+    test('Chỉ tạo banner cho nguồn foreground: $origin', () async {
+      final starting = start();
+      await _flushEvents();
+      service.reads.single.complete(NotificationPermission.granted);
+      await starting;
+      final notification = AppNotification(
+        id: 'message-${origin.name}',
+        title: 'Thông báo mới',
+        body: 'Nội dung cập nhật',
+        receivedAt: DateTime(2026),
+        origin: origin,
+      );
+
+      service.simulateForeground(notification);
+      await _flushEvents();
+
+      expect(vm.items.single, same(notification));
+      expect(service.histories['user']!.single, same(notification));
+      expect(vm.unreadCount, 1);
+      expect(vm.takePendingDeepLink(), isNull);
+      expect(
+        vm.takePendingBanner(),
+        origin == NotificationOrigin.foreground ? same(notification) : isNull,
+      );
+      expect(vm.takePendingBanner(), isNull);
+    });
+  }
+
+  for (final origin in [
+    NotificationOrigin.background,
+    NotificationOrigin.terminated,
+  ]) {
+    test(
+      'Mở từ khay hệ thống ($origin) chỉ điều hướng, không tạo banner',
+      () async {
+        final notification = AppNotification(
+          id: 'opened-${origin.name}',
+          title: 'Thông báo mới',
+          body: 'Nội dung cập nhật',
+          receivedAt: DateTime(2026),
+          origin: origin,
+        );
+        if (origin == NotificationOrigin.terminated) {
+          service.initialNotification = notification;
+        }
+        final starting = start();
+        await _flushEvents();
+        service.reads.single.complete(NotificationPermission.granted);
+        await starting;
+        if (origin == NotificationOrigin.background) {
+          service.simulateOpened(notification);
+          await _flushEvents();
+        }
+
+        expect(vm.takePendingBanner(), isNull);
+        expect(vm.takePendingDeepLink()?.target, DeepLinkTarget.notifications);
+        expect(vm.takePendingDeepLink(), isNull);
+        expect(vm.items.single.id, notification.id);
+        expect(vm.items.single.isRead, isTrue);
+        expect(vm.unreadCount, 0);
+        expect(service.histories['user']!.single.isRead, isTrue);
+      },
+    );
+  }
+
   test('Không hiện primer khi FCM mở app trước khi đọc xong quyền', () async {
     final observedPrimer = <bool>[];
     vm.addListener(() => observedPrimer.add(vm.shouldShowPermissionPrimer));

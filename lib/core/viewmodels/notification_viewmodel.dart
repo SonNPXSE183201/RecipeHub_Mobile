@@ -85,7 +85,9 @@ class NotificationViewModel extends ChangeNotifier {
         _service.onForegroundMessage.listen((n) {
           if (stale()) return;
           _upsert(n);
-          _pendingBanner = n;
+          if (n.origin == NotificationOrigin.foreground) {
+            _pendingBanner = n;
+          }
           _persist();
           _notify();
         }),
