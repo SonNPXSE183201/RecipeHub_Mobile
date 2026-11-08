@@ -8,7 +8,8 @@ class FakeRecipeSource implements IRecipeSource {
   int failuresBeforeSuccess;
   int calls = 0;
 
-  static RecipeDetailResponse detail(String id, String code, String name) => RecipeDetailResponse(
+  static RecipeDetailResponse detail(String id, String code, String name) =>
+      RecipeDetailResponse(
         id: id,
         code: code,
         state: 'Active',
@@ -52,7 +53,10 @@ class FakeRecipeSource implements IRecipeSource {
   };
 
   @override
-  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({String? query, int pageSize = 50}) async {
+  Future<PagedResponse<RecipeSummaryResponse>> searchApproved({
+    String? query,
+    int pageSize = 50,
+  }) async {
     calls++;
     if (failuresBeforeSuccess > 0) {
       failuresBeforeSuccess--;
@@ -60,18 +64,25 @@ class FakeRecipeSource implements IRecipeSource {
     }
     final items = _all.values
         .take(pageSize)
-        .map((d) => RecipeSummaryResponse(
-              id: d.id,
-              code: d.code,
-              state: d.state,
-              versionId: d.versionId,
-              versionNumber: d.versionNumber,
-              versionStatus: d.versionStatus,
-              name: d.name,
-              updatedAt: d.updatedAt,
-            ))
+        .map(
+          (d) => RecipeSummaryResponse(
+            id: d.id,
+            code: d.code,
+            state: d.state,
+            versionId: d.versionId,
+            versionNumber: d.versionNumber,
+            versionStatus: d.versionStatus,
+            name: d.name,
+            updatedAt: d.updatedAt,
+          ),
+        )
         .toList();
-    return PagedResponse(items: items, page: 1, pageSize: pageSize, totalCount: items.length);
+    return PagedResponse(
+      items: items,
+      page: 1,
+      pageSize: pageSize,
+      totalCount: items.length,
+    );
   }
 
   @override
