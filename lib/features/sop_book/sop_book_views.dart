@@ -190,7 +190,6 @@ class RecipeBookPage extends StatelessWidget {
             spacing: 8,
             runSpacing: 4,
             children: [
-              _chip(r.code, NomadKit.oceanLight, NomadKit.ocean, mono: true),
               _chip(
                 'Phiên bản ${r.version}',
                 NomadKit.canvas,

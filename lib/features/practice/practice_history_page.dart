@@ -335,7 +335,7 @@ class PracticeHistoryPage extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      '${rec.recipeCode} · ${rec.size}',
+                                      rec.size,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
