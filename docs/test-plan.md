@@ -1,0 +1,218 @@
+# Kế hoạch Kiểm thử Tự động E2E với ARTEMIS – RecipeHub Mobile
+
+Tài liệu kế hoạch kiểm thử tự động toàn diện (Lab 3, Appendix B) cho ứng dụng **RecipeHub Mobile** sử dụng agent AI kiểm thử bằng ngôn ngữ tự nhiên **ARTEMIS** trên thiết bị Android thật (Xiaomi Redmi 7, Android 10).
+
+---
+
+## 1. Flow quan trọng → Màn hình
+
+Bảng ánh xạ các luồng nghiệp vụ trọng yếu của ứng dụng tới tệp giao diện tương ứng trong `lib/features/`:
+
+| STT | Luồng nghiệp vụ trọng yếu | Mô tả nghiệp vụ | Tệp màn hình (`lib/features/...`) |
+| :-: | :--- | :--- | :--- |
+| 1 | **Đăng nhập & Xác thực** | Đăng nhập Email/Mật khẩu, Google Sign-In, tài khoản Khách, điều hướng AuthGate | `features/auth/login_page.dart`<br>`features/auth/auth_gate.dart` |
+| 2 | **Tra cứu tại quầy** | Tìm kiếm món không dấu, lọc theo nhóm, giới hạn danh sách theo Remote Config | `features/lookup/counter_recipe_lookup_page.dart` |
+| 3 | **Chi tiết món theo size** | Định lượng thành phần theo size, cảnh báo nguyên liệu, quy cách phục vụ chuẩn | `features/lookup/recipe_detail_size_page.dart` |
+| 4 | **Video chuẩn từng bước** | Trình phát video thao tác chuẩn, mốc timeline bước, chuyển bước trước/sau, toàn màn hình | `features/lookup/step_video_guide_page.dart` |
+| 5 | **Sổ tay SOP điện tử** | Sách điện tử lật trang 3D, nhảy trang theo mục lục, tìm kiếm nhanh và xuất PDF toàn bộ sổ tay | `features/sop_book/sop_book_page.dart` |
+| 6 | **Đào tạo, Nhiệm vụ học & Quiz** | Quản lý nhiệm vụ (Đang học, Chưa học, Hoàn thành), checklist đọc/xem, làm bài trắc nghiệm nộp điểm | `features/learning/my_learning_page.dart`<br>`features/learning/learning_task_detail_page.dart`<br>`features/practice/quiz_exam_page.dart` |
+| 7 | **Tự luyện & Báo cáo PDF** | Đồng hồ bấm giờ pha chế, lưu nhận xét cá nhân, xem lịch sử và xuất PDF lưu máy vào `Download/RecipeHub` | `features/practice/self_practice_timer_page.dart`<br>`features/practice/practice_history_page.dart` |
+| 8 | **Chấm thực hành (Admin)** | Bảng theo dõi nhân sự toàn chi nhánh, form chấm điểm thao tác quầy theo checklist tiêu chuẩn | `features/admin_training/admin_store_training_page.dart`<br>`features/practice/practical_evaluation_page.dart` |
+| 9 | **Phản hồi kèm ảnh & Trao đổi real-time** | Gửi phản hồi kèm ảnh qua photo picker hệ thống, quản lý trao đổi 2 chiều và cập nhật trạng thái | `features/feedback/create_feedback_page.dart`<br>`features/feedback/my_feedback_list_page.dart`<br>`features/feedback/feedback_detail_page.dart` |
+| 10 | **Thông báo FCM & Deep link** | Trung tâm thông báo, lọc loại tin, xử lý chạm push notification từ khay hệ thống mở màn tương ứng | `features/learning/notifications_page.dart` |
+| 11 | **Tài khoản & Đổi mật khẩu & Đăng xuất** | Hồ sơ nhân viên, đổi mật khẩu bảo mật, mở primer quyền thông báo, kiểm thử sự cố và đăng xuất an toàn | `features/account/account_profile_page.dart`<br>`features/account/change_password_page.dart` |
+
+---
+
+## 2. Ca kiểm thử tự động (ARTEMIS Test Cases)
+
+Bộ ca kiểm thử tự động bao gồm 24 ca (tối thiểu 22 ca theo yêu cầu), bao phủ toàn bộ các luồng chức năng, phân quyền, xử lý lỗi và kiểm chứng sự kiện Analytics.
+
+| Mã ca | Vai trò | Điều kiện đầu | Instruction tiếng Anh cho ARTEMIS | Kết quả mong đợi (tiếng Việt) | File test pytest dự kiến |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **TC-01** | Barista (Viewer) | App đã cài đặt, mở màn hình Đăng nhập | Start at the Login screen, enter the email from $RH_VIEWER_EMAIL into the email field, enter the password from $RH_VIEWER_PASSWORD into the password field, tap 'Đăng nhập', verify that the app successfully authenticates and displays the Counter Lookup screen with the headline 'Tra cứu tại quầy', and return JSON {status: 'success', screen: 'lookup', role: 'viewer'}. | Đăng nhập thành công, chuyển sang màn hình Tra cứu tại quầy bar với vai trò Barista (`VIEWER`). | `e2e_test/test_auth.py` |
+| **TC-02** | Barista (Viewer) | Màn hình Đăng nhập | Start at the Login screen, enter the email from $RH_VIEWER_EMAIL, enter an incorrect password 'WrongPass@2026', tap 'Đăng nhập', verify that a SnackBar appears displaying the error message 'Email hoặc mật khẩu không đúng.', and return JSON {error_displayed: true, message: 'Email hoặc mật khẩu không đúng.'}. | Ứng dụng từ chối đăng nhập, hiển thị SnackBar đỏ với nội dung "Email hoặc mật khẩu không đúng.". | `e2e_test/test_auth.py` |
+| **TC-03** | Barista (Viewer) | Màn hình Đăng nhập | Start at the Login screen, tap 'Quên mật khẩu?', in the modal bottom sheet enter the email from $RH_VIEWER_EMAIL into the email field, tap 'Gửi thư đặt lại', verify that the result text displays 'Nếu email đã được cấp tài khoản, bạn sẽ nhận thư đặt lại mật khẩu.', and return JSON {reset_requested: true, confirmation: 'Nếu email đã được cấp tài khoản, bạn sẽ nhận thư đặt lại mật khẩu.'}. | Gửi yêu cầu đặt lại mật khẩu thành công, hiển thị thông điệp trung tính không để lộ thông tin tài khoản. | `e2e_test/test_auth.py` |
+| **TC-04** | Barista (Viewer) | Màn hình Đăng nhập | Start at the Login screen, enter the credentials of a viewer account requesting admin role, tap 'Đăng nhập', verify that the app authenticates with role 'viewer' and displays the notice SnackBar 'Tài khoản chưa được cấp quyền Admin – đang dùng vai trò Barista.', and return JSON {authenticated: true, applied_role: 'viewer', notice_shown: true}. | Hệ thống tự động hạ về vai trò Barista do server không có claim Admin, hiện SnackBar thông báo rõ ràng. | `e2e_test/test_auth.py` |
+| **TC-05** | Barista (Viewer) | Màn hình Đăng nhập, thiết bị đã liên kết tài khoản Google | Start at the Login screen, tap 'Đăng nhập với Google', in the Android system Google account picker dialog select the target Google account, verify that authentication succeeds, the role badge 'VIEWER' is shown, and the Counter Lookup screen appears, returning JSON {auth_method: 'google', status: 'authenticated'}. | Đăng nhập Google thành công qua Account Picker hệ thống, ứng dụng mở màn hình Tra cứu với vai trò Barista. | `e2e_test/test_auth.py` |
+| **TC-06** | Barista (Viewer) | Màn hình Đăng nhập | Start at the Login screen, tap 'Đăng nhập với Google', when the Android system account picker dialog appears press the device Back button to dismiss it, verify that the Login screen remains active and an error SnackBar displays 'Bạn đã hủy đăng nhập Google. Chưa có thay đổi nào.', returning JSON {cancelled: true, current_screen: 'login'}. | Người dùng hủy chọn tài khoản Google, ứng dụng giữ nguyên trạng thái chưa đăng nhập và báo thông điệp hủy thân thiện. | `e2e_test/test_auth.py` |
+| **TC-07** | Barista (Viewer) | Đã đăng nhập, đang ở màn hình Tra cứu | Start at the Counter Lookup screen, enter 'Trà Sữa' into the search input with key 'lookup_search', verify that the recipe list filters and displays matching cards such as 'Trà Sữa Oolong', and return JSON {query: 'Trà Sữa', results_count: count, first_item_name: name}. | Danh sách công thức lọc tức thì theo từ khóa, hiển thị các thẻ món phù hợp kèm số lượng kết quả. | `e2e_test/test_search.py` |
+| **TC-08** | Barista (Viewer) | Đang ở màn hình Tra cứu | Start at the Counter Lookup screen, enter 'MonKhongTonTai999' into the search field, verify that the recipe list becomes empty and displays the empty state message 'Không tìm thấy công thức phù hợp' with subtitle 'Thử đổi từ khóa hoặc bộ lọc danh mục.', returning JSON {empty_state_shown: true, title: 'Không tìm thấy công thức phù hợp'}. | Hiển thị màn hình trạng thái rỗng (Empty State) với thông điệp hướng dẫn đổi từ khóa/bộ lọc. | `e2e_test/test_search.py` |
+| **TC-09** | Barista (Viewer) | Đã đăng nhập, giả lập ngắt mạng thiết bị | Disable Wi-Fi and mobile data on device, trigger recipe reload, verify that the error view appears showing 'Không tải được công thức' and a 'Thử lại' button, re-enable network, tap 'Thử lại', and verify that the recipe list loads successfully, returning JSON {error_resolved: true, status: 'ready'}. | Mất mạng hiển thị màn hình báo lỗi kèm nút "Thử lại"; khi có mạng trở lại bấm "Thử lại" tải thành công danh sách món. | `e2e_test/test_search.py` |
+| **TC-10** | Barista (Viewer) | Đã đăng nhập, ở màn hình chính | From the bottom navigation bar, successively tap tab 'Tra cứu', tab 'Việc học', tab 'Phản hồi', and tab 'Tài khoản', verify that the top AppBar title or screen content updates accordingly for each tab, and return JSON {tabs_verified: ['Tra cứu', 'Việc học', 'Phản hồi', 'Tài khoản'], status: 'pass'}. | Chuyển đổi mượt mà qua cả 4 tab cấp 1 trên NavigationBar; nội dung từng tab tải đúng IndexedStack. | `e2e_test/test_search.py` |
+| **TC-11** | Barista (Viewer) | Đang ở màn hình Tra cứu | Start at the Counter Lookup screen, tap the recipe card for 'Trà Sữa Oolong', verify that the Detail screen opens showing the recipe name, 'ĐỊNH LƯỢNG NGUYÊN LIỆU', and standard serving note, returning JSON {recipe_name: 'Trà Sữa Oolong', detail_opened: true, ingredients_count: count}. | Mở màn hình chi tiết món, hiển thị đầy đủ thông tin định lượng, nguyên liệu và quy cách phục vụ. | `e2e_test/test_detail.py` |
+| **TC-12** | Barista (Viewer) | Đang ở màn hình Chi tiết món | Start at the Recipe Detail screen, tap the 'Xem video chuẩn' button, verify that StepVideoGuidePage opens with video player loaded, verify step timeline chips 'Bước 1', 'Bước 2', tap 'Bước tiếp theo', and verify that active step advances, returning JSON {video_guide_opened: true, active_step: 2}. | Mở trình phát video chuẩn; các nút chuyển bước và mốc video hoạt động đồng bộ với bài hướng dẫn. | `e2e_test/test_detail.py` |
+| **TC-13** | Barista (Viewer) | Đã đăng nhập, kết nối logcat ADB | Start logcat filter for 'FA-SVC', open the recipe detail for 'Cà Phê Muối' from the Lookup list, verify in logcat that an analytics event 'view_recipe' is logged containing parameters 'recipe_code', 'category', 'size', and 'source=lookup' without any PII, returning JSON {event_name: 'view_recipe', params_found: true}. | Sự kiện Analytics `view_recipe` được ghi nhận chính xác trong logcat `FA-SVC`, không chứa PII (đáp ứng tiêu chuẩn đo lường). | `e2e_test/test_detail.py` |
+| **TC-14** | Barista (Viewer) | Đang ở màn hình Tài khoản | Start at the Account screen, tap 'Sổ tay SOP', verify that SopBookPage opens with 3D flip page view, tap the 'Mục lục' action icon on AppBar to jump to the Table of Contents on page 2, tap 'Xuất PDF', and verify that a SnackBar shows 'Đã lưu: Download/RecipeHub/...', returning JSON {sop_book_opened: true, pdf_exported: true, path: saved_path}. | Sổ tay SOP hiển thị dạng lật sách 3D, nhảy mục lục chính xác và xuất file PDF lưu vào thư mục máy thành công. | `e2e_test/test_practice_export.py` |
+| **TC-15** | Barista (Viewer) | Đang ở tab 'Việc học' | Start at the MyLearningPage, tap an in-progress learning task item, verify that LearningTaskDetailPage opens showing sections checklist, toggle a section checkbox to completed, tap 'Hoàn thành', and verify completion notice appears, returning JSON {task_detail_opened: true, completed: true}. | Xem chi tiết nhiệm vụ học tập, tick chọn các mục checklist và xác nhận hoàn thành nội dung đọc/xem. | `e2e_test/test_practice_export.py` |
+| **TC-16** | Barista (Viewer) | Đang ở tab 'Việc học' | Start at MyLearningPage, tap 'Làm bài Quiz', select a quiz set, answer all multiple-choice questions, tap 'Nộp bài kiểm tra', verify that the result card displays score 'X / Y câu đúng' along with detailed explanations for each question, returning JSON {quiz_submitted: true, score: score_string}. | Nộp bài kiểm tra lý thuyết thành công, xem điểm số, trạng thái Đạt/Chưa đạt và phần giải thích chi tiết từng câu. | `e2e_test/test_practice_export.py` |
+| **TC-17** | Barista (Viewer) | Đang ở màn hình Tra cứu | Tap the FloatingActionButton with key 'self_practice_fab' to open SelfPracticeTimerPage, tap 'Bấm giờ', wait 5 seconds, tap 'Tạm dừng', enter notes 'Test thực hành chuẩn', tap 'Lưu lần luyện tập', verify that PracticeHistoryPage opens, tap 'Xuất báo cáo PDF', and verify SnackBar 'Đã lưu: Download/RecipeHub/...', returning JSON {timer_saved: true, report_exported: true}. | Bấm giờ thao tác tự luyện, lưu kết quả vào lịch sử cá nhân và xuất báo cáo PDF lưu trữ cục bộ tại máy. | `e2e_test/test_practice_export.py` |
+| **TC-18** | Admin | Đã đăng nhập tài khoản Store Admin | Navigate to the 'Đào tạo' tab (AdminStoreTrainingPage), tap 'Chấm ngay' on evaluation card, in PracticalEvaluationPage select trainee Barista and recipe, toggle criteria switches, select overall result 'Đạt yêu cầu', enter comments, tap 'Lưu đánh giá', and verify success SnackBar, returning JSON {evaluation_saved: true, trainee: name}. | Quản lý Admin thực hiện quan sát và chấm thực hành tại quầy theo checklist tiêu chí; lưu kết quả thành công lên Firestore. | `e2e_test/test_practice_export.py` |
+| **TC-19** | Barista (Viewer) | Đang ở tab 'Phản hồi' | Start at MyFeedbackListPage, tap the create feedback icon, in CreateFeedbackPage choose feedback type 'Báo cáo vấn đề', enter detailed content, tap 'Thư viện' to pick an image from Android media picker, tap 'Gửi phản hồi', verify success message, switch to Admin account, and verify that Admin sees the new feedback with attachment instantly, returning JSON {feedback_sent: true, admin_received: true}. | Barista gửi phản hồi kèm ảnh chọn từ photo picker hệ thống; tài khoản Admin thấy ngay phản hồi và ảnh trên luồng real-time. | `e2e_test/test_feedback.py` |
+| **TC-20** | Barista (Viewer) | Barista A đã gửi 1 phản hồi | Log out of Barista A, log in with Barista B credentials ($RH_VIEWER_B_EMAIL), navigate to the 'Phản hồi' tab, verify that Barista B's list only shows B's own feedbacks and does NOT contain any feedback from Barista A, returning JSON {isolation_verified: true, foreign_feedback_present: false}. | Đảm bảo tính bảo mật và phân quyền: Barista B tuyệt đối không nhìn thấy các phản hồi riêng tư của Barista A. | `e2e_test/test_feedback.py` |
+| **TC-21** | Barista (Viewer) | Đã đăng nhập, ở màn hình Tra cứu | Observe the default count of recipes displayed on the Lookup screen, apply a Remote Config change setting 'max_lookup_results' to 5 via backend/console, verify that the Lookup list dynamically updates to show at most 5 items without restarting the app, returning JSON {remote_config_applied: true, count: 5}. | Ứng dụng tự động áp dụng giá trị `max_lookup_results` mới từ Remote Config và cập nhật giới hạn danh sách hiển thị tại quầy. | `e2e_test/test_profile_remote_config.py` |
+| **TC-22** | Admin | Đã đăng nhập tài khoản Store Admin | Check the Counter Lookup screen to verify that the floating action button 'self_practice_fab' is NOT present, check tab 2 is 'Đào tạo' instead of 'Việc học', open the 'Tài khoản' screen and verify that 'Tiến độ đào tạo cá nhân' and 'Lịch sử tự luyện với Timer' are hidden, returning JSON {admin_restrictions_verified: true, personal_learning_hidden: true}. | Giao diện vai trò Admin ẩn hoàn toàn nút tự luyện quầy bar, thanh tiến độ cá nhân và lịch sử tự luyện (chỉ tập trung quản lý). | `e2e_test/test_profile_remote_config.py` |
+| **TC-23** | Barista (Viewer) | App đang chạy nền (background) | Send a test FCM push notification with title 'Cập nhật công thức' and payload '{type: recipe}', open Android system notification shade, tap the RecipeHub notification, verify that the app is brought to foreground and navigates to NotificationsPage ('Thông báo & Thay đổi'), returning JSON {push_received: true, navigated_screen: 'notifications'}. | Chạm vào push notification từ khay hệ thống Android đánh thức app và điều hướng thẳng vào màn hình "Thông báo & Thay đổi". | `e2e_test/test_notifications.py` |
+| **TC-24** | Barista (Viewer) | Đang ở tab 'Tài khoản' | Start at the Account screen, tap 'Đổi mật khẩu tài khoản', enter current password and new password, submit change, return to Account screen, tap 'Đăng xuất khỏi quầy bar', confirm dialog 'Đăng xuất', and verify that the app returns to the Login screen, returning JSON {password_changed: true, logged_out: true, current_screen: 'login'}. | Đổi mật khẩu tài khoản thành công và thực hiện đăng xuất an toàn; ứng dụng hủy phiên và quay về màn hình Đăng nhập. | `e2e_test/test_auth.py` |
+
+---
+
+## 3. Dữ liệu và Điều kiện đầu
+
+### 3.1. Tài khoản kiểm thử theo vai trò (Biến môi trường)
+Nhằm bảo mật tuyệt đối, thông tin đăng nhập **không được viết trực tiếp vào mã nguồn hay tài liệu**, mà được nạp qua biến môi trường trước khi chạy bộ test:
+
+- **Tài khoản Barista A (Viewer chính):**
+  - Email: `$RH_VIEWER_EMAIL`
+  - Mật khẩu: `$RH_VIEWER_PASSWORD`
+- **Tài khoản Barista B (Viewer phụ – kiểm thử cách ly dữ liệu phản hồi TC-20):**
+  - Email: `$RH_VIEWER_B_EMAIL`
+  - Mật khẩu: `$RH_VIEWER_B_PASSWORD`
+- **Tài khoản Quản lý cửa hàng (Store Admin):**
+  - Email: `$RH_ADMIN_EMAIL`
+  - Mật khẩu: `$RH_ADMIN_PASSWORD`
+
+### 3.2. Thiết bị kiểm thử vật lý
+- **Thiết bị:** Xiaomi Redmi 7 (Onclite).
+- **Hệ điều hành:** Android 10 (API level 29).
+- **Độ phân giải màn hình:** 720 × 1520 pixels.
+- **Bản dựng ứng dụng:** APK bản Release chính thức (`app-release.apk`), build với cờ tối ưu hóa:
+  ```powershell
+  flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
+  ```
+
+### 3.3. Quy trình làm sạch trạng thái trước mỗi ca kiểm thử
+Để đảm bảo tính độc lập và tránh ảnh hưởng dữ liệu giữa các ca kiểm thử:
+1. Thực thi lệnh xóa dữ liệu app qua ADB:
+   ```bash
+   adb -s $ANDROID_SERIAL shell pm clear com.recipehub.mobile
+   ```
+2. Khởi chạy lại ứng dụng:
+   ```bash
+   adb -s $ANDROID_SERIAL shell am start -n com.recipehub.mobile/.MainActivity
+   ```
+3. Đăng nhập lại đúng vai trò yêu cầu của từng ca kiểm thử.
+
+---
+
+## 4. Cách chạy bộ kiểm thử tự động
+
+Bộ test E2E được điều khiển bởi ARTEMIS agent (sử dụng Gemini Flash/Pro) kết hợp cùng framework pytest trong thư mục `e2e_test/`.
+
+### 4.1. Cài đặt môi trường
+Sử dụng công cụ quản lý gói `uv`:
+```powershell
+cd e2e_test
+uv sync
+```
+
+### 4.2. Cấu hình biến môi trường
+Thiết lập các biến môi trường bắt buộc trong phiên dòng lệnh:
+```powershell
+$env:GEMINI_API_KEY = "AIzaSy..."
+$env:ANDROID_SERIAL = "dc6a090b"  # Serial của Redmi 7 kết nối adb
+$env:RH_VIEWER_EMAIL = "barista.hcm01@recipehub.vn"
+$env:RH_VIEWER_PASSWORD = "..."
+$env:RH_VIEWER_B_EMAIL = "barista.hcm02@recipehub.vn"
+$env:RH_VIEWER_B_PASSWORD = "..."
+$env:RH_ADMIN_EMAIL = "admin.hcm01@recipehub.vn"
+$env:RH_ADMIN_PASSWORD = "..."
+```
+
+### 4.3. Chạy kiểm thử đơn lẻ hoặc theo suite
+Chạy toàn bộ các ca pytest:
+```powershell
+uv run pytest -v
+```
+Chạy từng nhóm kiểm thử theo tệp:
+```powershell
+uv run pytest e2e_test/test_auth.py -v
+uv run pytest e2e_test/test_search.py -v
+uv run pytest e2e_test/test_detail.py -v
+uv run pytest e2e_test/test_practice_export.py -v
+uv run pytest e2e_test/test_feedback.py -v
+uv run pytest e2e_test/test_profile_remote_config.py -v
+uv run pytest e2e_test/test_notifications.py -v
+```
+
+### 4.4. Chạy đối soát 3 vòng độc lập
+Để đo lường độ ổn định (Pass Rate) và phát hiện flaky test, chạy tập lệnh lặp 3 vòng và xuất kết quả ra file `results.csv`:
+```powershell
+.\run_suite.ps1 -Rounds 3 -OutputFile results.csv
+```
+
+---
+
+## 5. Kết quả chạy kiểm thử & Phiên khám phá
+
+> [!NOTE]
+> **Trạng thái:** **Chưa chạy** (Bảng kết quả chuẩn bị sẵn để ghi nhận dữ liệu thực tế khi thực thi trên thiết bị thật; không điền số liệu giả định).
+
+### 5.1. Bảng kết quả chạy tự động (3 vòng đối soát)
+
+| Test ID | Ca kiểm thử | Số lần chạy | Pass Rate (%) | Thời gian TB (s) | Trace ID mẫu | Ghi chú |
+| :--- | :--- | :-: | :-: | :-: | :--- | :--- |
+| **TC-01** | Đăng nhập Email/Mật khẩu thành công | 0 | Chưa chạy | – | – | – |
+| **TC-02** | Đăng nhập sai mật khẩu báo lỗi | 0 | Chưa chạy | – | – | – |
+| **TC-03** | Quên mật khẩu gửi thư đặt lại | 0 | Chưa chạy | – | – | – |
+| **TC-04** | Tài khoản chưa cấp quyền hạ vai trò | 0 | Chưa chạy | – | – | – |
+| **TC-05** | Đăng nhập Google qua Account Picker | 0 | Chưa chạy | – | – | – |
+| **TC-06** | Hủy chọn tài khoản Google Sign-In | 0 | Chưa chạy | – | – | – |
+| **TC-07** | Tìm kiếm công thức có kết quả tại quầy | 0 | Chưa chạy | – | – | – |
+| **TC-08** | Tìm kiếm không có kết quả (Empty State) | 0 | Chưa chạy | – | – | – |
+| **TC-09** | Xử lý mất mạng và bấm nút Thử lại | 0 | Chưa chạy | – | – | – |
+| **TC-10** | Chuyển đổi qua 4 tab điều hướng cấp 1 | 0 | Chưa chạy | – | – | – |
+| **TC-11** | Xem chi tiết công thức và thông tin size | 0 | Chưa chạy | – | – | – |
+| **TC-12** | Xem video chuẩn từng bước thao tác | 0 | Chưa chạy | – | – | – |
+| **TC-13** | Kiểm tra event Analytics `view_recipe` logcat | 0 | Chưa chạy | – | – | – |
+| **TC-14** | Sổ tay SOP lật trang 3D & xuất PDF | 0 | Chưa chạy | – | – | – |
+| **TC-15** | Chi tiết nhiệm vụ học & tick checklist | 0 | Chưa chạy | – | – | – |
+| **TC-16** | Làm trắc nghiệm Quiz & nộp xem điểm | 0 | Chưa chạy | – | – | – |
+| **TC-17** | Tự luyện bấm giờ & xuất PDF vào máy | 0 | Chưa chạy | – | – | – |
+| **TC-18** | Admin chấm thực hành tại quầy theo tiêu chí | 0 | Chưa chạy | – | – | – |
+| **TC-19** | Gửi phản hồi kèm ảnh & Admin nhận real-time | 0 | Chưa chạy | – | – | – |
+| **TC-20** | Cách ly dữ liệu phản hồi giữa Barista A và B | 0 | Chưa chạy | – | – | – |
+| **TC-21** | Áp dụng cấu hình Remote Config giới hạn món | 0 | Chưa chạy | – | – | – |
+| **TC-22** | Admin bị ẩn tự luyện & tiến độ cá nhân | 0 | Chưa chạy | – | – | – |
+| **TC-23** | Chạm push notification khay hệ thống mở app | 0 | Chưa chạy | – | – | – |
+| **TC-24** | Đổi mật khẩu tài khoản & đăng xuất an toàn | 0 | Chưa chạy | – | – | – |
+
+### 5.2. Phiên kiểm thử khám phá (Exploratory Testing – 15 đến 30 phút)
+
+Bảng ghi nhận các vấn đề giao diện, trải nghiệm hoặc ngoại lệ phát hiện trong phiên tương tác tự do:
+
+| STT | Màn hình | Thao tác thực hiện | Hiện tượng quan sát được | Mức độ | Trạng thái |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| 1 | – | – | _Chưa chạy phiên khám phá_ | – | – |
+| 2 | – | – | _Chưa chạy phiên khám phá_ | – | – |
+| 3 | – | – | _Chưa chạy phiên khám phá_ | – | – |
+
+---
+
+## 6. Ca đã kiểm thủ công ngày 08/11/2026
+
+Ghi nhận trung thực kết quả kiểm thử thủ công chức năng **Firebase Cloud Messaging (FCM)** gửi từ Firebase Console tới thiết bị thật Xiaomi Redmi 7 vào ngày **08/11/2026**:
+
+### 6.1. Kết quả tiếp nhận thông báo trên 3 trạng thái ứng dụng
+Đã thực hiện gửi Test Message từ mục **Messaging** trên Firebase Console trực tiếp tới FCM Registration Token của Redmi 7:
+1. **Trạng thái Foreground (Ứng dụng đang mở trên màn hình):**
+   - Ứng dụng nhận thông báo tức thì, hiển thị banner **SnackBar nổi trong app** (`SnackBarBehavior.floating`) kèm nút bấm "Xem".
+   - Biểu tượng quả chuông thông báo trên AppBar tự động kích hoạt **chấm đỏ chỉ báo có tin mới** (`unreadNotifs > 0`).
+2. **Trạng thái Background (Ứng dụng đang ẩn dưới nền):**
+   - Thiết bị nhận thông báo hệ thống và hiển thị trên **khay thông báo (Notification Shade) của Android**.
+   - Có đầy đủ tiêu đề, nội dung và âm thanh thông báo tiêu chuẩn.
+3. **Trạng thái Terminated (Ứng dụng đã bị đóng hoàn toàn / Kill process):**
+   - Thiết bị đánh thức tiến trình nhận tin ngầm thành công, hiển thị thông báo trên **khay thông báo hệ thống**.
+   - Khi người dùng chạm vào thông báo từ khay hệ thống, ứng dụng được khởi động lạnh và điều hướng chính xác vào màn hình **"Thông báo & Thay đổi"** (`NotificationsPage`).
+
+### 6.2. Hai vấn đề thực tế phát hiện cần cải tiến
+Trong quá trình kiểm thử thủ công ngày 08/11/2026, nhóm kiểm thử phát hiện 2 vấn đề phát sinh trên Android 10:
+1. **Hiển thị SnackBar trùng khi mở app từ thông báo:**
+   - *Hiện tượng:* Khi chạm vào push notification từ khay hệ thống để mở ứng dụng, màn hình đã được điều hướng tới "Thông báo & Thay đổi", nhưng đồng thời giao diện vẫn bật thêm một SnackBar nổi chứa nội dung thông báo vừa chạm (gây trùng lặp hiển thị 2 lần).
+2. **Hộp thoại xin quyền hiển thị không cần thiết trên Android 10:**
+   - *Hiện tượng:* Khi mở lạnh ứng dụng trên Redmi 7 (Android 10), app vẫn bật hộp thoại quyền `Bật thông báo?` (`permission_primer_dialog`) với hai nút "Để sau" và "Cho phép", mặc dù trên Android 10 quyền thông báo được cấp mặc định khi cài đặt và hệ thống thông báo đã đang hoạt động bình thường.
+
+### 6.3. Bằng chứng kiểm thử
+Toàn bộ ảnh chụp màn hình kiểm chứng các bước kiểm thử thủ công FCM được lưu trữ tại thư mục:
+- Đường dẫn: `evidence/lab3/06-firebase-console/`
+- Tệp bằng chứng: `11.png`, `12.png`, `13.png`, `14.png`, `15.png`.
