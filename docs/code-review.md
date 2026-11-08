@@ -8,9 +8,9 @@ Nguồn phát hiện:
 | :-- | :-- | :-- |
 | CodeRabbit (GitHub App) | `@coderabbitai review` trên PR #2, comment theo dòng | 12 |
 | Codex CLI `codex review` (`gpt-6.1-sol`) | `codex review --base origin/dev` trong worktree của nhánh PR | 4 |
-| Kiểm thử thủ công trên Redmi 7 | FCM test message từ Firebase Console ở foreground / background / terminated (ngày 08/11/2026) | 2 |
+| Kiểm thử thủ công trên Redmi 7 (FCM + quay video demo) | FCM test message từ Firebase Console ở foreground / background / terminated (ngày 08/11/2026) | 4 |
 
-Tổng cộng 18 phát hiện (17 mục sau khi gộp trùng), trong đó 1 phát hiện trùng giữa hai nguồn (CodeRabbit #8 = Codex CR-01). Mỗi phát hiện được tự đọc lại code để xác nhận trước khi quyết định.
+Tổng cộng 20 phát hiện (19 mục sau khi gộp trùng), trong đó 1 phát hiện trùng giữa hai nguồn (CodeRabbit #8 = Codex CR-01). Mỗi phát hiện được tự đọc lại code để xác nhận trước khi quyết định.
 
 ## Bảng phát hiện và quyết định
 
@@ -35,13 +35,15 @@ Loại: **bug**, **security**, **architecture**, **performance**, **test gap**, 
 | CR-15 | CodeRabbit #1 | `MainActivity.kt` | bug | Thấp | Xuất PDF hai lần trong cùng phút thì Android tự đổi tên file (`(1)`), nhưng app trả về tên cũ. | Modified (hoãn) | Chỉ sai tên hiển thị trong SnackBar, vì file vẫn được lưu và mở đúng qua URI. Ưu tiên thấp hơn các lỗi dữ liệu. | – |
 | CR-16 | CodeRabbit #6 | `recipe_viewmodel.dart` | bug | Thấp | Listener công thức lỗi sau khi đăng xuất thì lần đăng nhập sau không đăng ký lại real-time. | Modified (hoãn) | Chưa tái hiện được trên Redmi 7. Sẽ sửa cùng phần dọn vòng đời subscription ở Final. | – |
 | CR-17 | CodeRabbit #12 | `practical_evaluation_page.dart` | bug | Thấp | Món được chọn trong form chấm không đồng bộ khi danh sách món đổi real-time. | Modified (hoãn) | Chỉ Admin dùng, và món hiếm khi đổi trong lúc đang chấm. Ghi nhận cho Final. | – |
+| CR-18 | Quay video demo (Redmi 7) | `sop_book_views.dart`, `practice_history_page.dart` | maintainability | Thấp | Sổ tay SOP và lịch sử tự luyện (kể cả PDF) vẫn hiện mã món như `CF-PHELANN`, trái yêu cầu ẩn mã trên mobile. | Accepted | Mã món là mã kỹ thuật; người dùng tại quầy chỉ cần tên món. | `62c03e5` |
+| CR-19 | Quay video demo (Redmi 7) | `main_app_shell.dart`, `practice_history_page.dart` | bug | Thấp | SnackBar "Đã lưu…" bám theo khi đổi tab và che nút "Gửi phản hồi". | Accepted | Che nút chính của màn khác. SnackBar nay ngắn hơn và được ẩn khi rời màn/đổi tab. | `69c2067` |
 
-Thống kê: 13 Accepted (đã sửa, mỗi mục có commit `fix(mobile): CR-xx …`), 4 Modified (hoãn có lý do), 0 Rejected. Các loại gồm bug, security, architecture, test gap và maintainability. Bài học: CR-12 suýt bị Rejected dựa trên giả định sai, nên mọi quyết định đều phải kiểm lại code.
+Thống kê: 15 Accepted (đã sửa, mỗi mục có commit `fix(mobile): CR-xx …`), 4 Modified (hoãn có lý do), 0 Rejected. Các loại gồm bug, security, architecture, test gap và maintainability. Bài học: CR-12 suýt bị Rejected dựa trên giả định sai, nên mọi quyết định đều phải kiểm lại code.
 
 ## Kiểm chứng sau sửa
 
 - `flutter analyze`: 0 issue.
-- `flutter test`: tăng từ 161 lên 275 test, tất cả pass. Mỗi fix có test riêng, ví dụ `test/admin_training_session_test.dart`, `test/core/viewmodels/recipe_search_test.dart`, `test/auth_crash_reporting_test.dart`, `test/core/utils/video_time_test.dart`.
+- `flutter test`: tăng từ 161 lên 286 test, tất cả pass. Mỗi fix có test riêng, ví dụ `test/admin_training_session_test.dart`, `test/core/viewmodels/recipe_search_test.dart`, `test/auth_crash_reporting_test.dart`, `test/core/utils/video_time_test.dart`.
 - CR-04 và CR-08: test do Codex sinh ra ban đầu fail vì dùng `pageBack()` trên trang không có nút back mặc định, vì SnackBar che nút, và vì layout tràn với font test. Đã đọc lỗi và sửa test bằng commit riêng (`5513474`, `5956250`), không nới lỏng assert.
 
 ## Công cụ AI đã dùng (disclosure)
