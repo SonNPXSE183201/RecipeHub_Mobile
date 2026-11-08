@@ -30,6 +30,8 @@ class TrainingViewModel extends ChangeNotifier {
 
   LoadState _sopState = LoadState.loading;
   LoadState _taskState = LoadState.loading;
+  LoadState _progressState = LoadState.loading;
+  LoadState _attemptsState = LoadState.loading;
   LoadState _quizState = LoadState.loading;
   LoadState _evalState = LoadState.loading;
   String? _error;
@@ -38,6 +40,8 @@ class TrainingViewModel extends ChangeNotifier {
   List<SopItem> get sops => _sops;
   LoadState get sopState => _sopState;
   LoadState get taskState => _taskState;
+  LoadState get progressState => _progressState;
+  LoadState get attemptsState => _attemptsState;
   LoadState get quizState => _quizState;
   LoadState get evaluationState => _evalState;
   String? get error => _error;
@@ -134,6 +138,8 @@ class TrainingViewModel extends ChangeNotifier {
     _attempts = const [];
     _evaluations = const [];
     _sopState = _taskState = _quizState = _evalState = LoadState.loading;
+    _progressState = _attemptsState = LoadState.loading;
+    _error = null;
     _notify();
   }
 
@@ -143,6 +149,7 @@ class TrainingViewModel extends ChangeNotifier {
     _cancel();
     _error = null;
     _sopState = _taskState = _quizState = _evalState = LoadState.loading;
+    _progressState = _attemptsState = LoadState.loading;
     _notify();
     _subs.add(
       _repo.watchSops().listen(
@@ -167,10 +174,15 @@ class TrainingViewModel extends ChangeNotifier {
       ),
     );
     _subs.add(
-      _repo.watchProgress(uid).listen((v) {
-        _progress = v;
-        _notify();
-      }, onError: (Object e, StackTrace s) => _fail(e, s, 'progress', () {})),
+      _repo.watchProgress(uid).listen(
+        (v) {
+          _progress = v;
+          _progressState = LoadState.ready;
+          _notify();
+        },
+        onError: (Object e, StackTrace s) =>
+            _fail(e, s, 'progress', () => _progressState = LoadState.error),
+      ),
     );
     _subs.add(
       _repo.watchQuizzes().listen(
@@ -184,10 +196,15 @@ class TrainingViewModel extends ChangeNotifier {
       ),
     );
     _subs.add(
-      _repo.watchMyAttempts(uid).listen((v) {
-        _attempts = v;
-        _notify();
-      }, onError: (Object e, StackTrace s) => _fail(e, s, 'attempts', () {})),
+      _repo.watchMyAttempts(uid).listen(
+        (v) {
+          _attempts = v;
+          _attemptsState = LoadState.ready;
+          _notify();
+        },
+        onError: (Object e, StackTrace s) =>
+            _fail(e, s, 'attempts', () => _attemptsState = LoadState.error),
+      ),
     );
     _subs.add(
       _repo.watchMyEvaluations(uid).listen(
@@ -219,6 +236,11 @@ class TrainingViewModel extends ChangeNotifier {
   ) async {
     final uid = _uid;
     if (uid == null) return 'Phiên đăng nhập đã hết.';
+    if (_progressState != LoadState.ready) {
+      return _progressState == LoadState.error
+          ? 'Không tải được tiến độ. Vui lòng thử lại trước khi lưu.'
+          : 'Đang tải tiến độ. Vui lòng đợi trước khi lưu.';
+    }
     try {
       await _repo.setSectionDone(
         uid: uid,
@@ -239,6 +261,11 @@ class TrainingViewModel extends ChangeNotifier {
   Future<String?> completeAll(LearningTaskItem task) async {
     final uid = _uid;
     if (uid == null) return 'Phiên đăng nhập đã hết.';
+    if (_progressState != LoadState.ready) {
+      return _progressState == LoadState.error
+          ? 'Không tải được tiến độ. Vui lòng thử lại trước khi lưu.'
+          : 'Đang tải tiến độ. Vui lòng đợi trước khi lưu.';
+    }
     final n = task.sections.length;
     if (n == 0) return null;
     try {
@@ -265,6 +292,13 @@ class TrainingViewModel extends ChangeNotifier {
   }) {
     final uid = _uid;
     if (uid == null) throw const TrainingFailure('Phiên đăng nhập đã hết.');
+    if (_attemptsState != LoadState.ready) {
+      throw TrainingFailure(
+        _attemptsState == LoadState.error
+            ? 'Không tải được lịch sử làm bài. Vui lòng thử lại trước khi nộp.'
+            : 'Đang tải lịch sử làm bài. Vui lòng đợi trước khi nộp.',
+      );
+    }
     final next =
         attemptsOf(quiz.id)
             .fold<int>(0, (m, a) => a.attemptNo > m ? a.attemptNo : m) +

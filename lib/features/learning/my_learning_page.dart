@@ -225,13 +225,17 @@ class _MyLearningPageState extends State<MyLearningPage>
 
             // Tab Views
             Expanded(
-              child: training.taskState == LoadState.loading && tasks.isEmpty
-                  ? const LoadStateView.loading()
-                  : training.taskState == LoadState.error && tasks.isEmpty
+              child:
+                  (training.taskState == LoadState.error && tasks.isEmpty) ||
+                      training.progressState == LoadState.error
                   ? LoadStateView.error(
                       message: training.error ?? 'Không tải được nhiệm vụ học.',
                       onRetry: training.retry,
                     )
+                  : (training.taskState == LoadState.loading &&
+                            tasks.isEmpty) ||
+                        training.progressState == LoadState.loading
+                  ? const LoadStateView.loading()
                   : TabBarView(
                       controller: _tabController,
                       children: [

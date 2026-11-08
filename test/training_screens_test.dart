@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:recipehub_mobile/core/di/app_services.dart';
 import 'package:recipehub_mobile/core/models/app_models.dart';
 import 'package:recipehub_mobile/core/models/recipe_models.dart';
+import 'package:recipehub_mobile/core/models/training_models.dart';
+import 'package:recipehub_mobile/core/services/interfaces/i_training_repository.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/viewmodels/app_config_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
@@ -20,6 +22,7 @@ import 'package:recipehub_mobile/features/practice/quiz_exam_page.dart';
 import 'package:recipehub_mobile/features/sop/sop_catalog_page.dart';
 
 import 'support/fake_recipe_source.dart';
+import 'support/deferred_training_repository.dart';
 import 'support/training_fixtures.dart';
 
 Future<void> _pump(
@@ -108,6 +111,78 @@ void _ignoreOverflow() {
 }
 
 void main() {
+  testWidgets('Chưa có snapshot không ghi đè tiến độ; hiện lỗi và thử lại', (
+    tester,
+  ) async {
+    _ignoreOverflow();
+    final repo = DeferredTrainingRepository();
+    final task = testTask();
+    final saved = TaskProgress(
+      taskId: task.id,
+      completedSections: const [0],
+      totalSections: task.sections.length,
+    );
+    repo.progress['u1'] = {task.id: saved};
+    addTearDown(() async {
+      await repo.progressStream.close();
+      await repo.attemptsStream.close();
+    });
+    await _pump(tester, repo, LearningTaskDetailPage(task: task));
+    expect(find.text('Đang tải tiến độ...'), findsOneWidget);
+    final checkbox = find.byType(Checkbox).last;
+    await tester.ensureVisible(checkbox);
+    await tester.tap(checkbox);
+    await tester.pump();
+    expect(repo.progressWrites, 0);
+    expect(repo.progress['u1']![task.id]!.completedSections, [0]);
+    expect(
+      find.text('Đang tải tiến độ. Vui lòng đợi trước khi lưu.'),
+      findsOneWidget,
+    );
+
+    repo.progressStream.addError(
+      const TrainingFailure('Không tải được tiến độ.'),
+    );
+    await tester.pump();
+    expect(find.text('Không tải được tiến độ.'), findsOneWidget);
+    await tester.tap(find.text('Thử lại'));
+    await tester.pump();
+    expect(find.text('Đang tải tiến độ...'), findsOneWidget);
+    repo.progressStream.add({task.id: saved});
+    await tester.pump();
+    expect(find.text('Đang tải tiến độ...'), findsNothing);
+    await tester.ensureVisible(checkbox);
+    await tester.tap(checkbox);
+    await tester.pump();
+    expect(repo.progressWrites, 1);
+    expect(repo.progress['u1']![task.id]!.completedSections, [0, 1]);
+  });
+
+  testWidgets('Quiz hiện lỗi lịch sử làm bài và chờ snapshot sau thử lại', (
+    tester,
+  ) async {
+    final repo = DeferredTrainingRepository();
+    addTearDown(() async {
+      await repo.progressStream.close();
+      await repo.attemptsStream.close();
+    });
+    await _pump(tester, repo, const QuizExamPage(quiz: testQuiz));
+    expect(find.text('Đang tải lịch sử làm bài...'), findsOneWidget);
+    expect(find.text(testQuiz.questions.first.text), findsNothing);
+    repo.attemptsStream.addError(
+      const TrainingFailure('Không tải được lịch sử làm bài.'),
+    );
+    await tester.pump();
+    expect(find.text('Không tải được lịch sử làm bài.'), findsOneWidget);
+    expect(repo.quizWrites, 0);
+    await tester.tap(find.text('Thử lại'));
+    await tester.pump();
+    expect(find.text('Đang tải lịch sử làm bài...'), findsOneWidget);
+    repo.attemptsStream.add([]);
+    await tester.pumpAndSettle();
+    expect(find.text(testQuiz.questions.first.text), findsOneWidget);
+  });
+
   testWidgets('Mở học tải món ngoài giới hạn, loading và không mở lặp', (
     tester,
   ) async {

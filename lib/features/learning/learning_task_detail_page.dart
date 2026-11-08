@@ -9,6 +9,7 @@ import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/widgets/load_state_view.dart';
 import '../lookup/step_video_guide_page.dart';
 import '../practice/quiz_exam_page.dart';
 import '../sop/sop_detail_page.dart';
@@ -123,6 +124,13 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
       body: SafeArea(
         child: Column(
           children: [
+            if (training.progressState == LoadState.error)
+              LoadStateView.error(
+                message: training.error ?? 'Không tải được tiến độ.',
+                onRetry: training.retry,
+              )
+            else if (training.progressState == LoadState.loading)
+              const LoadStateView.loading(message: 'Đang tải tiến độ...'),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
