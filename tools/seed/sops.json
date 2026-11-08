@@ -1,0 +1,1134 @@
+[
+  {
+    "code": "SOP-REFILL",
+    "title": "Re-fill nguyên vật liệu trong ca",
+    "category": "Vận hành quầy",
+    "version": "v1.0",
+    "summary": "Kiểm tra và fill bột sữa, HHSD, đường vào các khung giờ bắt buộc để máy định lượng không hết nguyên liệu giữa giờ cao điểm.",
+    "linkedRecipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLSUAN",
+      "TS-OLNHAID",
+      "TS-OLNHAIN",
+      "TS-MATNHAND",
+      "TS-MATNHANN",
+      "TS-TAMD",
+      "TS-TAMN",
+      "TS-KHOID",
+      "TS-KHOIN"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Checklist đường bột đầu ngày",
+        "content": "Duy trì checklist đường bột vào đầu ngày làm việc.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Khung giờ bắt buộc",
+        "content": "Kiểm tra và fill nguyên vật liệu vào các khung giờ: sáng 9h-12h, chiều 13h-14h-15h, tối 18h-19h-20h.",
+        "note": "Mục đích là tạo ý thức chủ động kiểm tra, không để nguyên vật liệu hết giữa chừng khi dùng máy giờ cao điểm.",
+        "icon": "schedule"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Đồng hồ nhắc việc",
+        "content": "Luôn có đồng hồ bấm giờ treo bên cạnh máy, cài nhắc 1 tiếng/lần để kiểm tra và fill nguyên vật liệu.",
+        "icon": "timer"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Mức fill tối đa",
+        "content": "Fill nguyên vật liệu cách miệng khoang chứa 2cm và luôn nằm trong giới hạn vạch Min - Max.",
+        "note": "Áp dụng cho máy định lượng Đường, máy Hỗn Hợp Sữa Đặc và máy Bột Sữa.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Mức fill tối thiểu",
+        "content": "Không để nguyên vật liệu thấp hơn con ốc bên hông khoang chứa; nguyên vật liệu luôn phải ngập vượt qua con ốc.",
+        "note": "Không fill quá đầy (tràn mép) hoặc để quá cạn (dưới con ốc) vì làm sai lệch định lượng bơm, dẫn đến phải cân lại nguyên vật liệu.",
+        "icon": "warning"
+      }
+    ],
+    "sourcePage": 2
+  },
+  {
+    "code": "SOP-THIEUNVL",
+    "title": "Xử lý khi máy hết nguyên liệu giữa chừng",
+    "category": "Vận hành quầy",
+    "version": "v1.0",
+    "summary": "Cách cân bù khi máy bột sữa, HHSD hoặc đường hết trong lúc đang làm đồ uống. Máy và thứ tự đong phải đúng thứ tự thì mới áp dụng được hướng dẫn này.",
+    "linkedRecipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLSUAN",
+      "TS-OLNHAID",
+      "TS-OLNHAIN",
+      "TS-MATNHAND",
+      "TS-MATNHANN",
+      "TS-TAMD",
+      "TS-TAMN",
+      "TS-KHOID",
+      "TS-KHOIN"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Thiếu bột sữa: cân ly rỗng",
+        "content": "Đặt ly rỗng lên cân, back cân về 0.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Thiếu bột sữa: cân ly đang thiếu",
+        "content": "Đặt ly đang thiếu lên cân để xem khối lượng bột sữa hiện tại.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Thiếu bột sữa: đong bù",
+        "content": "Đong bù thêm cho đủ định lượng.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Thiếu HHSD/đường: back cân",
+        "content": "B1: đặt ly đã có đủ bột sữa lên cân, back cân về 0.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Thiếu HHSD/đường: xem lượng hiện có",
+        "content": "B2: đặt ly đang thiếu lên cân, số hiển thị là lượng HHSD/đường đang có.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 6,
+        "title": "Thiếu HHSD/đường: đong bù",
+        "content": "B3: đong bù thêm cho đủ định lượng.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 4
+  },
+  {
+    "code": "SOP-BAOQUAN",
+    "title": "Date trà, vệ sinh sâu máy và bảo quản qua đêm",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Quy chuẩn bắt buộc về hạn dùng trà, lịch vệ sinh sâu máy cà phê và cách bảo quản nguyên liệu trong máy định lượng qua đêm.",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Date trà",
+        "content": "Date trà là D+5.",
+        "icon": "schedule"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Vệ sinh sâu máy cà phê",
+        "content": "Thứ 7 hàng tuần vệ sinh sâu máy pha cà phê bằng bột vệ sinh chuyên dụng CAFIZA.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Bảo quản qua đêm",
+        "content": "Nguyên vật liệu để qua đêm trong máy định lượng bột sữa, hỗn hợp sữa đặc, đường: bắt buộc đậy nắp và bọc kín bên ngoài bằng wrap thực phẩm.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 5,
+    "linkedRecipeCodes": [
+      "DX-KEMMATCHA",
+      "DX-HHSD",
+      "DX-PHIN200",
+      "DX-PHIN100",
+      "DX-TRANCHAU"
+    ]
+  },
+  {
+    "code": "SOP-SUCTRA",
+    "title": "Quy trình sục trà cơ bản",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Năm bước sục trà sữa: xả vòi, nghiêng cốc, tạo xoáy đến 30°C, đi tay 5-7 vòng và dừng ở 50-60°C. Trà là nguyên liệu đầu tiên được sục để bung hương.",
+    "linkedRecipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLNHAID",
+      "TS-MATNHAND",
+      "TS-TAMD",
+      "TS-KHOID"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Xả vòi và kiểm tra áp suất",
+        "content": "Thực hiện xả vòi trước mỗi lần sục dù sản phẩm cùng loại: kiểm tra vòi hơi ra đủ 4 tia, không bị tắc. Áp suất máy đạt >= 1.4 mới được sục.",
+        "note": "Xả tia nước đầu vòi để tránh ảnh hưởng sản phẩm.",
+        "icon": "speed"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Nghiêng cốc 45°",
+        "content": "Nghiêng cốc 45°, trà ngập 1/3 đầu vòi; vị trí đầu vòi luôn nằm ở giữa ly, không sát thành ly.",
+        "note": "Đảm bảo trà được sục đầu tiên: bung hương trà quyết định 70% độ ngon của ly trà sữa.",
+        "icon": "coffee_maker"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Xả vòi tạo xoáy đến 30°C",
+        "content": "Mở vòi từ từ để tạo xoáy đến 30°C thì dựng thẳng cốc.",
+        "icon": "thermostat"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Đi tay 5-7 vòng",
+        "content": "Đi tay 5-7 vòng từ trên xuống dưới, nhịp đều. Với 5 vòng: 1 giữa, 2 đáy, 1 giữa, 1 mặt. Size La cách đáy 2cm.",
+        "note": "Đã đi 5 vòng mà chưa đủ nhiệt độ thì đi thêm 1-2 lần ở vòng giữa; không đi xuống đáy hoặc giữ yên vòi sục.",
+        "icon": "sync"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Dừng ở 50-60°C",
+        "content": "Dừng sục khi sản phẩm đạt 50-60°C.",
+        "icon": "thermostat"
+      }
+    ],
+    "sourcePage": 6
+  },
+  {
+    "code": "SOP-TSLANH",
+    "title": "Quy trình sục trà sữa lạnh",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Bảy thao tác từ xả vòi đến khuấy kiểm tra dị vật khi sục trà sữa lạnh, kèm lưu ý để tránh trà sữa bị lên đường.",
+    "linkedRecipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLNHAID",
+      "TS-MATNHAND",
+      "TS-TAMD",
+      "TS-KHOID",
+      "TS-PLUSOLSUA",
+      "TS-PLUSOLNHAI",
+      "TS-PLUSMATNHAN",
+      "TS-PLUSTAM",
+      "TS-PLUSKHOI"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Xả vòi, kiểm tra áp suất",
+        "content": "Xả đầu vòi trước mỗi lần sục (bắt buộc), kiểm tra vòi hơi ra đủ 4 tia và áp suất máy >= 1.4.",
+        "icon": "speed"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cảm nhận vị trí vòi",
+        "content": "Đặt ngón út dưới đáy ly để cảm nhận vòi sục có đang ở đáy ly hay không; cảm nhận nhiệt độ thành phẩm khi cho đá vào khuấy làm mát (với trà sữa nóng).",
+        "icon": "thermostat"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Nghiêng ly 45 độ",
+        "content": "Nghiêng ly 45 độ, ngập 1/3 đầu vòi, vòi sục luôn ở giữa ly (không sát thành ly).",
+        "icon": "coffee_maker"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Tạo xoáy đến 30°C",
+        "content": "Mở từ từ xả vòi sục tạo xoáy đến 30°C, rồi đứng ly và đi tay 5-7 vòng đều nhịp.",
+        "icon": "sync"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Đi tay đúng đủ",
+        "content": "Đi tay 5-7 vòng (1 giữa, 2 đáy, 1 giữa, 1 bề mặt) để trà tiếp xúc với đầu vòi và được sục đầu tiên. Sản phẩm đạt 50-60°C.",
+        "note": "Tuyệt đối không cắm vòi sục quá sâu xuống đáy ly sau khi sục trà vì sẽ sục thẳng vào sữa đặc làm trà sữa bị lên đường. Chưa đủ nhiệt sau 5 vòng thì đi thêm 1-2 lần ở vòng giữa.",
+        "icon": "sync"
+      },
+      {
+        "stepNumber": 6,
+        "title": "Vệ sinh vòi",
+        "content": "Vệ sinh vòi ngay sau khi sục nếu sục khác loại; nếu sục liên tiếp 5 ly cùng loại thì vệ sinh vòi sau 5 ly.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 7,
+        "title": "Khuấy kiểm tra",
+        "content": "Khuấy đảo từ trong ra ngoài, từ ngoài vào trong, cào nhẹ từ đáy lên và vào thành ly để kiểm tra dị vật hoặc bột sữa còn sót.",
+        "icon": "checklist"
+      }
+    ],
+    "sourcePage": 7
+  },
+  {
+    "code": "SOP-TSNONG",
+    "title": "Quy trình trà sữa nóng",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Quy trình trà sữa nóng gồm sục lần 1 ở 50-60°C, làm mát bằng đá rồi sục lần 2 dừng ở 60-65°C. Áp dụng cho Ô Long sữa Phê La, Tấm (size Phê và La) và Ô Long Nhài sữa, Khói B'lao, Mật Nhãn (size La).",
+    "linkedRecipeCodes": [
+      "TS-OLSUAN",
+      "TS-OLNHAIN",
+      "TS-MATNHANN",
+      "TS-TAMN",
+      "TS-KHOIN"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Cho nguyên liệu theo thứ tự",
+        "content": "Cho lần lượt bột sữa, HHSD, đường nước, cốt trà vào ly. Bột sữa size Phê 22.5g, size La 28g; HHSD size Phê 55g, size La 70g (độ ngọt 100%).",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Sục hỗn hợp lần 1",
+        "content": "Sục hỗn hợp theo quy trình sục ở 50-60°C, sau đó vệ sinh vòi sau khi sục.",
+        "icon": "thermostat"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Khuấy kỹ",
+        "content": "Khuấy kỹ bằng thìa inox cán dài, khuấy từ đáy lên để kiểm tra dị vật.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Cho đá làm mát",
+        "content": "Dùng cốc định lượng 200ml: size Phê 1 cốc ngang miệng, size La 1 cốc ngang miệng + 1/2 cốc. Khuấy tan đá, vớt xác đá thừa bằng vợt nếu còn.",
+        "note": "Đặt ngón út dưới đáy ly để cảm nhận nhiệt độ, đảm bảo làm mát sâu.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Sục lần 2",
+        "content": "Cắm vòi sục vào giữa ly, vặn mở từ từ vòi sục trà, đồng thời sục lên 30°C với thao tác đi tay 5-7 vòng đều quanh ly. Sản phẩm đạt 60-65°C.",
+        "note": "Nếu khách note 0% đường: thêm sữa đặc 25g (size Phê) hoặc 40g (size La) ở bước 1 thay cho HHSD và đường.",
+        "icon": "thermostat"
+      }
+    ],
+    "sourcePage": 9
+  },
+  {
+    "code": "SOP-DAD",
+    "title": "Định lượng đá theo độ đá",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Mức đá chuẩn theo nhóm sản phẩm ở độ đá 100%; các mức 70%, 50%, 30% giảm dần 1cm, 2cm, 3cm so với mức 100%.",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Trà sữa không topping (ly 16oz/22oz)",
+        "content": "Đá 100% ngang miệng cốc; đá 70% giảm 1cm, 50% giảm 2cm, 30% giảm 3cm.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Trà sữa có topping",
+        "content": "Đá 100% cách miệng cốc 0.5cm.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Trà Vỏ Cà Phê, LangBiang",
+        "content": "Đá ngang miệng cốc.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Si Mơ, Bòng Bưởi",
+        "content": "Đá cách miệng cốc 0.5cm.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Gấm, Ô Long Đào Hồng, Lụa Đào, Matcha Coco Latte",
+        "content": "Đá cách miệng cốc 1cm.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 6,
+        "title": "Ly nhựa 14oz: Phê Nâu, Phê Đen, Phê Xỉu Vani",
+        "content": "Phê Nâu, Phê Đen: đá 100% cách miệng cốc 1cm. Phê Xỉu Vani: cách miệng cốc 1.5cm. Đá 70%, 50%, 30% giảm 1cm, 2cm, 3cm.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 7,
+        "title": "Ly giấy 14oz: Phê Ô Long Bưởi, Đà Lạt",
+        "content": "Phê Ô Long Bưởi Cam Vàng, Phê Ô Long Bưởi Chanh Vàng, Đà Lạt: đá 100% cách miệng cốc 1.5cm. Đá 70%, 50%, 30% giảm 1cm, 2cm, 3cm.",
+        "note": "Độ giảm luôn căn cứ từ định lượng 100%.",
+        "icon": "ac_unit"
+      }
+    ],
+    "sourcePage": 10,
+    "linkedRecipeCodes": [
+      "TS-OLSUAD",
+      "TS-OLNHAID",
+      "TS-MATNHAND",
+      "TS-TAMD",
+      "TS-KHOID",
+      "TS-PHONGLAND",
+      "TT-GAM",
+      "TT-OLDAOHONG",
+      "TS-LUADAO",
+      "TT-TRAVOCF",
+      "TT-LANGBIANG",
+      "TT-SIMO",
+      "TT-BONGBUOI",
+      "DX-MATCHACOCO",
+      "DX-MATCHAPXP850",
+      "DX-MATCHAPXP855",
+      "DX-SCBONGBUOI850",
+      "DX-SCBONGBUOI855",
+      "DX-PHINDACSAN850",
+      "DX-PHINDACSAN855",
+      "CF-PHEDEN",
+      "CF-PHENAU",
+      "CF-XIUVANI",
+      "CF-OLBUOICAM",
+      "CF-OLBUOICHANH",
+      "CF-DALAT"
+    ]
+  },
+  {
+    "code": "SOP-SHAKER",
+    "title": "Kỹ năng lắc bình shaker",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Tư thế cầm và thao tác lắc bình shaker đúng cách để bung hương trà.",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Tư thế cầm",
+        "content": "Tay thuận: ngón cái giữ nắp nhỏ, 4 ngón còn lại giữ thân bình (đảm bảo khóa chặt các điểm nối). Tay còn lại đỡ đáy bình.",
+        "icon": "blender"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Thao tác lắc",
+        "content": "Giữ bình ngang vai, lắc lên xuống, lực dứt khoát, mắt nhìn thẳng, đủ nhịp để bung hương trà.",
+        "icon": "sync"
+      }
+    ],
+    "sourcePage": 19,
+    "linkedRecipeCodes": [
+      "TS-PHONGLAND",
+      "TS-PHONGLANN",
+      "TT-GAM",
+      "TT-OLDAOHONG",
+      "TS-LUADAO",
+      "TT-TRAVOCF",
+      "TT-SIMO",
+      "TT-BONGBUOI",
+      "TS-PLUSPHONGLAN",
+      "TS-PLUSLUADAO"
+    ]
+  },
+  {
+    "code": "SOP-ZIC",
+    "title": "Thao tác đặc biệt khi đong syrup và fill đá",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Nhắc lại thao tác đong syrup bằng zic để lấy hết định lượng và cách fill đá cho sản phẩm có hoặc không có topping.",
+    "linkedRecipeCodes": [
+      "TT-GAM",
+      "TT-OLDAOHONG",
+      "TT-TRAVOCF",
+      "TT-SIMO"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Lắc zic vào thành cốc",
+        "content": "Khi đong syrup/si rô cho Gấm, Ô Long Đào Hồng, Trà Vỏ Cà Phê, Si Mơ, toàn bộ nhân sự phải gõ zic đong vào thành cốc để lấy hết hoàn toàn định lượng syrup bên trong.",
+        "icon": "water_drop"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Fill đá không topping",
+        "content": "Lắc nhẹ ly khi cho đá để lấp đầy khoảng trống cho đến khi đầy đến miệng ly.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Fill đá có topping",
+        "content": "Với sản phẩm có topping đi kèm, fill đá theo mức cách miệng cốc quy định cho từng sản phẩm.",
+        "icon": "ac_unit"
+      }
+    ],
+    "sourcePage": 20
+  },
+  {
+    "code": "SOP-TRAICAY",
+    "title": "Nhận và bảo quản trái cây, húng lủi",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Cân kiểm, đánh giá độ tươi và san chiết cam vàng, chanh vàng, chanh xanh, húng lủi sang túi zip Phê La kèm HSD.",
+    "linkedRecipeCodes": [
+      "TT-LANGBIANG",
+      "TT-GAM",
+      "TT-SIMO",
+      "CF-OLBUOICAM"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Cân kiểm định lượng",
+        "content": "Cân kiểm tra định lượng từng loại trái cây và húng lủi so với phiếu order, ghi nhận số thực tế. Chuẩn bị túi zip Phê La, găng tay nylon, cân 30kg.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Kiểm tra độ tươi theo tiêu chuẩn",
+        "content": "Cam vàng 250-300g/quả (quả tròn, vỏ căng, vàng tươi, mọng nước). Chanh vàng 150-200g/quả (vỏ vàng đậm, thơm tinh dầu, không khô xốp). Chanh xanh 46-60g/quả (chanh ta có hạt, vỏ nhẵn mỏng). Húng lủi: lá không quá to hoặc quá nhỏ, không úng héo.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 3,
+        "title": "San chiết sang túi zip",
+        "content": "Loại bỏ túi, bao bì của nhà cung cấp, cho vào túi zip Phê La kèm hạn sử dụng theo tiêu chuẩn QA. Với trái cây có túi nilon ngoài thì xé bỏ túi trước.",
+        "note": "Trái cây/rau khi san chiết và bảo quản trong túi zip không được rửa nước, chỉ rửa trước khi sử dụng, vì nước đọng làm nhanh hỏng, mốc, mềm nhũn và môi trường kín giữ ẩm làm vi khuẩn, nấm phát triển nhanh hơn.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 57
+  },
+  {
+    "code": "SOP-LATCAM",
+    "title": "Cắt lát cam vàng",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Cắt lát cam vàng bằng máy cắt trái cây ở nấc số 3, độ dày 0.3-0.4cm.",
+    "linkedRecipeCodes": [
+      "TT-LANGBIANG",
+      "CF-OLBUOICAM"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Rửa cam",
+        "content": "Rửa sạch quả cam vàng; dụng cụ (thớt nhựa trắng, dao, máy cắt, bowl) cần rửa sạch trước khi sơ chế, đeo găng tay nylon.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cắt bỏ hai đầu",
+        "content": "Cắt bỏ 2 phần đầu và cuống quả cam, ước lượng khoảng 1-1.5cm.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Cắt bằng máy",
+        "content": "Dùng máy cắt chọn nấc số 3, độ dày 0.3-0.4cm. Cho vào bowl đựng, bảo quản 5-10°C và dán tem HSD.",
+        "icon": "thermostat"
+      }
+    ],
+    "sourcePage": 62
+  },
+  {
+    "code": "SOP-HUNGLUI",
+    "title": "Cắt và bảo quản húng lủi",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Tách ngọn húng và nhánh thứ 2, rửa với nước lọc rồi ngâm bảo quản 5-10°C.",
+    "linkedRecipeCodes": [
+      "TT-LANGBIANG",
+      "TT-SIMO"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Chuẩn bị dụng cụ",
+        "content": "Chuẩn bị kéo, bình shaker, húng lủi; dụng cụ rửa sạch trước, đeo găng tay nylon.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Tách ngọn và nhánh",
+        "content": "Cắt húng làm 2 phần: ngọn húng và nhánh thứ 2 của húng.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Rửa sạch",
+        "content": "Rửa sạch húng với nước lọc.",
+        "icon": "water_drop"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Ngâm và bảo quản",
+        "content": "Ngâm húng đã setup cùng nước lọc, ghi HSD và bảo quản ở 5-10°C.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 63
+  },
+  {
+    "code": "SOP-COTCHANHX",
+    "title": "Vắt cốt chanh xanh",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Hai cách vắt cốt chanh xanh: dùng cây vắt (không dùng máy) hoặc dùng máy ép, rồi chiết vào chai định lượng 300ml.",
+    "linkedRecipeCodes": [
+      "TT-BONGBUOI",
+      "TT-LANGBIANG"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Rửa chanh",
+        "content": "Rửa sạch quả chanh xanh; dụng cụ rửa sạch trước khi sơ chế, đeo găng tay nylon.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cách 1: vắt bằng cây vắt",
+        "content": "Bào sạch phần vỏ xanh trước, cắt thành các phần nhỏ, dùng cây vắt ép chặt tay lấy hết cốt chanh vào bình shaker nhựa.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Cách 2: dùng máy ép",
+        "content": "Cắt đôi quả chanh, ép đúng số lượng tối đa 2 quả/lần và chỉ ép 1 lần duy nhất. Lọc nước cốt qua rây lọc.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Chiết và bảo quản",
+        "content": "Chiết cốt chanh vào chai nhựa định lượng 300ml khi sử dụng, bảo quản 5-10°C và dán tem HSD.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 64
+  },
+  {
+    "code": "SOP-BAOVOCHANH",
+    "title": "Bào vỏ chanh vàng",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Bào phần vỏ vàng dùng cho thạch Trà Chanh Vàng, phần còn lại vắt lấy cốt chanh.",
+    "linkedRecipeCodes": [
+      "DX-THACHCHANH"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Rửa chanh",
+        "content": "Rửa sạch chanh vàng và dụng cụ trước khi sơ chế.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cắt bỏ hai đầu",
+        "content": "Cắt bỏ 2 phần đầu và cuống quả chanh.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Bào vỏ",
+        "content": "Dùng dụng cụ bào vỏ phần màu vàng, không bào sâu vào phần cùi trắng, vào từng khay. Dùng cho thạch Trà Chanh Vàng (2g/khay), phần còn lại vắt lấy cốt chanh.",
+        "icon": "restaurant"
+      }
+    ],
+    "sourcePage": 66
+  },
+  {
+    "code": "SOP-LATCHANH",
+    "title": "Cắt lát và lọc hạt chanh vàng",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Cắt lát chanh vàng bằng máy ở nấc số 3, gắp bỏ hạt, cân từng lát và bảo quản 2-5°C.",
+    "linkedRecipeCodes": [
+      "DX-SCBONGBUOI850",
+      "DX-SCBONGBUOI855",
+      "TT-TRAVOCF"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Cắt bỏ hai đầu",
+        "content": "Dùng dao sắc cắt bỏ 2 đầu trái chanh vàng.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cắt lát bằng máy",
+        "content": "Cắt bằng máy ở nấc số 3, độ dày 0.3-0.4cm; chỉ dùng 11 đến 12 lát ở giữa.",
+        "icon": "thermostat"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Gắp bỏ hạt",
+        "content": "Dùng kẹp gắp bỏ hạt ở cả 2 mặt lát chanh.",
+        "icon": "filter"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Cân định lượng lát",
+        "content": "Mỗi lát chanh dùng cho Sữa Chua Bòng Bưởi phải đạt 11-14g.",
+        "note": "Lát không đạt định lượng dùng để trang trí Trà Vỏ Cà Phê hoặc vắt lấy cốt chanh.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Xếp hộp và bảo quản",
+        "content": "Xếp lát chanh vào hộp đựng để tránh nát và bay hương. Bảo quản 2-5°C và dán tem HSD.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 67
+  },
+  {
+    "code": "SOP-COTCHANHV",
+    "title": "Vắt cốt chanh vàng",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Lấy 30g vỏ chanh vàng dầm lấy tinh dầu, sau đó vắt cốt chanh vàng qua rây lọc hạt. Mỗi lần setup tối đa 5 trái.",
+    "linkedRecipeCodes": [
+      "TT-TRAVOCF",
+      "TT-GAM",
+      "TT-OLDAOHONG"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Rửa chanh",
+        "content": "Rửa sạch chanh vàng và dụng cụ trước khi sơ chế.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Lọc 30g vỏ chanh",
+        "content": "Cắt lọc lấy 30g vỏ chanh vàng vào bình shaker nhựa; phần vỏ không còn dính tép chanh. Setup một lần tối đa 5 trái.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Dầm lấy tinh dầu",
+        "content": "Dầm 20-30 nhịp để lấy tinh dầu vỏ chanh vàng.",
+        "icon": "blender"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Vắt cốt chanh",
+        "content": "Cắt thành các phần nhỏ, dùng cây vắt ép chặt tay lấy cốt chanh vàng qua rây lọc vào bình shaker nhựa để loại bỏ toàn bộ hạt. Có thể dùng máy vắt (4 miếng/lần, chỉ ép chặt 1 lần).",
+        "icon": "filter"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Bảo quản và chiết",
+        "content": "Nếu setup sẵn chưa dùng thì ngâm cốt chanh cùng vỏ trong shaker và bọc wrap, bảo quản 5-10°C và dán tem HSD. Khi sử dụng chiết vào chai nhựa định lượng 300ml và dán tem HSD đồng nhất với shaker trước đó.",
+        "note": "Cốt chanh vàng sau khi vắt xong cơ sở được phép sử dụng luôn.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 69
+  },
+  {
+    "code": "SOP-VOBUOI",
+    "title": "Cắt vỏ bưởi sấy",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Cắt vỏ bưởi sấy thành đoạn 2cm, bảo quản từng túi riêng và ghi date 7 ngày.",
+    "linkedRecipeCodes": [
+      "TT-BONGBUOI",
+      "DX-SCBONGBUOI850",
+      "DX-SCBONGBUOI855"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Chuẩn bị",
+        "content": "Lấy túi vỏ bưởi sấy để setup, nhân sự đeo găng tay nilon.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Lau khô dụng cụ",
+        "content": "Lau khô kéo và bowl đựng, lấy phần vỏ bưởi sấy ra để setup.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Cắt đoạn 2cm",
+        "content": "Dùng kéo cắt vỏ bưởi sấy (3-4 miếng cùng lúc) thành đoạn nhỏ 2cm/miếng, setup hết phần còn lại của túi.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Bảo quản và ghi date",
+        "content": "Cho vỏ bưởi đã setup vào lại túi zip ban đầu, ghi date bảo quản 7 ngày (To thường).",
+        "note": "Không setup chung nhiều túi thành phẩm vào một túi; mỗi túi bảo quản riêng, ghi date riêng.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 71
+  },
+  {
+    "code": "SOP-DAOHONG",
+    "title": "Chuẩn bị đào hồng dầm",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Dầm đào hồng nguyên lon trong một lần, vẫn còn thấy hình miếng đào, bảo quản tủ lạnh có tem HSD.",
+    "linkedRecipeCodes": [
+      "TS-LUADAO",
+      "TT-OLDAOHONG",
+      "TT-SIMO",
+      "DX-THACHDAOHONG",
+      "TS-PLUSLUADAO"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Đổ đào ra khay",
+        "content": "Khui lon đào hồng, cho toàn bộ phần nước và thịt đào vào khay inox, trải đều ra khắp bề mặt khay (tránh chỗ dày chỗ mỏng).",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Dầm nhẹ",
+        "content": "Dùng chày dầm, dầm nhẹ (tránh nát đào), đi lần lượt từ trên xuống dưới, từ trái qua phải liền kề nhau.",
+        "icon": "blender"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Kiểm tra",
+        "content": "Đảo lại phần đã dầm để kiểm tra; nếu còn miếng chưa dầm thì dầm bổ sung 5-7 nhịp (tối đa dầm 3 lần).",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Bảo quản",
+        "content": "Cho toàn bộ đào hồng đã dầm vào bowl inox, đậy nắp, ghi tem HSD và bảo quản tủ lạnh.",
+        "note": "Phải chuẩn bị 100% nguyên lon trong một lần, không chia nhỏ lon hay để lại một nửa trong lon gốc. Đạt: vẫn thấy rõ hình dạng miếng đào. Không đạt: dầm nát như cháo.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 72
+  },
+  {
+    "code": "SOP-NITRO",
+    "title": "Vệ sinh và nạp bình Nitro Cold Brew",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Bảy bước xả gas, vệ sinh bình bằng nước nóng, làm mát, test trà Cold Brew rồi nạp gas Isi cho bình Nitro Cold Brew.",
+    "linkedRecipeCodes": [
+      "TT-LANGBIANG"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Xả hết khí gas",
+        "content": "Xả hết khí gas trong bình nitro.",
+        "icon": "warning"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Tháo nắp bình",
+        "content": "Tháo nắp bình ra khỏi thân bình.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Vệ sinh nắp và phụ kiện",
+        "content": "Vệ sinh nắp bình, đầu piston, đệm cao su, đầu vòi bằng nước nóng.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Vệ sinh thân bình",
+        "content": "Vệ sinh thân bình bằng nước nóng.",
+        "note": "Dùng khăn đen quấn quanh thân bình để không bị nóng.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Làm mát thân bình",
+        "content": "Cho đá vào làm mát lại thân bình.",
+        "note": "Bỏ sạch đá và nước sau khi làm lạnh bình.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 6,
+        "title": "Test Cold Brew",
+        "content": "Đặt bình lên cân, cân 1000g trà Cold Brew; test trà trước khi cho vào bình. Trà đạt: tươi mát, thanh khiết, ngọt hậu, màu vàng trong, không kết tủa, không xuống hương.",
+        "note": "Không fill chồng khác date trà.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 7,
+        "title": "Đóng nắp và nạp gas",
+        "content": "Đóng nắp bình rồi lắp 1 viên gas Isi vào (đầu mềm của viên gas hướng lên trên), vặn đến khi gas xì hết.",
+        "icon": "local_drink"
+      }
+    ],
+    "sourcePage": 75
+  },
+  {
+    "code": "SOP-MUTNHAI",
+    "title": "Setup mứt nhài Boduo",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Chuyển mứt đào nhài Boduo sang hộp đựng sạch, ghi hạn sử dụng và bảo quản tủ lạnh.",
+    "linkedRecipeCodes": [
+      "TT-LANGBIANG"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Chuẩn bị hộp mứt",
+        "content": "Lấy hộp mứt đào nhài Boduo để setup, nhân sự đeo găng tay nilon.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Lau khô hộp đựng",
+        "content": "Lau khô hộp đựng sau khi đã vệ sinh sạch.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Mở nắp và seal",
+        "content": "Bóc mở nắp hộp và miếng seal dán trên hộp mứt nhài.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Đổ mứt",
+        "content": "Đổ hộp mứt nhài đã bóc vào hộp đựng, dùng spatula lấy hết phần mứt còn bám trong hộp.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Ghi hạn và bảo quản",
+        "content": "Ghi hạn sử dụng, khoanh nhiệt độ bảo quản nguyên vật liệu và cho vào tủ lạnh.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 76
+  },
+  {
+    "code": "SOP-TCPHONGLAN",
+    "title": "Setup trân châu Phong Lan",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Chuyển trân châu Phong Lan vào bowl sạch, ghi hạn sử dụng và bảo quản tủ lạnh.",
+    "linkedRecipeCodes": [
+      "TS-PHONGLAND",
+      "TS-PHONGLANN"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Chuẩn bị túi",
+        "content": "Lấy túi trân châu Phong Lan để setup, nhân sự đeo găng tay nilon.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Chuẩn bị dụng cụ",
+        "content": "Chuẩn bị kéo cắt sạch, lau khô; lau khô bowl đựng trân châu sau khi đã vệ sinh sạch.",
+        "icon": "cleaning"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Cắt mở và đổ",
+        "content": "Cắt mở túi và đổ trân châu vào bowl đựng.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Ghi hạn và bảo quản",
+        "content": "Ghi hạn sử dụng, khoanh nhiệt độ bảo quản nguyên vật liệu, đóng nắp và cho vào tủ lạnh để bảo quản, sử dụng.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 78
+  },
+  {
+    "code": "SOP-ESPRESSO",
+    "title": "Thông số chiết xuất Espresso",
+    "category": "Tiêu chuẩn chất lượng",
+    "version": "v1.0",
+    "summary": "Định lượng cà phê, tỷ lệ chiết xuất và thời gian chiết cho hai loại hạt Espresso 1 và Espresso 2.",
+    "linkedRecipeCodes": [
+      "CF-ESPRESSO",
+      "CF-AMERICANON",
+      "CF-AMERICANOD",
+      "CF-CAPUCHINON",
+      "CF-CAPUCHINOD",
+      "CF-LATTEN",
+      "CF-LATTED",
+      "CF-PHELANN",
+      "CF-PHELAND",
+      "CF-DALAT",
+      "CF-PLUSDALAT"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Hai loại hạt",
+        "content": "Espresso 1: 70% Arabica Brazil + 30% Robusta Việt Nam. Espresso 2: 50% Colombia + 50% Ethiopia.",
+        "icon": "grain"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Tỷ lệ 1:2 shot đôi (Espresso, Americano, Cappuccino đá, Latte đá)",
+        "content": "18g cà phê, thành phẩm gồm crema 36g. Thời gian chiết Espresso 1: 22-28 giây; Espresso 2: 26-32 giây.",
+        "icon": "timer"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Tỷ lệ 1:1,5 shot đôi (Cappuccino nóng, Latte nóng)",
+        "content": "18g cà phê, thành phẩm 25g. Thời gian chiết Espresso 1: 18-25 giây; Espresso 2: 22-28 giây.",
+        "icon": "timer"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Tỷ lệ 1:2 shot đơn (Đà Lạt, Plus Đà Lạt)",
+        "content": "11g cà phê, thành phẩm 28g, thời gian chiết 28-36 giây (Espresso 1).",
+        "note": "Shot đơn dùng cho Đà Lạt và Plus Đà Lạt; shot đôi dùng cho các sản phẩm còn lại.",
+        "icon": "coffee_maker"
+      },
+      {
+        "stepNumber": 5,
+        "title": "Độ sai lệch cho phép",
+        "content": "Cà phê xay: cần đơn ± 0.2g, cần đôi ± 0.5g. Nước cà phê thành phẩm ± 1g.",
+        "icon": "scale"
+      },
+      {
+        "stepNumber": 6,
+        "title": "Đánh sữa nóng",
+        "content": "Sữa tươi Meiji đánh nóng ở 58-62°C, rảo đều sữa và tạo hình.",
+        "icon": "thermostat"
+      }
+    ],
+    "sourcePage": 42
+  },
+  {
+    "code": "SOP-DONGGOI",
+    "title": "Đóng gói đơn lon và chai Plus",
+    "category": "Vận hành quầy",
+    "version": "v1.0",
+    "summary": "Quy cách đóng gói và phục vụ các sản phẩm Plus đóng lon nhựa 500ml và chai thủy tinh, chỉ bán mang về và giao hàng.",
+    "linkedRecipeCodes": [
+      "TS-PLUSOLSUA",
+      "TS-PLUSOLNHAI",
+      "TS-PLUSMATNHAN",
+      "TS-PLUSTAM",
+      "TS-PLUSPHONGLAN",
+      "TS-PLUSKHOI",
+      "TS-PLUSLUADAO",
+      "DX-PLUSMATCHA",
+      "CF-PLUSDALAT",
+      "TT-PLUSCBOLONG"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Dán tem và rót",
+        "content": "Dán tem sản phẩm vào lon/chai, sau đó rót hỗn hợp và đóng nắp.",
+        "icon": "local_drink"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Đơn mang về và giao hàng",
+        "content": "Đóng túi nilon và túi giữ nhiệt từ 2 lon, kèm card cảm ơn. Đơn đóng chai bọc chống sốc.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Đơn đi xa",
+        "content": "Đóng thùng xốp phủ đá, card cảm ơn cho vào túi nilon và dán bên ngoài thùng.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Phụ kiện",
+        "content": "Phục vụ kèm thêm 2 ống hút nhỏ.",
+        "icon": "checklist"
+      }
+    ],
+    "sourcePage": 49
+  },
+  {
+    "code": "SOP-LAMLANH",
+    "title": "Làm lạnh cấp tốc khay thạch",
+    "category": "Vệ sinh & bảo quản",
+    "version": "v1.0",
+    "summary": "Làm lạnh khay thạch đã đậy kín bằng hộp nhựa Việt Nhật, đá viên và nước lọc, tối đa 1 khay mỗi lần.",
+    "linkedRecipeCodes": [
+      "DX-THACHTRAVO",
+      "DX-THACHOLMATCHA",
+      "DX-THACHCHANH",
+      "DX-THACHDAOHONG",
+      "DX-THACHXIUVANI"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Đặt khay thạch",
+        "content": "Đặt khay thạch đã đậy kín nắp vào hộp nhựa Việt Nhật (41x31x24cm, 20.7 lít) về một góc của hộp.",
+        "icon": "inventory"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Cho đá và nước",
+        "content": "Cân 1kg đá viên cho vào góc còn lại của hộp, sau đó cho 500ml nước lọc. Đổ theo thứ tự đá rồi nước, giữ khay để không xô lệch và không đổ tràn đá lên bề mặt khay.",
+        "icon": "ac_unit"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Hẹn giờ kiểm tra",
+        "content": "Hẹn giờ 30 phút, sau đó đeo găng tay kiểm tra bề mặt thạch đã lạnh và đông cứng.",
+        "note": "Nếu thạch chưa đông mà đá đã tan hết thì cho thêm 300g đá vào góc còn lại và ngâm thêm 5 phút. Mỗi lần setup tối đa 1 khay thạch.",
+        "icon": "timer"
+      }
+    ],
+    "sourcePage": 89
+  },
+  {
+    "code": "SOP-CATTHACH",
+    "title": "Cắt thạch",
+    "category": "Kỹ thuật pha chế",
+    "version": "v1.0",
+    "summary": "Cắt thạch ngay trong khay thành khối, khoảng cách các đường cắt 1-1.5cm, bảo quản 2-5°C.",
+    "linkedRecipeCodes": [
+      "DX-THACHTRAVO",
+      "DX-THACHOLMATCHA",
+      "DX-THACHCHANH",
+      "DX-THACHDAOHONG",
+      "DX-THACHXIUVANI"
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Chuẩn bị",
+        "content": "Chuẩn bị khay thạch cần cắt, dao cán đen, găng tay nylon, bowl inox đựng thạch. Cắt thạch ngay trong khay.",
+        "note": "Hạn chế cắt sẵn thạch quá nhiều vì dễ tách nước, bở thạch. Có thể cắt theo chiều trên xuống hoặc dưới lên.",
+        "icon": "checklist"
+      },
+      {
+        "stepNumber": 2,
+        "title": "Đường cắt dọc",
+        "content": "Cắt đường đầu tiên cách mép khay khoảng 1-1.5cm, cắt chia đôi phần còn lại, rồi cắt nửa trên 4 đường và nửa dưới 4 đường, khoảng cách các đường cắt ước lượng 1-1.5cm.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 3,
+        "title": "Đường cắt ngang",
+        "content": "Cắt đường đầu chia đôi khay thạch; lấy đường này làm tâm, cắt mỗi bên 1 đường cách tâm khoảng 1-1.5cm, rồi chia đôi từng phần và cắt thêm mỗi bên 2 đường cách tâm 1-1.5cm.",
+        "icon": "restaurant"
+      },
+      {
+        "stepNumber": 4,
+        "title": "Bảo quản",
+        "content": "Đổ thạch ra bowl và bảo quản theo tiêu chuẩn 2-5°C.",
+        "icon": "inventory"
+      }
+    ],
+    "sourcePage": 92
+  }
+]

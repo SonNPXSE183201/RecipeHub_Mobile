@@ -1,0 +1,863 @@
+[
+  {
+    "id": "QZ-TRASUA",
+    "title": "Trà sữa nóng - định lượng và quy trình",
+    "targetCode": "SOP-TSNONG",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Bột sữa dùng cho trà sữa nóng size Phê (M) là bao nhiêu?",
+        "options": [
+          "22.5g",
+          "20g",
+          "25g",
+          "28g"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-TSNONG: bột sữa size Phê 22.5g, size La 28g.",
+        "reviewSection": "SOP-TSNONG · Bước 1"
+      },
+      {
+        "id": "q2",
+        "text": "HHSD cho trà sữa nóng size La ở độ ngọt 100% là bao nhiêu?",
+        "options": [
+          "55g",
+          "70g",
+          "65g",
+          "75g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-TSNONG: HHSD size La 100% là 70g (size Phê 55g).",
+        "reviewSection": "SOP-TSNONG · Bước 1"
+      },
+      {
+        "id": "q3",
+        "text": "Sục hỗn hợp lần 1 của trà sữa nóng dừng ở nhiệt độ nào?",
+        "options": [
+          "40-50°C",
+          "60-65°C",
+          "50-60°C",
+          "65-70°C"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-TSNONG: sục lần 1 ở 50-60°C, sau đó vệ sinh vòi.",
+        "reviewSection": "SOP-TSNONG · Bước 2"
+      },
+      {
+        "id": "q4",
+        "text": "Sục lần 2 của trà sữa nóng cho sản phẩm đạt nhiệt độ bao nhiêu?",
+        "options": [
+          "50-60°C",
+          "55-60°C",
+          "65-75°C",
+          "60-65°C"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-TSNONG: sục lần 2 dừng ở 60-65°C.",
+        "reviewSection": "SOP-TSNONG · Bước 5"
+      },
+      {
+        "id": "q5",
+        "text": "Lượng đá làm mát cho trà sữa nóng size La là bao nhiêu (cốc định lượng 200ml)?",
+        "options": [
+          "1 cốc + 1/2 cốc",
+          "1 cốc",
+          "2 cốc",
+          "1/2 cốc"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-TSNONG: size Phê 1 cốc ngang miệng, size La 1 cốc + 1/2 cốc.",
+        "reviewSection": "SOP-TSNONG · Bước 4"
+      },
+      {
+        "id": "q6",
+        "text": "HHSD cho trà sữa nóng size Phê ở độ ngọt 70% là bao nhiêu?",
+        "options": [
+          "45g",
+          "50g",
+          "55g",
+          "35g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo bảng độ ngọt size Phê: 100% 55g, 70% 50g, 50% 45g, 30% 35g.",
+        "reviewSection": "TS-OLSUAN · Bảng độ ngọt"
+      },
+      {
+        "id": "q7",
+        "text": "Khách note 0% đường, size La: thêm bao nhiêu sữa đặc ở bước 1 thay cho HHSD và đường?",
+        "options": [
+          "25g",
+          "30g",
+          "40g",
+          "55g"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo yêu cầu đặc biệt: 25g cho size Phê, 40g cho size La.",
+        "reviewSection": "SOP-TSNONG · Yêu cầu đặc biệt"
+      },
+      {
+        "id": "q8",
+        "text": "Mức tăng/giảm trà tối đa khi khách yêu cầu là bao nhiêu?",
+        "options": [
+          "± 5ml",
+          "± 20ml",
+          "± 2.5ml",
+          "± 10ml"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo yêu cầu đặc biệt của sản phẩm: tăng/giảm trà ± 10ml.",
+        "reviewSection": "TS-OLSUAN · Yêu cầu đặc biệt"
+      },
+      {
+        "id": "q9",
+        "text": "Trước khi dùng, can trà cần được lắc ít nhất bao nhiêu nhịp?",
+        "options": [
+          "10 nhịp",
+          "5 nhịp",
+          "15 nhịp",
+          "20 nhịp"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo yêu cầu đặc biệt: lắc can trà ít nhất 10 nhịp trước khi sử dụng.",
+        "reviewSection": "TS-OLSUAN · Yêu cầu đặc biệt"
+      },
+      {
+        "id": "q10",
+        "text": "Thứ tự cho nguyên liệu vào ly khi pha trà sữa nóng là gì?",
+        "options": [
+          "HHSD, bột sữa, cốt trà, đường nước",
+          "Bột sữa, HHSD, đường nước, cốt trà",
+          "Cốt trà, đường nước, HHSD, bột sữa",
+          "Đường nước, bột sữa, HHSD, cốt trà"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-TSNONG bước 1: bột sữa, HHSD, đường nước, rồi cốt trà.",
+        "reviewSection": "SOP-TSNONG · Bước 1"
+      },
+      {
+        "id": "q11",
+        "text": "Sản phẩm nào có cả size Phê (M) và La (L) trong quy trình trà sữa nóng?",
+        "options": [
+          "Khói B'lao",
+          "Mật Nhãn",
+          "Tấm",
+          "Ô Long Nhài Sữa"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo tài liệu: Ô Long sữa Phê La và Tấm có size Phê và La; Ô Long Nhài Sữa, Khói B'lao, Mật Nhãn chỉ size La.",
+        "reviewSection": "SOP-TSNONG · Phạm vi áp dụng"
+      }
+    ]
+  },
+  {
+    "id": "QZ-SUCTRA",
+    "title": "Quy trình sục trà",
+    "targetCode": "SOP-SUCTRA",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Áp suất máy tối thiểu để được thực hiện sục trà sữa là bao nhiêu?",
+        "options": [
+          ">= 1.4",
+          ">= 1.0",
+          ">= 1.2",
+          ">= 2.0"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-SUCTRA bước 1: áp suất >= 1.4 mới được sục.",
+        "reviewSection": "SOP-SUCTRA · Bước 1"
+      },
+      {
+        "id": "q2",
+        "text": "Khi xả vòi trước khi sục, vòi hơi phải ra đủ mấy tia?",
+        "options": [
+          "2 tia",
+          "4 tia",
+          "3 tia",
+          "6 tia"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-SUCTRA: kiểm tra vòi hơi ra đủ 4 tia, không bị tắc.",
+        "reviewSection": "SOP-SUCTRA · Bước 1"
+      },
+      {
+        "id": "q3",
+        "text": "Khi sục, cốc được nghiêng bao nhiêu độ và trà ngập bao nhiêu đầu vòi?",
+        "options": [
+          "30°, ngập 1/3 đầu vòi",
+          "45°, ngập 1/2 đầu vòi",
+          "45°, ngập 1/3 đầu vòi",
+          "60°, ngập 1/3 đầu vòi"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-SUCTRA bước 2: nghiêng cốc 45°, trà ngập 1/3 đầu vòi.",
+        "reviewSection": "SOP-SUCTRA · Bước 2"
+      },
+      {
+        "id": "q4",
+        "text": "Xả vòi sục tạo xoáy đến nhiệt độ nào thì dựng thẳng cốc?",
+        "options": [
+          "20°C",
+          "40°C",
+          "50°C",
+          "30°C"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-SUCTRA bước 3: tạo xoáy đến 30°C thì dựng thẳng cốc.",
+        "reviewSection": "SOP-SUCTRA · Bước 3"
+      },
+      {
+        "id": "q5",
+        "text": "Thứ tự đi tay 5 vòng chuẩn là gì?",
+        "options": [
+          "1 giữa, 2 đáy, 1 giữa, 1 mặt",
+          "2 giữa, 1 đáy, 1 giữa, 1 mặt",
+          "1 mặt, 2 giữa, 2 đáy",
+          "1 đáy, 2 giữa, 1 đáy, 1 mặt"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-SUCTRA bước 4: 1 giữa, 2 đáy, 1 giữa, 1 mặt.",
+        "reviewSection": "SOP-SUCTRA · Bước 4"
+      },
+      {
+        "id": "q6",
+        "text": "Đã đi tay 5 vòng mà chưa đủ nhiệt độ thì xử lý thế nào?",
+        "options": [
+          "Giữ yên vòi sục ở đáy",
+          "Đi thêm 1-2 lần ở vòng giữa",
+          "Đi thêm 1-2 lần xuống đáy",
+          "Tăng áp suất máy"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-SUCTRA: được đi thêm 1-2 lần ở vòng giữa, không đi xuống đáy hoặc giữ yên vòi sục.",
+        "reviewSection": "SOP-SUCTRA · Bước 4"
+      },
+      {
+        "id": "q7",
+        "text": "Với size La, vòi sục cách đáy ly bao nhiêu?",
+        "options": [
+          "1cm",
+          "3cm",
+          "2cm",
+          "0.5cm"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-SUCTRA bước 4: size La cách đáy 2cm.",
+        "reviewSection": "SOP-SUCTRA · Bước 4"
+      },
+      {
+        "id": "q8",
+        "text": "Sản phẩm trà sữa lạnh sau khi sục đạt nhiệt độ nào?",
+        "options": [
+          "30-40°C",
+          "60-65°C",
+          "70-80°C",
+          "50-60°C"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-SUCTRA bước 5: dừng ở 50-60°C.",
+        "reviewSection": "SOP-SUCTRA · Bước 5"
+      },
+      {
+        "id": "q9",
+        "text": "Khi sục liên tiếp các ly cùng loại, sau bao nhiêu ly thì phải vệ sinh vòi?",
+        "options": [
+          "5 ly",
+          "2 ly",
+          "3 ly",
+          "10 ly"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-TSLANH bước 6: sục liên tiếp 5 ly cùng loại thì vệ sinh vòi.",
+        "reviewSection": "SOP-TSLANH · Bước 6"
+      },
+      {
+        "id": "q10",
+        "text": "Hương trà quyết định bao nhiêu phần trăm độ ngon của một ly trà sữa?",
+        "options": [
+          "30%",
+          "70%",
+          "50%",
+          "90%"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-SUCTRA bước 2: trà được sục đầu tiên làm bung hương, quyết định 70% độ ngon.",
+        "reviewSection": "SOP-SUCTRA · Bước 2"
+      }
+    ]
+  },
+  {
+    "id": "QZ-REFILL",
+    "title": "Re-fill nguyên vật liệu và bảo quản trong ca",
+    "targetCode": "SOP-REFILL",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Mức nguyên vật liệu fill vào phải cách miệng khoang chứa bao nhiêu?",
+        "options": [
+          "2cm",
+          "1cm",
+          "3cm",
+          "5cm"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-REFILL bước 4: fill cách miệng khoang chứa 2cm.",
+        "reviewSection": "SOP-REFILL · Bước 4"
+      },
+      {
+        "id": "q2",
+        "text": "Đồng hồ bấm giờ bên cạnh máy được cài nhắc kiểm tra bao lâu một lần?",
+        "options": [
+          "30 phút/lần",
+          "1 tiếng/lần",
+          "2 tiếng/lần",
+          "Chỉ 1 lần mỗi ca"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-REFILL bước 3: nhắc 1 tiếng/lần.",
+        "reviewSection": "SOP-REFILL · Bước 3"
+      },
+      {
+        "id": "q3",
+        "text": "Khung giờ bắt buộc kiểm tra buổi chiều là khi nào?",
+        "options": [
+          "12h - 13h - 14h",
+          "14h - 15h - 16h",
+          "13h - 14h - 15h",
+          "15h - 16h - 17h"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-REFILL bước 2: chiều 13h-14h-15h.",
+        "reviewSection": "SOP-REFILL · Bước 2"
+      },
+      {
+        "id": "q4",
+        "text": "Khung giờ bắt buộc kiểm tra buổi tối là khi nào?",
+        "options": [
+          "17h - 18h - 19h",
+          "19h - 20h - 21h",
+          "20h - 21h - 22h",
+          "18h - 19h - 20h"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-REFILL bước 2: tối 18h-19h-20h.",
+        "reviewSection": "SOP-REFILL · Bước 2"
+      },
+      {
+        "id": "q5",
+        "text": "Mức MIN của khoang chứa tuyệt đối không được thấp hơn vị trí nào?",
+        "options": [
+          "Con ốc bên hông khoang chứa",
+          "Vạch Max",
+          "Miệng khoang chứa",
+          "Đáy khoang chứa"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-REFILL bước 5: nguyên vật liệu luôn ngập vượt qua con ốc bên hông.",
+        "reviewSection": "SOP-REFILL · Bước 5"
+      },
+      {
+        "id": "q6",
+        "text": "Khi máy bột sữa bị thiếu giữa chừng, bước đầu tiên là gì?",
+        "options": [
+          "Đặt ly đang thiếu lên cân",
+          "Đặt ly rỗng lên cân và back về 0",
+          "Đong bù thêm ngay",
+          "Tắt máy và fill lại toàn bộ"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-THIEUNVL: đặt ly rỗng lên cân, back cân về 0, rồi đặt ly thiếu lên cân.",
+        "reviewSection": "SOP-THIEUNVL · Bước 1"
+      },
+      {
+        "id": "q7",
+        "text": "Khi thiếu HHSD hoặc đường, bước B1 là gì?",
+        "options": [
+          "Đặt ly rỗng lên cân",
+          "Đong bù thêm HHSD",
+          "Đặt ly có đủ bột sữa lên cân và back về 0",
+          "Đặt ly thiếu lên cân trước"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-THIEUNVL: B1 đặt ly có đủ bột sữa lên cân, back về 0.",
+        "reviewSection": "SOP-THIEUNVL · Bước 4"
+      },
+      {
+        "id": "q8",
+        "text": "Date trà theo quy định là bao nhiêu ngày?",
+        "options": [
+          "D+1",
+          "D+3",
+          "D+7",
+          "D+5"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-BAOQUAN: date trà là D+5.",
+        "reviewSection": "SOP-BAOQUAN · Bước 1"
+      },
+      {
+        "id": "q9",
+        "text": "Vệ sinh sâu máy pha cà phê bằng bột CAFIZA vào ngày nào trong tuần?",
+        "options": [
+          "Thứ 7",
+          "Thứ 2",
+          "Thứ 4",
+          "Chủ nhật"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-BAOQUAN: thứ 7 hàng tuần vệ sinh sâu máy pha cà phê bằng CAFIZA.",
+        "reviewSection": "SOP-BAOQUAN · Bước 2"
+      },
+      {
+        "id": "q10",
+        "text": "Bảo quản nguyên liệu qua đêm trong máy định lượng cần làm gì?",
+        "options": [
+          "Chỉ đậy nắp",
+          "Đậy nắp và bọc kín bằng wrap thực phẩm",
+          "Chỉ bọc wrap",
+          "Đổ bỏ toàn bộ"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-BAOQUAN bước 3: đậy nắp và dùng wrap thực phẩm bọc kín bên ngoài.",
+        "reviewSection": "SOP-BAOQUAN · Bước 3"
+      }
+    ]
+  },
+  {
+    "id": "QZ-TRAICAY",
+    "title": "Nhận, sơ chế và bảo quản trái cây",
+    "targetCode": "SOP-TRAICAY",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Tiêu chuẩn khối lượng một quả cam vàng là bao nhiêu?",
+        "options": [
+          "250-300g",
+          "150-200g",
+          "46-60g",
+          "350-400g"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-TRAICAY bước 2: cam vàng 250-300g/quả.",
+        "reviewSection": "SOP-TRAICAY · Bước 2"
+      },
+      {
+        "id": "q2",
+        "text": "Tiêu chuẩn khối lượng một quả chanh vàng là bao nhiêu?",
+        "options": [
+          "250-300g",
+          "150-200g",
+          "46-60g",
+          "100-120g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-TRAICAY bước 2: chanh vàng 150-200g/quả.",
+        "reviewSection": "SOP-TRAICAY · Bước 2"
+      },
+      {
+        "id": "q3",
+        "text": "Tiêu chuẩn khối lượng một quả chanh xanh là bao nhiêu?",
+        "options": [
+          "150-200g",
+          "30-40g",
+          "46-60g",
+          "70-90g"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-TRAICAY bước 2: chanh xanh 46-60g/quả.",
+        "reviewSection": "SOP-TRAICAY · Bước 2"
+      },
+      {
+        "id": "q4",
+        "text": "Trái cây san chiết sang túi zip Phê La xử lý thế nào về nước?",
+        "options": [
+          "Rửa sạch rồi để ráo trước khi bỏ túi",
+          "Ngâm nước muối rồi bỏ túi",
+          "Rửa nước nóng trước khi bỏ túi",
+          "Không rửa, chỉ rửa trước khi sử dụng"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-TRAICAY: nước đọng làm trái cây nhanh hỏng, mốc, nhũn; chỉ rửa trước khi sử dụng.",
+        "reviewSection": "SOP-TRAICAY · Bước 3"
+      },
+      {
+        "id": "q5",
+        "text": "Máy cắt lát cam vàng dùng nấc số mấy và độ dày bao nhiêu?",
+        "options": [
+          "Nấc số 3, dày 0.3-0.4cm",
+          "Nấc số 1, dày 0.1cm",
+          "Nấc số 3, dày 0.8-1cm",
+          "Nấc số 5, dày 0.3-0.4cm"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-LATCAM bước 3: nấc số 3, độ dày 0.3-0.4cm.",
+        "reviewSection": "SOP-LATCAM · Bước 3"
+      },
+      {
+        "id": "q6",
+        "text": "Mỗi lát chanh vàng dùng cho Sữa Chua Bòng Bưởi phải đạt định lượng bao nhiêu?",
+        "options": [
+          "5-8g",
+          "11-14g",
+          "15-20g",
+          "20-25g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-LATCHANH bước 4: mỗi lát 11-14g.",
+        "reviewSection": "SOP-LATCHANH · Bước 4"
+      },
+      {
+        "id": "q7",
+        "text": "Lát chanh vàng sau khi cắt được bảo quản ở nhiệt độ nào?",
+        "options": [
+          "5-10°C",
+          "10-15°C",
+          "2-5°C",
+          "Nhiệt độ phòng"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-LATCHANH bước 5: bảo quản 2-5°C và dán tem HSD.",
+        "reviewSection": "SOP-LATCHANH · Bước 5"
+      },
+      {
+        "id": "q8",
+        "text": "Khi dùng máy ép chanh xanh, ép tối đa bao nhiêu quả mỗi lần?",
+        "options": [
+          "4 quả, ép 2 lần",
+          "1 quả, ép 2 lần",
+          "5 quả, ép 1 lần",
+          "2 quả, ép 1 lần duy nhất"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-COTCHANHX bước 3: tối đa 2 quả/lần và chỉ ép 1 lần duy nhất.",
+        "reviewSection": "SOP-COTCHANHX · Bước 3"
+      },
+      {
+        "id": "q9",
+        "text": "Khi vắt cốt chanh vàng, mỗi lần setup tối đa bao nhiêu trái và dầm vỏ bao nhiêu nhịp?",
+        "options": [
+          "Tối đa 5 trái, dầm 20-30 nhịp",
+          "Tối đa 10 trái, dầm 20-30 nhịp",
+          "Tối đa 5 trái, dầm 5-7 nhịp",
+          "Tối đa 3 trái, dầm 10-12 nhịp"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-COTCHANHV: lọc 30g vỏ, dầm 20-30 nhịp, mỗi lần tối đa 5 trái.",
+        "reviewSection": "SOP-COTCHANHV · Bước 2-3"
+      },
+      {
+        "id": "q10",
+        "text": "Vỏ bưởi sấy được cắt thành đoạn dài bao nhiêu và ghi date mấy ngày?",
+        "options": [
+          "1cm, 7 ngày",
+          "2cm, 7 ngày",
+          "2cm, 3 ngày",
+          "5cm, 5 ngày"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-VOBUOI: cắt 2cm/miếng, ghi date bảo quản 7 ngày.",
+        "reviewSection": "SOP-VOBUOI · Bước 3-4"
+      }
+    ]
+  },
+  {
+    "id": "QZ-ESPRESSO",
+    "title": "Cà phê máy Espresso - thông số chiết xuất",
+    "targetCode": "SOP-ESPRESSO",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Espresso 1 gồm tỷ lệ hạt nào?",
+        "options": [
+          "70% Arabica Brazil + 30% Robusta Việt Nam",
+          "50% Colombia + 50% Ethiopia",
+          "100% Arabica Brazil",
+          "50% Arabica + 50% Robusta"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-ESPRESSO bước 1: Espresso 1 là 70% Arabica Brazil + 30% Robusta Việt Nam.",
+        "reviewSection": "SOP-ESPRESSO · Bước 1"
+      },
+      {
+        "id": "q2",
+        "text": "Espresso 2 gồm tỷ lệ hạt nào?",
+        "options": [
+          "70% Arabica Brazil + 30% Robusta",
+          "50% Colombia + 50% Ethiopia",
+          "100% Colombia",
+          "30% Colombia + 70% Ethiopia"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-ESPRESSO bước 1: Espresso 2 là 50% Colombia + 50% Ethiopia.",
+        "reviewSection": "SOP-ESPRESSO · Bước 1"
+      },
+      {
+        "id": "q3",
+        "text": "Shot đôi tỷ lệ 1:2 dùng bao nhiêu cà phê và cho ra bao nhiêu thành phẩm?",
+        "options": [
+          "18g cà phê, 25g thành phẩm",
+          "11g cà phê, 28g thành phẩm",
+          "18g cà phê, 36g thành phẩm",
+          "20g cà phê, 40g thành phẩm"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-ESPRESSO bước 2: 18g cà phê, 36g thành phẩm gồm crema.",
+        "reviewSection": "SOP-ESPRESSO · Bước 2"
+      },
+      {
+        "id": "q4",
+        "text": "Thời gian chiết Espresso 1 tỷ lệ 1:2 (shot đôi) là bao lâu?",
+        "options": [
+          "18-25 giây",
+          "26-32 giây",
+          "28-36 giây",
+          "22-28 giây"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-ESPRESSO bước 2: Espresso 1 chiết 22-28 giây.",
+        "reviewSection": "SOP-ESPRESSO · Bước 2"
+      },
+      {
+        "id": "q5",
+        "text": "Thời gian chiết Espresso 2 tỷ lệ 1:2 (shot đôi) là bao lâu?",
+        "options": [
+          "26-32 giây",
+          "22-28 giây",
+          "18-25 giây",
+          "28-36 giây"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-ESPRESSO bước 2: Espresso 2 chiết 26-32 giây.",
+        "reviewSection": "SOP-ESPRESSO · Bước 2"
+      },
+      {
+        "id": "q6",
+        "text": "Cappuccino nóng và Latte nóng chiết tỷ lệ nào, thành phẩm bao nhiêu?",
+        "options": [
+          "1:2, thành phẩm 36g",
+          "1:1,5, thành phẩm 25g",
+          "1:1, thành phẩm 18g",
+          "1:3, thành phẩm 54g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-ESPRESSO bước 3: tỷ lệ 1:1,5, 18g cà phê, thành phẩm 25g.",
+        "reviewSection": "SOP-ESPRESSO · Bước 3"
+      },
+      {
+        "id": "q7",
+        "text": "Shot đơn 11g dùng cho sản phẩm nào, cho ra bao nhiêu thành phẩm?",
+        "options": [
+          "Americano, thành phẩm 36g",
+          "Latte nóng, thành phẩm 25g",
+          "Đà Lạt, thành phẩm 28g",
+          "Espresso, thành phẩm 36g"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-ESPRESSO bước 4: shot đơn 11g, thành phẩm 28g cho Đà Lạt và Plus Đà Lạt.",
+        "reviewSection": "SOP-ESPRESSO · Bước 4"
+      },
+      {
+        "id": "q8",
+        "text": "Sữa tươi Meiji khi đánh nóng cho Cappuccino/Latte nóng ở nhiệt độ nào?",
+        "options": [
+          "40-45°C",
+          "50-55°C",
+          "65-70°C",
+          "58-62°C"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-ESPRESSO bước 6: đánh nóng sữa ở 58-62°C.",
+        "reviewSection": "SOP-ESPRESSO · Bước 6"
+      },
+      {
+        "id": "q9",
+        "text": "Americano đá dùng bao nhiêu đá viên và nước lọc?",
+        "options": [
+          "150g đá, 100ml nước lọc",
+          "150g đá, 120ml nước lọc",
+          "100g đá, 100ml nước lọc",
+          "200g đá, 150ml nước lọc"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo công thức CF-AMERICANOD: 150g đá viên, 100ml nước lọc.",
+        "reviewSection": "CF-AMERICANOD · Nguyên liệu"
+      },
+      {
+        "id": "q10",
+        "text": "Americano nóng dùng bao nhiêu nước nóng?",
+        "options": [
+          "100ml",
+          "120ml",
+          "150ml",
+          "200ml"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo công thức CF-AMERICANON: 120ml nước nóng.",
+        "reviewSection": "CF-AMERICANON · Nguyên liệu"
+      },
+      {
+        "id": "q11",
+        "text": "Độ sai lệch cho phép của cà phê xay khi dùng cần đôi là bao nhiêu?",
+        "options": [
+          "± 0.2g",
+          "± 1g",
+          "± 0.5g",
+          "± 2g"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-ESPRESSO bước 5: cần đơn ± 0.2g, cần đôi ± 0.5g.",
+        "reviewSection": "SOP-ESPRESSO · Bước 5"
+      }
+    ]
+  },
+  {
+    "id": "QZ-THACH",
+    "title": "Thạch topping - nấu, làm lạnh và cắt",
+    "targetCode": "SOP-LAMLANH",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Làm lạnh cấp tốc khay thạch cần bao nhiêu đá viên và nước lọc?",
+        "options": [
+          "1kg đá viên, 500ml nước lọc",
+          "500g đá viên, 1 lít nước lọc",
+          "2kg đá viên, 500ml nước lọc",
+          "1kg đá viên, 1 lít nước lọc"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo SOP-LAMLANH bước 2: cân 1kg đá viên, sau đó cho 500ml nước lọc.",
+        "reviewSection": "SOP-LAMLANH · Bước 2"
+      },
+      {
+        "id": "q2",
+        "text": "Sau khi làm lạnh cấp tốc, hẹn giờ bao lâu để kiểm tra bề mặt thạch?",
+        "options": [
+          "10 phút",
+          "30 phút",
+          "15 phút",
+          "60 phút"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo SOP-LAMLANH bước 3: hẹn giờ 30 phút.",
+        "reviewSection": "SOP-LAMLANH · Bước 3"
+      },
+      {
+        "id": "q3",
+        "text": "Thạch chưa đông mà đá đã tan hết thì xử lý thế nào?",
+        "options": [
+          "Thêm 1kg đá và ngâm thêm 30 phút",
+          "Thêm 300g đá và ngâm thêm 15 phút",
+          "Thêm 300g đá và ngâm thêm 5 phút",
+          "Thêm 500ml nước lạnh"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-LAMLANH bước 3: cho thêm 300g đá, bấm đồng hồ ngâm thêm 5 phút.",
+        "reviewSection": "SOP-LAMLANH · Bước 3"
+      },
+      {
+        "id": "q4",
+        "text": "Mỗi lần làm lạnh cấp tốc được setup tối đa bao nhiêu khay thạch?",
+        "options": [
+          "2 khay",
+          "3 khay",
+          "4 khay",
+          "1 khay"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo SOP-LAMLANH: mỗi lần setup tối đa 1 khay thạch.",
+        "reviewSection": "SOP-LAMLANH · Bước 3"
+      },
+      {
+        "id": "q5",
+        "text": "Nấu hỗn hợp thạch khoai nưa trong bao lâu và ở nhiệt độ nào?",
+        "options": [
+          "5-6 phút, 90-95°C",
+          "2-3 phút, 70-80°C",
+          "10-15 phút, 90-95°C",
+          "5-6 phút, 60-65°C"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo công thức thạch: đun sôi khoảng 5-6 phút ở 90-95°C.",
+        "reviewSection": "DX-THACHTRAVO · Bước 2"
+      },
+      {
+        "id": "q6",
+        "text": "Gói bột thạch khoai nưa (gồm bao bì) có khối lượng bao nhiêu?",
+        "options": [
+          "100-110g",
+          "182-184g",
+          "200-210g",
+          "250-260g"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo công thức thạch: gói bột 182-184g gồm bao bì.",
+        "reviewSection": "DX-THACHTRAVO · Bước 1"
+      },
+      {
+        "id": "q7",
+        "text": "Thạch thành phẩm bảo quản lạnh được bao lâu và ở nhiệt độ nào?",
+        "options": [
+          "24 giờ, 2-5°C",
+          "72 giờ, 10-15°C",
+          "72 giờ, 2-5°C",
+          "5 giờ, 40°C"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo công thức thạch: 72 giờ bảo quản lạnh, đậy kín, 2-5°C.",
+        "reviewSection": "DX-THACHTRAVO · Bảo quản"
+      },
+      {
+        "id": "q8",
+        "text": "Sau khi đổ khay, thạch được để nguội tự nhiên bao lâu rồi mới vào tủ lạnh?",
+        "options": [
+          "5 phút",
+          "15 phút",
+          "60 phút",
+          "30 phút"
+        ],
+        "correctIndex": 3,
+        "explanation": "Theo công thức thạch: để nguội tự nhiên 30 phút, sau đó bảo quản tủ lạnh 2-5°C trong 1 tiếng mới được sử dụng.",
+        "reviewSection": "DX-THACHTRAVO · Bước 5"
+      },
+      {
+        "id": "q9",
+        "text": "Thạch Trà Vỏ dùng bao nhiêu nước lọc nguội RO?",
+        "options": [
+          "800ml",
+          "700ml",
+          "500ml",
+          "1000ml"
+        ],
+        "correctIndex": 0,
+        "explanation": "Theo công thức DX-THACHTRAVO: 800ml nước lọc nguội RO (Thạch Trà Chanh Vàng dùng 700ml).",
+        "reviewSection": "DX-THACHTRAVO · Nguyên liệu"
+      },
+      {
+        "id": "q10",
+        "text": "Thạch Trà Chanh Vàng dùng bao nhiêu trà Cold Brew Hoa Trà?",
+        "options": [
+          "100ml",
+          "120ml",
+          "70ml",
+          "150ml"
+        ],
+        "correctIndex": 1,
+        "explanation": "Theo công thức DX-THACHCHANH: 120ml trà Cold Brew Hoa Trà.",
+        "reviewSection": "DX-THACHCHANH · Nguyên liệu"
+      },
+      {
+        "id": "q11",
+        "text": "Khoảng cách giữa các đường cắt thạch ước lượng là bao nhiêu?",
+        "options": [
+          "0.5cm",
+          "2-3cm",
+          "1-1.5cm",
+          "4-5cm"
+        ],
+        "correctIndex": 2,
+        "explanation": "Theo SOP-CATTHACH: khoảng cách các đường cắt ước lượng 1-1.5cm.",
+        "reviewSection": "SOP-CATTHACH · Bước 2"
+      }
+    ]
+  }
+]
