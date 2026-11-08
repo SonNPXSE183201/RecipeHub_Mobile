@@ -5,6 +5,7 @@ import '../../core/theme/nomad_kit.dart';
 import '../../core/di/app_services.dart';
 import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
+import '../../core/utils/video_time.dart';
 import 'step_video_guide_page.dart';
 import '../practice/self_practice_timer_page.dart';
 import '../feedback/create_feedback_page.dart';
@@ -563,7 +564,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Mốc video: 00:${st.videoStartSeconds.toString().padLeft(2, '0')}',
+                                      'Mốc video: ${formatVideoTime(Duration(seconds: st.videoStartSeconds))}',
                                       style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,

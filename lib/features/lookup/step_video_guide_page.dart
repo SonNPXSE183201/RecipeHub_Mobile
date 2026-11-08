@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
+import '../../core/utils/video_time.dart';
 
 import 'package:video_player/video_player.dart';
 
@@ -56,9 +57,6 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
     _playback.dispose();
     super.dispose();
   }
-
-  String _time(Duration value) =>
-      '${value.inMinutes.toString().padLeft(2, '0')}:${(value.inSeconds % 60).toString().padLeft(2, '0')}';
 
   Future<void> _restorePortrait() async {
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -179,7 +177,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
                   ),
                 ),
                 Text(
-                  _time(_playback.position),
+                  formatVideoTime(_playback.position),
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
                 Expanded(
@@ -200,7 +198,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: Text(
-                    _time(_playback.duration),
+                    formatVideoTime(_playback.duration),
                     style: const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ),
@@ -292,7 +290,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
                         ),
                         label: Text(
                           _playback.hasVideo
-                              ? 'Bước ${st.stepNumber} (${_time(Duration(seconds: st.videoStartSeconds))})'
+                              ? 'Bước ${st.stepNumber} (${formatVideoTime(Duration(seconds: st.videoStartSeconds))})'
                               : 'Bước ${st.stepNumber}',
                           style: TextStyle(
                             fontSize: 14,
