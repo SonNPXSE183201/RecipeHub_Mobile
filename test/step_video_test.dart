@@ -8,10 +8,15 @@ import 'package:recipehub_mobile/core/viewmodels/step_video_viewmodel.dart';
 import 'package:recipehub_mobile/features/lookup/step_video_guide_page.dart';
 import 'package:video_player/video_player.dart';
 
-RecipeItem _recipe({String url = ''}) => RecipeMapper.fromDetail(
+RecipeItem _recipe({
+  String url = '',
+  String name = 'Trà mẫu',
+  String? equipment,
+  String? safetyNote,
+}) => RecipeMapper.fromDetail(
   RecipeDetailResponse.fromJson(
     FirestoreRecipeSource.detailJson('test', {
-      'name': 'Trà mẫu',
+      'name': name,
       'code': 'TT-01',
       'videoUrl': url,
       'steps': [
@@ -19,6 +24,8 @@ RecipeItem _recipe({String url = ''}) => RecipeMapper.fromDetail(
           'title': 'Chuẩn bị',
           'description': 'Đong nguyên liệu',
           'durationSeconds': 10,
+          'equipment': equipment,
+          'safetyNote': safetyNote,
         },
         {
           'title': 'Hoàn thiện',
@@ -67,6 +74,66 @@ class _VideoController extends VideoPlayerController {
 }
 
 void main() {
+  testWidgets('step guide uses only the selected recipe step data', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    for (final name in ['Trà đào', 'Matcha sữa']) {
+      final recipe = _recipe(
+        name: name,
+        equipment: 'Bình lắc',
+        safetyNote: 'Đậy kín nắp trước khi lắc.',
+      );
+      await tester.pumpWidget(
+        MaterialApp(home: StepVideoGuidePage(recipe: recipe)),
+      );
+      expect(
+        find.text(
+          'Đong nguyên liệu\nDụng cụ: Bình lắc\n'
+          'Lưu ý: Đậy kín nắp trước khi lắc.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Toddy'), findsNothing);
+      expect(find.textContaining('Cold Brew'), findsNothing);
+      expect(find.text('DỤNG CỤ & TIÊU CHÍ HOÀN THÀNH BƯỚC'), findsNothing);
+
+      await tester.tap(find.text('Bước tiếp theo'));
+      await tester.pump();
+      expect(find.text('Khuấy đều'), findsOneWidget);
+      expect(find.textContaining('Bình lắc'), findsNothing);
+      expect(find.textContaining('Đậy kín nắp'), findsNothing);
+      expect(find.textContaining('Dụng cụ:'), findsNothing);
+      expect(find.textContaining('Tiêu chí'), findsNothing);
+      expect(find.textContaining('syrup quế'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
+
+  testWidgets('steps without metadata never show invented guidance', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    for (final metadata in [null, '', '   ']) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StepVideoGuidePage(
+            recipe: _recipe(equipment: metadata, safetyNote: metadata),
+          ),
+        ),
+      );
+      expect(find.textContaining('Đong nguyên liệu'), findsOneWidget);
+      expect(find.text('DỤNG CỤ & TIÊU CHÍ HOÀN THÀNH BƯỚC'), findsNothing);
+      expect(find.textContaining('Toddy'), findsNothing);
+      expect(find.textContaining('Cold Brew'), findsNothing);
+      expect(find.textContaining('lát cam vàng sấy'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
+
   test(
     'videoUrl survives Firestore DTO and mapper; absent URL stays empty',
     () {

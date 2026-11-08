@@ -220,32 +220,6 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
     );
   }
 
-  String _completionCriteriaForStep(int stepNumber) {
-    switch (stepNumber) {
-      case 1:
-        return 'Cốt Cold Brew trong suốt, đúng định lượng 100 ml tại vạch ca đong Inox, nhiệt độ bảo quản đạt 4°C.';
-      case 2:
-        return 'Hỗn hợp nước cốt cam vàng và syrup quế hòa quyện đồng nhất, thơm dịu, không lắng cặn đáy ly.';
-      case 3:
-        return 'Đá viên bi đầy cách miệng ly 1.5 cm, tạo nền nâng đỡ vững chắc cho tầng cà phê phía trên.';
-      default:
-        return 'Thành phẩm phân 2 tầng màu rõ rệt, lát cam vàng sấy đặt cân đối trên bề mặt đá.';
-    }
-  }
-
-  String _equipmentForStep(int stepNumber) {
-    switch (stepNumber) {
-      case 1:
-        return 'Ca đong chuẩn Inox 250 ml · Bình ủ lạnh Toddy';
-      case 2:
-        return 'Jigger đong 2 đầu (20/40 ml) · Muỗng khuấy bar';
-      case 3:
-        return 'Xúc đá Inox tiêu chuẩn · Ly thủy tinh 500 ml';
-      default:
-        return 'Kẹp gắp trang trí Inox · Khay phục vụ quầy bar';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final recipe = widget.recipe;
@@ -579,69 +553,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
                     ),
                     const SizedBox(height: 14),
 
-                    // 3. Equipment & Completion Criteria Card (from recipe_step schema)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: NomadKit.surface,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: NomadKit.border),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Image.asset(
-                                'assets/icons/icon_check_circle.png',
-                                width: 22,
-                                height: 22,
-                                filterQuality: FilterQuality.medium,
-                                errorBuilder: (ctx, err, stack) => const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 20,
-                                  color: NomadKit.forest,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text(
-                                  'DỤNG CỤ & TIÊU CHÍ HOÀN THÀNH BƯỚC',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: NomadKit.forest,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Dụng cụ: ${_equipmentForStep(currentStep.stepNumber)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: NomadKit.ink,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _completionCriteriaForStep(currentStep.stepNumber),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: NomadKit.secondary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // 4. Linked SOP (if available)
+                    // 3. Linked SOP (if available)
                     if (currentStep.linkedSopId != null) ...[
                       InkWell(
                         borderRadius: BorderRadius.circular(16),
