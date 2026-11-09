@@ -2,7 +2,7 @@
 
 Tài liệu kế hoạch kiểm thử tự động toàn diện (Lab 3, Appendix B) cho ứng dụng **RecipeHub Mobile** sử dụng agent AI kiểm thử bằng ngôn ngữ tự nhiên **ARTEMIS** trên thiết bị Android thật (Xiaomi Redmi 7, Android 10).
 
-> Các ca ARTEMIS dưới đây là kế hoạch, chưa có kết quả chạy. TC-04 và TC-09 hiện là ca thủ công bị chặn bởi điều kiện UI/phiên; không tính là đã pass.
+> Kết quả chạy thực tế ở mục 5.1. TC-04 và TC-09 là ca thủ công bị chặn bởi điều kiện UI/phiên; không tính là đã pass.
 
 ---
 
@@ -148,37 +148,39 @@ uv run pytest test_notifications.py -v
 
 ## 5. Kết quả chạy kiểm thử & Phiên khám phá
 
+<!-- ARTEMIS-TP:START -->
 > [!NOTE]
-> **Trạng thái:** **Chưa chạy** (Bảng kết quả chuẩn bị sẵn để ghi nhận dữ liệu thực tế khi thực thi trên thiết bị thật; không điền số liệu giả định).
+> **Trạng thái (cập nhật 09/11/2026 09:02):** **18/19 ca tự động đã PASS ít nhất 1 vòng**, 3 vòng · 49/55 lượt-ca PASS · lượt thử gồm cả lần thử lại do Gemini 429/503; 5 ca thủ công (TC-04, TC-09, TC-21, TC-23, TC-24). Model: Gemini 3.5/3.1 Flash-Lite (free tier, xoay 5 key). Số liệu sinh tự động từ `e2e_test/results/round*.jsonl` (+ `rerun*.jsonl`).
 
 ### 5.1. Bảng kết quả chạy tự động (3 vòng đối soát)
 
-| Test ID | Ca kiểm thử | Số lần chạy | Pass Rate (%) | Thời gian TB (s) | Trace ID mẫu | Ghi chú |
+| Test ID | Ca kiểm thử | Số vòng | Pass | Thời gian TB (lượt pass) | Trace mẫu | Ghi chú |
 | :--- | :--- | :-: | :-: | :-: | :--- | :--- |
-| **TC-01** | Đăng nhập Email/Mật khẩu thành công | 0 | Chưa chạy | – | – | – |
-| **TC-02** | Đăng nhập sai mật khẩu báo lỗi | 0 | Chưa chạy | – | – | – |
-| **TC-03** | Quên mật khẩu gửi thư đặt lại | 0 | Chưa chạy | – | – | – |
-| **TC-04** | Tài khoản chưa cấp quyền hạ vai trò | 0 | Chưa chạy | – | – | – |
-| **TC-05** | Đăng nhập Google qua Account Picker | 0 | Chưa chạy | – | – | – |
-| **TC-06** | Hủy chọn tài khoản Google Sign-In | 0 | Chưa chạy | – | – | – |
-| **TC-07** | Tìm kiếm công thức có kết quả tại quầy | 0 | Chưa chạy | – | – | – |
-| **TC-08** | Tìm kiếm không có kết quả (Empty State) | 0 | Chưa chạy | – | – | – |
-| **TC-09** | Xử lý mất mạng và bấm nút Thử lại | 0 | Chưa chạy | – | – | – |
-| **TC-10** | Chuyển đổi qua 4 tab điều hướng cấp 1 | 0 | Chưa chạy | – | – | – |
-| **TC-11** | Xem chi tiết công thức và thông tin size | 0 | Chưa chạy | – | – | – |
-| **TC-12** | Xem video chuẩn từng bước thao tác | 0 | Chưa chạy | – | – | – |
-| **TC-13** | Kiểm tra event Analytics `view_recipe` logcat | 0 | Chưa chạy | – | – | – |
-| **TC-14** | Sổ tay SOP lật trang 3D & xuất PDF | 0 | Chưa chạy | – | – | – |
-| **TC-15** | Chi tiết nhiệm vụ học & tick checklist | 0 | Chưa chạy | – | – | – |
-| **TC-16** | Làm trắc nghiệm Quiz & nộp xem điểm | 0 | Chưa chạy | – | – | – |
-| **TC-17** | Tự luyện bấm giờ & xuất PDF vào máy | 0 | Chưa chạy | – | – | – |
-| **TC-18** | Admin chấm thực hành tại quầy theo tiêu chí | 0 | Chưa chạy | – | – | – |
-| **TC-19** | Gửi phản hồi kèm ảnh & Admin nhận real-time | 0 | Chưa chạy | – | – | – |
-| **TC-20** | Cách ly dữ liệu phản hồi giữa Barista A và B | 0 | Chưa chạy | – | – | – |
-| **TC-21** | Áp dụng cấu hình Remote Config giới hạn món | 0 | Chưa chạy | – | – | – |
-| **TC-22** | Admin bị ẩn tự luyện & tiến độ cá nhân | 0 | Chưa chạy | – | – | – |
-| **TC-23** | Chạm push notification khay hệ thống mở app | 0 | Chưa chạy | – | – | – |
-| **TC-24** | Đổi mật khẩu tài khoản & đăng xuất an toàn | 0 | Chưa chạy | – | – | – |
+| **TC-01** | Đăng nhập Email/Mật khẩu thành công | 3 | 3/3 | 267s | `72cbde45` | – |
+| **TC-02** | Đăng nhập sai mật khẩu báo lỗi | 3 | 3/3 | 171s | `8c7a98e3` | – |
+| **TC-03** | Quên mật khẩu gửi thư đặt lại | 3 | 3/3 | 92s | `31141d22` | – |
+| **TC-04** | Tài khoản chưa cấp quyền hạ vai trò | – | Thủ công | – | – | Thủ công: màn đăng nhập không có lựa chọn xin quyền Admin |
+| **TC-05** | Đăng nhập Google qua Account Picker | 3 | 3/3 | 200s | `c26179a0` | – |
+| **TC-06** | Hủy chọn tài khoản Google Sign-In | 3 | 3/3 | 53s | `0ce4f207` | – |
+| **TC-07** | Tìm kiếm công thức có kết quả tại quầy | 3 | 3/3 | 175s | `3f9c1159` | – |
+| **TC-08** | Tìm kiếm không có kết quả (Empty State) | 3 | 3/3 | 154s | `e13b2520` | – |
+| **TC-09** | Xử lý mất mạng và bấm nút Thử lại | – | Thủ công | – | – | Thủ công: pm clear xoá phiên nên không tạo được lỗi tải khi đã đăng nhập |
+| **TC-10** | Chuyển đổi qua 4 tab điều hướng cấp 1 | 3 | 1/3 | 42s | `dd13bd6a` | Vòng 2–3: agent trả lời văn xuôi thay vì JSON (model lite); đã đổi khoá kết quả + chỉ dẫn |
+| **TC-11** | Xem chi tiết công thức và thông tin size | 3 | 3/3 | 109s | `7bd16778` | – |
+| **TC-12** | Xem video chuẩn từng bước thao tác | 3 | 3/3 | 174s | `33e5af3d` | – |
+| **TC-13** | Kiểm tra event Analytics `view_recipe` logcat | 3 | 3/3 | 97s | `1879fed5` | – |
+| **TC-14** | Sổ tay SOP lật trang 3D & xuất PDF | 3 | 3/3 | 101s | `ccaf0466` | – |
+| **TC-15** | Chi tiết nhiệm vụ học & tick checklist | 3 | 2/3 | 91s | `8261ff25` | Vòng 2: agent trả lời văn xuôi; vòng 3 PASS sau khi thêm chỉ dẫn JSON |
+| **TC-16** | Làm trắc nghiệm Quiz & nộp xem điểm | 3 | 3/3 | 261s | `d2032ead` | – |
+| **TC-17** | Tự luyện bấm giờ & xuất PDF vào máy | 3 | 3/3 | 183s | `fbaa4c40` | – |
+| **TC-18** | Admin chấm thực hành tại quầy theo tiêu chí | 3 | 2/3 | 314s | `5fd11e30` | Vòng 3: hết quota Gemini (429) trên cả 5 key lúc đăng nhập Admin |
+| **TC-19** | Gửi phản hồi kèm ảnh & Admin nhận real-time | 3 | 3/3 | 236s | `4e324883` | – |
+| **TC-20** | Cách ly dữ liệu phản hồi giữa Barista A và B | 1 | Đang chờ chạy lại | – | – | Vòng 1: adb gõ email sai (@→#); đã sửa gõ từng ký tự |
+| **TC-21** | Áp dụng cấu hình Remote Config giới hạn món | – | PASS (thủ công) | – | – | Thủ công 08/11: Remote Config 50 → 5 → 50, áp dụng khi mở lại app |
+| **TC-22** | Admin bị ẩn tự luyện & tiến độ cá nhân | 3 | 2/3 | 156s | `312a02c3` | Vòng 3: gián đoạn do hết quota 429, chờ reset quota |
+| **TC-23** | Chạm push notification khay hệ thống mở app | – | PASS (thủ công) | – | – | Thủ công 08/11: FCM foreground/background/terminated, chạm mở đúng màn |
+| **TC-24** | Đổi mật khẩu tài khoản & đăng xuất an toàn | – | PASS (thủ công) | – | – | PASS – kiểm thủ công bởi chủ dự án (đổi mật khẩu) |
+<!-- ARTEMIS-TP:END -->
 
 ### 5.2. Phiên kiểm thử khám phá (Exploratory Testing – 15 đến 30 phút)
 
