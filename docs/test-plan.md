@@ -184,13 +184,17 @@ uv run pytest test_notifications.py -v
 
 ### 5.2. Phiên kiểm thử khám phá (Exploratory Testing – 15 đến 30 phút)
 
-Bảng ghi nhận các vấn đề giao diện, trải nghiệm hoặc ngoại lệ phát hiện trong phiên tương tác tự do:
+> [!IMPORTANT]
+> **Phiên khám phá bằng ARTEMIS profile Pro chưa chạy.** Free tier Gemini chỉ khoảng 20 request/ngày/model, đã dùng hết cho 3 vòng hồi quy. Không ghi kết quả giả.
+
+Đã có một phiên khám phá **không theo kịch bản** ngày 05/11/2026, khoảng 25 phút (2 phiên 04:53–05:03 và 05:14–05:35). Phiên này do agent điều khiển Redmi 7 qua adb (chạm, nhập, chụp màn hình, đọc logcat), trên bản build khi app còn gọi Gateway .NET; xem đầy đủ tại [`exploratory-testing-log.md`](exploratory-testing-log.md). Nhật ký có 40 phát hiện (8 Cao, 12 Trung bình, còn lại Thấp/Thông tin), gồm cả các lượt chạy sau phiên. Một số phát hiện Cao tiêu biểu:
 
 | STT | Màn hình | Thao tác thực hiện | Hiện tượng quan sát được | Mức độ | Trạng thái |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| 1 | – | – | _Chưa chạy phiên khám phá_ | – | – |
-| 2 | – | – | _Chưa chạy phiên khám phá_ | – | – |
-| 3 | – | – | _Chưa chạy phiên khám phá_ | – | – |
+| E-01 | Tra cứu | Mở danh sách trên màn 360 dp | Tràn ngang 9.5 px ở hàng chip và meta thẻ công thức | Cao | Đã sửa (`Flexible`/ellipsis) |
+| E-21 | Thông báo | Chạm thông báo trỏ tới món ngoài giới hạn Remote Config | Mở trang Thông báo thay vì chi tiết món | Cao | Đã sửa |
+| E-23 | Đăng xuất / đăng nhập | Bị khoá rồi đăng nhập lại ngay | `ConcurrentModificationError` trong `NotificationViewModel.reset()` | Cao | Đã sửa |
+| E-32 | Thông báo | Đổi vai trò khi đang ở trang Thông báo rồi bấm back | `setState() called after dispose()` gây crash | Cao | Đã sửa (kiểm `mounted`) |
 
 ---
 
