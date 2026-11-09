@@ -137,8 +137,10 @@ async def execute(artemis: ArtemisClient, instruction: str) -> TaskResult:
     try:
         result = await artemis.run(
             instruction + " Stay inside the RecipeHub app (com.recipehub.mobile); never open, launch "
-            "or type into any other app. Return only the requested JSON object. Report only observed "
-            "evidence; never invent success, data or missing controls. Never return credentials.",
+            "or type into any other app. Return only the requested JSON object: when you finish, the "
+            "explanation of your final report must be exactly that JSON object and nothing else. "
+            "Report only observed evidence; never invent success, data or missing controls. "
+            "Never return credentials.",
             # Without this lock a lite model once launched another app on the shared phone and
             # typed the test password into its login form.
             locked_app_package=app_package(),
