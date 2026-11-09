@@ -1,6 +1,6 @@
 # RecipeHub Mobile – ARTEMIS E2E
 
-Bộ 24 ca TC-01…TC-24 theo `docs/test-plan.md`, chạy tuần tự trên Android thật với dữ liệu Firestore thật. Chỉ tạo bộ test; chưa thực thi hoặc có kết quả thiết bị. Không chạy đồng thời nhiều pytest trên cùng thiết bị/thư mục kết quả.
+Bộ 24 ca TC-01…TC-24 theo `docs/test-plan.md`, chạy tuần tự trên Android thật với dữ liệu Firestore thật. Đã chạy 3 vòng trên Redmi 7 (09/11/2026); kết quả ở `docs/test-plan.md` mục 5.1. Không chạy đồng thời nhiều pytest trên cùng thiết bị/thư mục kết quả.
 
 ## Chuẩn bị
 
@@ -79,14 +79,14 @@ Sau setup đăng nhập mới, test dùng ADB đưa app về background và tạ
 
 Đọc `packages/artemis-client/README.md`, `src/artemis_client/client.py`, `models.py`, `examples/basic.py`. Dùng `ArtemisClient(base_url, device_serial=..., default_profile=...)` và `await client.run(goal, enable_outputter=True, expected_output=...)`. `expected_output` là **chuỗi hướng dẫn**, client này không nhận `schema`/`response_schema`; suite yêu cầu JSON rồi parse `result.output` (dict hoặc chuỗi JSON, chấp nhận fence JSON). Kiểm tra `result.succeeded`, dùng `result.trace_id`, `result.error`, `result.status`. Thành công của agent chưa đủ: mọi ca còn assert output; TC-13 kiểm tra logcat từ host.
 
-Follow-up offline không chạy uv sync/pytest thiết bị. Đã thử Flutter analyze/test với --no-pub nhưng chưa có kết quả; Python chưa khởi chạy được. Xem docs/coderabbit-followup.md.
 
 
 ## Tùy chọn ADB_LOGIN và E2E_REUSE_SESSION
 
-- `ADB_LOGIN=1`: nhập Viewer bằng ADB; toạ độ email `(400,660)`, password `(380,848)`, submit `(360,1134)` đo trên Redmi 7 **720×1520**. Thiết bị khác cần đo lại `_LOGIN_POINTS`. Mặc định tắt.
-- Mật khẩu (và email) khi dùng `ADB_LOGIN=1` chỉ hỗ trợ ASCII in được từ space đến `~`, **trừ `%`**: chữ `A–Z`, `a–z`, số `0–9`, khoảng trắng và dấu câu ASCII còn lại. Khoảng trắng được mã hóa thành `%s`, shell metacharacter được quote; `%` bị từ chối vì `input text` biến `%s` thành khoảng trắng. Unicode, emoji, tab, xuống dòng và ký tự điều khiển không được hỗ trợ. Fixture fail rõ ràng trước khi xóa dữ liệu app nếu credential không hợp lệ, không in mật khẩu. Dùng `ADB_LOGIN=0` để nhập credential ngoài tập này qua ARTEMIS.
-- `E2E_REUSE_SESSION=1`: chỉ có hiệu lực với `ADB_LOGIN=1`; tái dùng Viewer cùng tài khoản qua `results/.session`. TC-19/20/24 invalidate marker trước thao tác đổi phiên; `fresh_app` cũng xóa marker.
+- `ADB_LOGIN=1`: đăng nhập Viewer bằng adb thay cho agent (agent gõ không ổn định vào `TextField` của Flutter). Chạm ô email tại `_LOGIN_POINTS["email"] = (400,790)` (đo trên Redmi 7 **720×1520**; thiết bị khác cần đo lại), gõ email, `KEYCODE_TAB` sang ô mật khẩu, gõ mật khẩu, `KEYCODE_ENTER` để gửi. Mặc định tắt.
+- Gõ **từng ký tự**: `@`, `.` và khoảng trắng gửi bằng keyevent (`KEYCODE_AT`, `KEYCODE_PERIOD`, `KEYCODE_SPACE`), vì `input text` gõ nhanh làm rơi ký tự và biến `@` thành `#`. Chỉ hỗ trợ ASCII in được, **trừ `%`**; fixture fail rõ ràng trước khi xoá dữ liệu app nếu credential không hợp lệ, không in mật khẩu. Dùng `ADB_LOGIN=0` để nhập credential ngoài tập này qua ARTEMIS.
+- `E2E_REUSE_SESSION=force`: tái dùng phiên Viewer giữa các ca qua `results/.session`. Giá trị khác (kể cả `1`) không tái dùng, vì phiên cũ từng làm treo ca; mỗi ca đăng nhập mới.
+- TC-20: Barista A tạo phản hồi bằng ARTEMIS, Barista B đăng nhập bằng adb (`adb_viewer_login("_B")`), rồi ARTEMIS kiểm danh sách của B.
 - TC-24 dùng tài khoản password test riêng, nhập đủ ba ô và phục hồi mật khẩu gốc trong finally kể cả khi assertion lỗi.
 - TC-24 báo cả lỗi thân test và lỗi phục hồi bằng `BaseExceptionGroup` nếu cả hai cùng lỗi.
 - TC-21 vẫn chỉ chạy khi `RH_RC_OPERATOR=1`; chấp nhận giới hạn gốc là mọi số nguyên dương, kể cả 1 hoặc 2. Trước khi yêu cầu publish, lưu giá trị gốc vào `results/.tc21-original-limit` (không phụ thuộc `RUN_ID`). Nếu khôi phục timeout, giữ file này; vòng sau phải nhận xác nhận `tc21-restore-done` cho đúng giá trị gốc trước khi ghi baseline mới. Không xóa file pending để bỏ qua khôi phục. Các file ready/done vẫn có tiền tố `RUN_ID` như handshake hiện tại.

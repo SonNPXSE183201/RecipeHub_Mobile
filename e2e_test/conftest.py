@@ -1,6 +1,7 @@
 """Device fixtures and a redacted, one-row-per-case JSONL journal (sequential only)."""
 from __future__ import annotations
 
+import ast
 import asyncio
 import json
 import os
@@ -73,26 +74,45 @@ def app_package() -> str:
     return os.getenv("RH_APP_PACKAGE", "com.recipehub.mobile")
 
 
-_REPORT = re.compile(r"report_task_status\(\{'explanation': '(\{.*?\})', 'status': '(\w+)'")
+_REPORT = re.compile(r"Executing Flash tool: report_task_status\((\{.*?\})\)\s*$", re.M)
+
+
+def _first_json_object(text: str) -> Any:
+    """Return the first JSON object embedded in text (the agent often wraps it in prose)."""
+    decoder = json.JSONDecoder()
+    for start in (m.start() for m in re.finditer(r"\{", text)):
+        try:
+            value, _ = decoder.raw_decode(text[start:])
+        except ValueError:
+            continue
+        if isinstance(value, dict):
+            return value
+    return None
 
 
 def _trace_output(task_id: str) -> Any:
     """The ARTEMIS session API does not return the Flash agent's final report.
 
-    The agent writes it with report_task_status into traces/<task_id>/stdout.log on the
-    same machine as the server; read the last JSON explanation from there.
+    The agent writes it with report_task_status({...}) into traces/<task_id>/stdout.log on
+    the same machine as the server. Field order varies and the JSON answer may sit inside
+    prose, so parse the call's dict literal and pull the first JSON object from it.
     """
     root = Path(os.getenv("ARTEMIS_TRACES_DIR", "D:/PRM393/artemis/traces"))
     log = root / task_id / "stdout.log"
     if not log.is_file():
         return None
-    matches = _REPORT.findall(log.read_text(encoding="utf-8", errors="replace"))
-    if not matches:
-        return None
-    try:
-        return json.loads(matches[-1][0])
-    except ValueError:
-        return None
+    calls = _REPORT.findall(log.read_text(encoding="utf-8", errors="replace"))
+    for literal in reversed(calls):
+        try:
+            report = ast.literal_eval(literal)
+        except (ValueError, SyntaxError):
+            continue
+        explanation = report.get("explanation") if isinstance(report, dict) else None
+        if isinstance(explanation, str):
+            found = _first_json_object(explanation)
+            if found is not None:
+                return found
+    return None
 
 
 def output(result: TaskResult) -> dict[str, Any]:
@@ -117,8 +137,10 @@ async def execute(artemis: ArtemisClient, instruction: str) -> TaskResult:
     try:
         result = await artemis.run(
             instruction + " Stay inside the RecipeHub app (com.recipehub.mobile); never open, launch "
-            "or type into any other app. Return only the requested JSON object. Report only observed "
-            "evidence; never invent success, data or missing controls. Never return credentials.",
+            "or type into any other app. Return only the requested JSON object: when you finish, the "
+            "explanation of your final report must be exactly that JSON object and nothing else. "
+            "Report only observed evidence; never invent success, data or missing controls. "
+            "Never return credentials.",
             # Without this lock a lite model once launched another app on the shared phone and
             # typed the test password into its login form.
             locked_app_package=app_package(),
@@ -255,7 +277,7 @@ async def sign_in(artemis: ArtemisClient, instruction: str) -> ArtemisClient:
 # rewrites %s as spaces and cannot reliably inject Unicode or control characters.
 # With E2E_REUSE_SESSION=1 a signed-in viewer session is kept between cases.
 _SESSION_FILE = ROOT / "results" / ".session"
-_LOGIN_POINTS = {"email": (400, 660), "password": (380, 848), "submit": (360, 1134)}
+_LOGIN_POINTS = {"email": (400, 790)}
 
 
 def validate_adb_text(text: str) -> None:
@@ -265,9 +287,19 @@ def validate_adb_text(text: str) -> None:
 
 
 def adb_input_text(text: str) -> None:
-    """Quote for the Android shell; adb joins shell arguments before execution."""
+    """Quote for the Android shell; adb joins shell arguments before execution.
+
+    Sent one character at a time: longer `input text` calls dropped letters on Redmi 7
+    (vuonglam → vunglam) and '@' came out as '#', so '@' and '.' use key events.
+    """
     validate_adb_text(text)
-    adb("shell", "input", "text", shlex.quote(text.replace(" ", "%s")))
+    keys = {"@": "KEYCODE_AT", ".": "KEYCODE_PERIOD", " ": "KEYCODE_SPACE"}
+    for char in text:
+        if char in keys:
+            adb("shell", "input", "keyevent", keys[char])
+        else:
+            adb("shell", "input", "text", shlex.quote(char))
+        time.sleep(0.08)
 
 
 def _type_field(point: tuple[int, int], text: str) -> None:
@@ -290,20 +322,35 @@ def adb_viewer_login(suffix: str = "") -> None:
     adb("shell", "pm", "clear", package)
     adb("shell", "monkey", "-p", package, "1")
     time.sleep(8)
-    _type_field(_LOGIN_POINTS["email"], email)
-    _type_field(_LOGIN_POINTS["password"], password)
-    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    # Fresh login screen on Redmi 7 (720x1520): the Email field sits at y=790. Typing, then
+    # Tab to the password field and Enter to submit, avoids coordinates that move once the
+    # keyboard opens (verified on device 09/11/2026).
+    ex, ey = _LOGIN_POINTS["email"]
+    adb("shell", "input", "tap", str(ex), str(ey))
     time.sleep(1)
-    tx, ty = _LOGIN_POINTS["submit"]
-    adb("shell", "input", "tap", str(tx), str(ty))
-    time.sleep(8)
+    adb_input_text(email)
+    time.sleep(0.5)
+    adb("shell", "input", "keyevent", "KEYCODE_TAB")
+    time.sleep(0.5)
+    adb_input_text(password)
+    time.sleep(0.5)
+    adb("shell", "input", "keyevent", "KEYCODE_ENTER")
+    time.sleep(9)
+    if "com.recipehub.mobile" not in adb("shell", "dumpsys", "window"):
+        pytest.fail("adb login left the RecipeHub app", pytrace=False)
+    # Still on the login screen means the credentials did not go through.
+    ui = adb("shell", "uiautomator", "dump", "/dev/tty")
+    if "Đăng nhập với Google" in ui or "Quên mật khẩu" in ui:
+        pytest.fail(f"adb login for viewer{suffix} did not reach the app shell", pytrace=False)
 
 
 async def _viewer(artemis: ArtemisClient, suffix: str) -> ArtemisClient:
     package = app_package()
     if os.getenv("ADB_LOGIN") == "1":
         tag = f"viewer{suffix}"
-        reuse = os.getenv("E2E_REUSE_SESSION") == "1"
+        # Reusing a session broke when an earlier case had signed out (the agent then tried to
+        # type credentials itself and looped). Reuse only when explicitly forced.
+        reuse = os.getenv("E2E_REUSE_SESSION") == "force"
         if reuse and _SESSION_FILE.exists() and _SESSION_FILE.read_text() == tag:
             adb("shell", "am", "force-stop", package)
             adb("shell", "monkey", "-p", package, "1")
