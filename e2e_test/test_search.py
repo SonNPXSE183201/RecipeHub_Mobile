@@ -41,6 +41,8 @@ async def test_tc10_bottom_tabs(signed_in_viewer: ArtemisClient) -> None:
         "Start at Lookup. Successively tap bottom tabs 'Tra cứu', 'Việc học', 'Phản hồi', 'Tài khoản'. "
         "At each stop wait for data and verify its matching screen content/AppBar, finally "
         "'Tài khoản & Phân quyền'. "
-        'Return {"tabs_verified":["Tra cứu","Việc học","Phản hồi","Tài khoản"],"status":"pass"}.')
+        'Return {"tabs_verified":["Tra cứu","Việc học","Phản hồi","Tài khoản"],"all_screens_matched":true}.')
     assert result.succeeded, result.error or result.status
-    assert output(result) == {"tabs_verified": ["Tra cứu", "Việc học", "Phản hồi", "Tài khoản"], "status": "pass"}
+    # A "status" key collided with report_task_status(status=...) and the agent replied in prose.
+    assert output(result) == {"tabs_verified": ["Tra cứu", "Việc học", "Phản hồi", "Tài khoản"],
+                              "all_screens_matched": True}
