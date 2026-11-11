@@ -42,6 +42,8 @@ import '../services/mock/mock_notification_service.dart';
 import '../services/mock/mock_practice_history_store.dart';
 import '../services/mock/mock_remote_config_service.dart';
 import '../services/mock/mock_storage_service.dart';
+import '../services/interfaces/i_ai_practice_service.dart';
+import '../services/firebase/firebase_ai_practice_service.dart';
 
 /// Composition root: gom service (interface) để inject vào ViewModel.
 class AppServices {
@@ -62,6 +64,7 @@ class AppServices {
     required this.training,
     this.fileSaver,
     this.usesFirebase = false,
+    this.aiPractice = const UnavailableAiPracticeService(),
   });
 
   final IAuthService auth;
@@ -96,6 +99,7 @@ class AppServices {
 
   /// `true` khi chạy 6 dịch vụ Firebase thật.
   final bool usesFirebase;
+  final IAiPracticeService aiPractice;
 
   /// Nguồn công thức: `firestore` (mặc định, Admin quản lý trên web) hoặc `gateway` (API .NET).
   static const String recipeSourceName = String.fromEnvironment(
@@ -123,6 +127,7 @@ class AppServices {
     training: FirestoreTrainingRepository(),
     fileSaver: AndroidFileSaveService(),
     usesFirebase: true,
+    aiPractice: FirebaseAiPracticeService(),
   );
 
   /// Test (ARTEMIS E2E) hoặc máy chưa cấu hình Firebase: không chạm plugin native.

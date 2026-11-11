@@ -190,13 +190,16 @@ class _MyLearningPageState extends State<MyLearningPage>
 
                   // 3 Tabs
                   Container(
-                    height: 44,
+                    constraints: const BoxConstraints(minHeight: 48),
                     decoration: BoxDecoration(
                       color: NomadKit.surface,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: NomadKit.border),
                     ),
                     child: TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      dividerColor: Colors.transparent,
                       controller: _tabController,
                       indicatorColor: NomadKit.sand,
                       indicatorSize: TabBarIndicatorSize.tab,

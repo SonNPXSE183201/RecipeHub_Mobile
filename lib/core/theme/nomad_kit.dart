@@ -17,4 +17,45 @@ class NomadKit {
   static const surface = Colors.white;
   static const border = Color(0xFFE7E0D5);
   static const error = Color(0xFFDC2626);
+
+  // Shared mobile typography: practice/AI reuse these rather than screen constants.
+  static const title = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.w800,
+    color: ink,
+  );
+  static const subtitle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    color: ink,
+  );
+  static const body = TextStyle(fontSize: 14, height: 1.4, color: ink);
+  static const caption = TextStyle(
+    fontSize: 12,
+    height: 1.35,
+    color: secondary,
+  );
+  static const label = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    color: ink,
+  );
+  static const section = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w800,
+    color: sandDark,
+    letterSpacing: .6,
+  );
+  static const timer = TextStyle(
+    fontSize: 48,
+    fontWeight: FontWeight.w900,
+    color: ink,
+    fontFamily: 'monospace',
+  );
+  static const timerCompact = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w900,
+    color: ink,
+    fontFamily: 'monospace',
+  );
 }

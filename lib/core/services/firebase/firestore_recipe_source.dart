@@ -170,6 +170,9 @@ class FirestoreRecipeSource
             'title': steps[i]['title'] ?? 'Bước ${i + 1}',
             'description': steps[i]['description'] ?? '',
             'durationSeconds': (steps[i]['durationSeconds'] as num?)?.toInt(),
+            'videoStartSeconds': (steps[i]['videoStartSeconds'] as num?)
+                ?.toInt(),
+            'videoEndSeconds': (steps[i]['videoEndSeconds'] as num?)?.toInt(),
             'temperatureCelsius': (steps[i]['temperatureCelsius'] as num?)
                 ?.toDouble(),
             'equipment': steps[i]['equipment'],

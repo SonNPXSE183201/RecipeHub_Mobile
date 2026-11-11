@@ -180,6 +180,8 @@ class RecipeStepResponse {
   final String title;
   final String description;
   final int? durationSeconds;
+  final int? videoStartSeconds;
+  final int? videoEndSeconds;
   final double? temperatureCelsius;
   final String? equipment;
   final String? safetyNote;
@@ -192,6 +194,8 @@ class RecipeStepResponse {
     required this.title,
     required this.description,
     this.durationSeconds,
+    this.videoStartSeconds,
+    this.videoEndSeconds,
     this.temperatureCelsius,
     this.equipment,
     this.safetyNote,
@@ -207,6 +211,8 @@ class RecipeStepResponse {
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       durationSeconds: (json['durationSeconds'] as num?)?.toInt(),
+      videoStartSeconds: (json['videoStartSeconds'] as num?)?.toInt(),
+      videoEndSeconds: (json['videoEndSeconds'] as num?)?.toInt(),
       temperatureCelsius: (json['temperatureCelsius'] as num?)?.toDouble(),
       equipment: json['equipment'] as String?,
       safetyNote: json['safetyNote'] as String?,

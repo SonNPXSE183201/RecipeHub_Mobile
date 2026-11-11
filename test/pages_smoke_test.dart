@@ -37,6 +37,7 @@ import 'package:recipehub_mobile/features/system/error_recovery_page.dart';
 import 'package:recipehub_mobile/features/system/loading_transition_page.dart';
 
 import 'support/fake_recipe_source.dart';
+import 'support/fake_practice_clock.dart';
 import 'support/training_fixtures.dart';
 
 class _Harness {
@@ -220,7 +221,10 @@ void main() {
     await _pumpPage(
       tester,
       h,
-      SelfPracticeTimerPage(initialRecipe: _recipes[1]),
+      SelfPracticeTimerPage(
+        initialRecipe: _recipes[1],
+        clock: FakePracticeClock(tester.binding.clock.now),
+      ),
     );
     await _tapIfPresent(tester, find.byKey(AppKeys.timerStart));
     await tester.pump(const Duration(seconds: 3));

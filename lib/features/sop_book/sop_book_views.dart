@@ -375,7 +375,6 @@ class SopBookPageView extends StatelessWidget {
             spacing: 8,
             runSpacing: 4,
             children: [
-              _chip(sop.code, NomadKit.oceanLight, NomadKit.ocean, mono: true),
               _chip(
                 'Phiên bản ${sop.version}',
                 NomadKit.canvas,
@@ -416,7 +415,7 @@ class SopBookPageView extends StatelessWidget {
           if (sop.linkedRecipeCodes.isNotEmpty) ...[
             const Text('Món áp dụng', style: _h2),
             const SizedBox(height: 2),
-            Text(sop.linkedRecipeCodes.join(', '), style: _body),
+            Text('${sop.linkedRecipeCodes.length} món liên quan', style: _body),
           ],
         ],
       ),

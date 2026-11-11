@@ -35,8 +35,15 @@ class RecipeMapper {
     for (final st in steps) {
       stepNo++;
       final dur = st.durationSeconds ?? 0;
-      final start = cursor;
-      cursor += dur > 0 ? dur : 10;
+      final chapterStart = st.videoStartSeconds;
+      final chapterEnd = st.videoEndSeconds;
+      final hasChapter =
+          chapterStart != null &&
+          chapterEnd != null &&
+          chapterStart >= 0 &&
+          chapterEnd > chapterStart;
+      final start = hasChapter ? chapterStart : cursor;
+      cursor = hasChapter ? chapterEnd : cursor + (dur > 0 ? dur : 10);
       final extra = <String>[
         if (st.equipment != null && st.equipment!.isNotEmpty)
           'Dụng cụ: ${st.equipment}',

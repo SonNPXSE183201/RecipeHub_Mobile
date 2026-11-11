@@ -74,7 +74,7 @@ class SopBookPdf {
     pdf.paragraph('${r.category} · Phiên bản ${r.version}');
     pdf.paragraph(r.description);
     pdf.paragraph(
-      'Thời gian chuẩn: ${r.standardTime} · Nhiệt độ: ${r.standardTemp}',
+      'Thời lượng các bước có dữ liệu: ${r.standardTime} · Nhiệt độ: ${r.standardTemp}',
     );
     pdf.paragraph('Định lượng theo size', size: 12);
     // Match name + unit, preserving multiple portions/notes rather than dropping

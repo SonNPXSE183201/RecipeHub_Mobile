@@ -254,7 +254,7 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Code & Version
+                                    // SOP type and published version.
                                     Row(
                                       children: [
                                         Image.asset(
@@ -270,7 +270,6 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                               ),
                                         ),
                                         const SizedBox(width: 8),
-                                        // Mã SOP là mã nghiệp vụ dùng để tra cứu → luôn hiển thị đủ, không co.
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 8,
@@ -283,7 +282,7 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                             ),
                                           ),
                                           child: Text(
-                                            sop.code,
+                                            'SOP',
                                             style: const TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w800,
@@ -370,7 +369,7 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
-                                            'Áp dụng: ${sop.linkedRecipeCodes.join(', ')}',
+                                            'Áp dụng cho ${sop.linkedRecipeCodes.length} món',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
