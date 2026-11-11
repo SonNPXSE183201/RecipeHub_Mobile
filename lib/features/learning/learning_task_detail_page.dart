@@ -355,7 +355,10 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             title: Text(
-                              task.sections[idx],
+                              task.sections[idx].replaceAll(
+                                RegExp(r'\bQZ-[A-Z0-9_-]+\b'),
+                                'theo nội dung bài học',
+                              ),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,

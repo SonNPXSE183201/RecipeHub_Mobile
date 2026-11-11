@@ -29,7 +29,9 @@ class SopDetailPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          sop.code,
+          sop.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
@@ -76,7 +78,7 @@ class SopDetailPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      sop.code,
+                      'SOP',
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,

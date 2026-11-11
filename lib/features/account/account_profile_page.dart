@@ -216,12 +216,16 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                auth.displayName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                  color: NomadKit.ink,
+                              Expanded(
+                                child: Text(
+                                  auth.displayName,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    color: NomadKit.ink,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),

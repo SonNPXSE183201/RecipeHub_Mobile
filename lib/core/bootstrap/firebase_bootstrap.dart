@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -60,6 +61,24 @@ class FirebaseBootstrap {
   static Future<bool> initialize() async {
     try {
       await Firebase.initializeApp();
+
+      // Isolate App Check errors: the existing app remains usable if AI is not configured.
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+        try {
+          const debugToken = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN');
+          await FirebaseAppCheck.instance.activate(
+            providerAndroid: kDebugMode
+                ? AndroidDebugProvider(
+                    debugToken: debugToken.isEmpty ? null : debugToken,
+                  )
+                : const AndroidPlayIntegrityProvider(),
+          );
+        } catch (_) {
+          debugPrint(
+            '[Bootstrap] App Check unavailable; AI may require setup.',
+          );
+        }
+      }
 
       // Crashlytics: lỗi framework Flutter (non-fatal) + lỗi async ngoài framework (fatal).
       FlutterError.onError = (details) {

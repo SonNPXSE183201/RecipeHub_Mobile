@@ -419,32 +419,31 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: Row(
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
                         children: [
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: NomadKit.canvas,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: NomadKit.border),
-                              ),
-                              child: Text(
-                                recipe.category,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: NomadKit.ink,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: NomadKit.canvas,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: NomadKit.border),
+                            ),
+                            child: Text(
+                              recipe.category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: NomadKit.ink,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -472,21 +471,26 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                     // Time & Temp Icons
                     Row(
                       children: [
-                        const Icon(
-                          Icons.timer_outlined,
-                          size: 15,
-                          color: NomadKit.secondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          recipe.standardTime,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                        if (recipe.steps.isNotEmpty &&
+                            recipe.steps.every(
+                              (s) => s.durationText != null,
+                            )) ...[
+                          const Icon(
+                            Icons.timer_outlined,
+                            size: 15,
                             color: NomadKit.secondary,
                           ),
-                        ),
-                        const SizedBox(width: 10),
+                          const SizedBox(width: 4),
+                          Text(
+                            recipe.standardTime,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: NomadKit.secondary,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
                         const Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 12,
