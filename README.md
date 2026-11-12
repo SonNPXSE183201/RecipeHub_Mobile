@@ -2,7 +2,7 @@
 
 Ứng dụng Flutter cho Barista và quản lý cửa hàng chuỗi đồ uống: tra cứu công thức chuẩn, sổ tay SOP, việc học + quiz, chấm thực hành tại quầy, phản hồi có ảnh với quản lý (real-time). Dữ liệu thật trên **Cloud Firestore** (dự án Firebase `recipehub-mobile`); nội dung công thức lấy từ *Bộ công thức Phê La* (61 món, 25 SOP) đã chuẩn hóa.
 
-Thiết kế Figma hiện tại: [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?t=b7uALQ2dLq3WUN2d-0). Tài liệu `docs/lab2/` giữ nguồn thiết kế Lab 2 để truy vết lịch sử.
+Thiết kế Figma hiện tại: [Redesign RecipeHub Mobile](https://www.figma.com/design/68BTNO85D6I7UyBujZW1DT/Untitled?node-id=0-1&p=f&t=dakf73mwRDqebamN-0). Tài liệu `docs/lab2/` giữ nguồn thiết kế Lab 2 để truy vết lịch sử.
 
 > Repo nộp Lab 3 theo cấu trúc §9 của đề. Final Assignment sẽ tiếp tục chính repo này (đổi tên `PRM393_Final_SE183201`, dời app vào `mobile/`).
 
