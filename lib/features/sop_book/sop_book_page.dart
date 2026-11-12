@@ -343,10 +343,6 @@ class _SopBookScaffoldState extends State<_SopBookScaffold> {
         _Controls(
           current: _leafIndex,
           total: _layout.leaves.length,
-          onPrev: _leafIndex > 0 ? () => _gotoLeaf(_leafIndex - 1) : null,
-          onNext: _leafIndex < _layout.leaves.length - 1
-              ? () => _gotoLeaf(_leafIndex + 1)
-              : null,
         ),
       ],
     );
@@ -380,13 +376,9 @@ class _Controls extends StatefulWidget {
   const _Controls({
     required this.current,
     required this.total,
-    required this.onPrev,
-    required this.onNext,
   });
   final int current;
   final int total;
-  final VoidCallback? onPrev;
-  final VoidCallback? onNext;
 
   @override
   State<_Controls> createState() => _ControlsState();
@@ -408,35 +400,6 @@ class _ControlsState extends State<_Controls> {
               fontWeight: FontWeight.w700,
               color: NomadKit.ink,
             ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: widget.onPrev,
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    label: const Text('Trước'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: NomadKit.sandDark,
-                    ),
-                    onPressed: widget.onNext,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    iconAlignment: IconAlignment.end,
-                    label: const Text('Sau'),
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
