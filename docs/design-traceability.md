@@ -3,7 +3,7 @@
 Nguồn yêu cầu: `requirements-draft.md` mục 10 (M-01 → M-18). Thiết kế UI ban đầu: `docs/lab2/DESIGN.md`, `docs/lab2/ux/`.
 Mã ca kiểm thử: `FT-xx` = unit/widget test Flutter trong `test/`; `FT-xx` là alias tài liệu cho nhãn `TC-xx` cũ trong `test/artemis_e2e_test.dart` và `test/admin_link_test.dart`. `ART-xx` = mã runner adb lịch sử (`docs/artemis-test-plan.md`), không phải kết quả của suite ARTEMIS mới. Suite ARTEMIS dùng `TC-01`–`TC-24` trong `e2e_test/`; kết quả 3 vòng ở `docs/test-plan.md` mục 5.1.
 
-Cập nhật 12/11/2026: thiết kế hiện tại là [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?t=b7uALQ2dLq3WUN2d-0). `docs/lab2/` lưu thiết kế gốc. Thay đổi triển khai và kiểm chứng: [bản cập nhật 12/11](releases/2026-11-12.md).
+Cập nhật 12/11/2026: thiết kế hiện tại là [Redesign RecipeHub Mobile](https://www.figma.com/design/68BTNO85D6I7UyBujZW1DT/Untitled?node-id=0-1&p=f&t=dakf73mwRDqebamN-0). `docs/lab2/` lưu thiết kế gốc. Thay đổi triển khai và kiểm chứng: [bản cập nhật 12/11](releases/2026-11-12.md).
 
 ---
 

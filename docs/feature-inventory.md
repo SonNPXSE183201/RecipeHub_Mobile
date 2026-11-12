@@ -307,8 +307,9 @@ Các số liệu là snapshot theo tài liệu `docs/ai-full-verification-202611
 
 ### 11.1. Phạm vi Figma đã kiểm tra
 
-- File: [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?node-id=51-2).
-- Ngày đối chiếu: 12/11/2026.
+- File: [Redesign RecipeHub Mobile](https://www.figma.com/design/68BTNO85D6I7UyBujZW1DT/Untitled?node-id=0-1&p=f&t=dakf73mwRDqebamN-0).
+- Link được cập nhật theo file chủ repo cung cấp. Các thống kê dưới đây là snapshot đối chiếu trước khi đổi link, chưa xác minh lại nội dung file mới.
+- Ngày đối chiếu snapshot: 12/11/2026.
 - Các page đã đọc: `00 · Tổng quan`, `01 · User journey & flow`, `02 · Wireframe`, `03 · Hi-fi`, `04 · Final UI`, `05 · Components`, `06 · States & patterns`, `07 · Design system`, `08 · Assets`, `09 · Prototype`.
 - `04 · Final UI` hiện có **40 frame màn hình/trạng thái**, kích thước chuẩn `430 × 932`.
 - Việc đối chiếu dùng cấu trúc layer, tên component/action, prototype flow và ảnh render của các màn đại diện. Đây là audit chức năng và khả năng tích hợp; không phải xác nhận pixel-perfect hoặc prototype đã nối đủ mọi interaction.
