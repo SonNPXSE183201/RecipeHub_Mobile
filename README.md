@@ -65,7 +65,7 @@ Security Rules được ghi nhận đã kiểm bằng Firebase Emulator (57 ca a
 
 Ảnh Tra cứu tải từ `imageUrl` qua `RecipeThumb`; khi tải lỗi/thiếu URL sẽ hiện biểu tượng thay thế. Điện thoại cần Internet để tải ảnh và đồng bộ Firestore; kết nối scrcpy qua USB không tự cấp Internet. Thông báo trong app dùng toast phía trên; sổ tay dùng trang cố định và hiệu ứng lật quanh gáy trái.
 
-SOP hiện truy cập qua sub-tab Tra cứu. `SopBookPage` còn trong source/test nhưng entry ở Tài khoản đã bị gỡ; cần nối lại entry production trước khi coi luồng sổ tay/PDF là truy cập được từ app hiện tại.
+SOP và Sổ tay truy cập qua sub-tab SOP trong Tra cứu: chọn **Sổ tay công thức & SOP** hoặc **Mục lục, tìm kiếm & PDF** để mở reader.
 
 ## Phiên bản chính
 

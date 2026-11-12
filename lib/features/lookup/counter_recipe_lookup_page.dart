@@ -21,6 +21,7 @@ import '../practice/self_practice_timer_page.dart';
 import '../learning/notifications_page.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../sop/sop_detail_page.dart';
+import '../sop_book/sop_book_page.dart';
 import '../../core/widgets/recipe_thumb.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/rh_motion.dart';
@@ -330,6 +331,11 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                           },
                         ),
                       ),
+                    if (_sopMode)
+                      _bookRows(
+                        recipeCount: allRecipes.length,
+                        sopCount: training.sops.length,
+                      ),
                     RhSectionHeading(
                       title: _sopMode
                           ? 'Quy trình tại quầy'
@@ -361,6 +367,62 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                 child: const Icon(Icons.timer_outlined),
               ),
             ),
+    );
+  }
+
+  Widget _bookRows({required int recipeCount, required int sopCount}) {
+    void open() => go(context, const SopBookPage());
+    return Column(
+      children: [
+        InkWell(
+          onTap: open,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 70),
+            child: Row(
+              children: [
+                const RhSvgIcon('assets/redesign/book.svg', size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Sổ tay công thức & SOP', style: NomadKit.subtitle),
+                      Text(
+                        '$recipeCount công thức · $sopCount SOP',
+                        style: NomadKit.caption,
+                      ),
+                    ],
+                  ),
+                ),
+                const RhChevron(),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1),
+        InkWell(
+          onTap: open,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44),
+            child: Row(
+              children: [
+                const SizedBox(width: 36),
+                Expanded(
+                  child: Text(
+                    'Mục lục, tìm kiếm & PDF',
+                    style: NomadKit.caption.copyWith(
+                      color: NomadKit.ink,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const RhChevron(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -88,7 +88,7 @@ Các điều chỉnh dưới đây do chủ dự án yêu cầu khi chạy thử
    - *Lý do*: Yêu cầu của chủ dự án: thông tin chi nhánh chưa được quản lý thật (chưa có collection `stores`), nên không hiển thị số liệu không có nguồn.
 4. **SOP và entry Sổ tay (cập nhật 12/11/2026)**:
    - *Ban đầu*: Màn Tra cứu có chip "Thư viện SOP" dẫn sang danh mục SOP.
-   - *Hiện tại*: SOP nằm ở sub-tab Tra cứu, mở `SopDetailPage`. Entry Sổ tay tại Tài khoản đã bị gỡ; `SopBookPage` còn trong source/test/debug automation nhưng chưa thấy entry production.
+   - *Hiện tại*: SOP nằm ở sub-tab Tra cứu, mở `SopDetailPage`. Entry Sổ tay chuyển từ Tài khoản sang sub-tab SOP của Tra cứu, có hai dòng mở `SopBookPage`: Sổ tay công thức & SOP và Mục lục, tìm kiếm & PDF.
    - *Lịch sử*: Trước đợt đổi UI, SOP được gom vào Sổ tay tại Tài khoản. Mục này ghi nhận source hiện tại, không xác nhận phê duyệt việc gỡ entry Sổ tay.
 5. **Admin không có tiến độ đào tạo cá nhân và đồng hồ tự luyện**:
    - *Ban đầu*: Mọi vai trò đều thấy thanh tiến độ đào tạo và nút tự luyện.
