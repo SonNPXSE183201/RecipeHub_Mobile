@@ -2,6 +2,14 @@
 
 Tài liệu đặc tả kiến trúc tổng thể, cấu trúc thư mục, sơ đồ lớp MVVM, luồng dữ liệu tuần tự và ma trận ViewModel ↔ Dịch vụ của ứng dụng RecipeHub Mobile.
 
+Cập nhật 12/11/2026:
+
+- Ảnh món: Firestore `recipes.imageUrl` → `FirestoreRecipeSource` → `RecipeDetailResponse` → `RecipeMapper` → `RecipeItem` → `RecipeThumb`. Widget tải URL ảnh; thiếu URL hoặc tải lỗi thì hiện biểu tượng thay thế. Storage path `recipe-images/{code}/{file}`: người đăng nhập đọc, Admin ghi ảnh JPEG/PNG/WEBP dưới 5 MB theo rules.
+- `ToastMessenger` trong `core/widgets/app_toast.dart` hiển thị thông báo trên root Overlay phía trên màn hình, giữ action/thời gian tự ẩn của `SnackBar`. Các sơ đồ ghi SnackBar bên dưới mô tả thông điệp/action; giao diện hiện tại dùng toast.
+- `RhPageRoute` và `PressScale` dùng thông số chuyển động trong `rh_motion.dart`, tôn trọng `MediaQuery.disableAnimations`. `BookReaderStage` xử lý lật trang/quay quanh gáy, kéo ngang và kéo xuống đóng sách; `book_leaves.dart` đo và phân trang cố định.
+- Thư viện SOP nằm ở tab SOP trong Tra cứu; `sop_catalog_page.dart` và `experience_settings_page.dart` đã được xóa. Thiết lập trợ năng lấy từ hệ điều hành.
+- Kiểm chứng/build và giới hạn: [bản cập nhật 12/11](releases/2026-11-12.md).
+
 ---
 
 ## 1. Cấu trúc thư mục mã nguồn (`lib/`)
@@ -35,6 +43,7 @@ lib
     ├── learning
     ├── lookup
     ├── practice
+    ├── shell
     ├── sop
     ├── sop_book
     └── system
@@ -248,15 +257,15 @@ sequenceDiagram
     activate StorageVM
     StorageVM ->> PDFEngine: build(fontBytes, storeLabel, traineeLabel, records)
     PDFEngine -->> StorageVM: Uint8List (Dữ liệu nhị phân PDF)
-    
+
     %% Lưu file vào bộ nhớ máy (Download/RecipeHub)
     StorageVM ->> FileSaver: savePdf(fileName, bytes)
     FileSaver -->> StorageVM: SavedFile(path: "Download/RecipeHub/...")
-    
+
     %% Upload bản sao lên Firebase Cloud Storage
     StorageVM ->> StorageSvc: uploadReportPdf(uid, bytes, fileName)
     StorageSvc -->> StorageVM: UploadResult(downloadUrl, storagePath)
-    
+
     StorageVM ->> Analytics: logExportReportPdf(type, recordCount, fileSizeKb)
     StorageVM -->> HistoryView: Trả về kết quả xuất (kèm file đã lưu)
     deactivate StorageVM

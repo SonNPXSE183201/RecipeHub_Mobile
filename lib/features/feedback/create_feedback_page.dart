@@ -11,6 +11,7 @@ import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/services/interfaces/i_feedback_repository.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/storage_viewmodel.dart';
+import '../../core/widgets/app_toast.dart';
 
 class CreateFeedbackPage extends StatefulWidget {
   const CreateFeedbackPage({
@@ -185,7 +186,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
     if (_targetCode.isEmpty || _isSubmitting) return;
     final text = _contentCtrl.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vui lòng nhập nội dung phản hồi chi tiết.'),
           backgroundColor: NomadKit.error,
@@ -195,7 +196,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
     }
 
     if (text.length > _maxContentLength) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Nội dung phản hồi không được vượt quá $_maxContentLength ký tự.',
@@ -216,7 +217,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
       if (imageUrl == null) {
         // Upload lỗi: giữ nguyên form để người dùng thử lại / bỏ ảnh.
         setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+        ToastMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(storage.attachmentError ?? 'Tải ảnh thất bại.'),
             backgroundColor: NomadKit.error,
@@ -230,7 +231,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
     final uid = auth.user?.uid;
     if (uid == null) {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.'),
           backgroundColor: NomadKit.error,
@@ -258,7 +259,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
     } on FeedbackFailure catch (f) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         SnackBar(content: Text(f.message), backgroundColor: NomadKit.error),
       );
       return;
@@ -275,7 +276,7 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
     setState(() => _isSubmitting = false);
 
     // Quay về màn trước rồi hiện snackbar thành công (Figma 112:324).
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ToastMessenger.of(context);
     Navigator.pop(context);
     messenger
       ..hideCurrentSnackBar()

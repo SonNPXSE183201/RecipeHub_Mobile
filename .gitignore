@@ -59,3 +59,13 @@ app.*.map.json
 *.keystore
 /firebase/hosting/
 /firebase/functions/
+
+# Local exports, build output and image import snapshots (contain download tokens)
+/dist/
+/.tmp-*
+/_backup_ui_old_*/
+/4943d36c-2283-4a4a-8e2e-d8538c5696c8/
+/tools/seed/image-import*.json
+**/service-account*.json
+/evidence/admin-web-deployed.png
+/evidence/admin-web-recipes-deployed.png

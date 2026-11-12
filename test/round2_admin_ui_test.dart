@@ -15,7 +15,6 @@ import 'package:recipehub_mobile/core/viewmodels/storage_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/features/account/account_profile_page.dart';
 import 'package:recipehub_mobile/features/account/change_password_page.dart';
-import 'package:recipehub_mobile/features/sop_book/sop_book_page.dart';
 import 'package:recipehub_mobile/features/feedback/create_feedback_page.dart';
 import 'package:recipehub_mobile/features/feedback/my_feedback_list_page.dart';
 import 'package:recipehub_mobile/features/learning/learning_task_detail_page.dart';
@@ -180,7 +179,7 @@ void main() {
     expect(find.text('Tiến độ đào tạo cá nhân'), findsNothing);
     expect(find.text('Lịch sử tự luyện với Timer'), findsNothing);
     expect(find.text('Đào tạo chi nhánh'), findsOneWidget);
-    expect(find.text('Sổ tay SOP'), findsOneWidget);
+    expect(find.text('Sổ tay SOP'), findsNothing);
   });
 
   testWidgets('Barista account keeps personal progress and practice history', (
@@ -189,13 +188,9 @@ void main() {
     await _pump(tester, const AccountProfilePage(), admin: false);
     expect(find.text('Tiến độ đào tạo cá nhân'), findsOneWidget);
     expect(find.text('Lịch sử tự luyện với Timer'), findsOneWidget);
-    expect(find.text('Sổ tay SOP'), findsOneWidget);
+    expect(find.text('Sổ tay SOP'), findsNothing);
     expect(find.textContaining('CỬA HÀNG CÔNG TÁC'), findsNothing);
     expect(find.textContaining('Cửa hàng công tác'), findsNothing);
-    await tester.tap(find.text('Sổ tay SOP'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byType(SopBookPage), findsOneWidget);
   });
 
   for (final admin in [true, false]) {

@@ -8,6 +8,7 @@ import 'package:recipehub_mobile/core/models/recipe_models.dart';
 import 'package:recipehub_mobile/core/services/i_recipe_source.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
+import 'package:recipehub_mobile/features/sop_book/book_leaves.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_page.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_pages.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_views.dart';
@@ -173,12 +174,9 @@ void main() {
       // Ô tìm kiếm cũng chứa cùng chuỗi; chạm vào dòng kết quả.
       await tester.tap(find.text('Cà Phê Muối').last);
       await tester.pumpAndSettle();
-      expect(find.byType(RecipeBookPage), findsWidgets);
+      expect(find.byType(LeafView), findsWidgets);
       expect(
-        tester
-            .widget<RecipeBookPage>(find.byType(RecipeBookPage).last)
-            .recipe
-            .code,
+        tester.widget<LeafView>(find.byType(LeafView).last).page.recipe!.code,
         'RC-CFE-01',
       );
       expect(find.text('Cà Phê Muối'), findsWidgets);

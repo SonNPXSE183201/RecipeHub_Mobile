@@ -9,6 +9,7 @@ import '../learning/my_learning_page.dart';
 import '../feedback/my_feedback_list_page.dart';
 import '../account/account_profile_page.dart';
 import '../admin_training/admin_store_training_page.dart';
+import '../../core/widgets/app_toast.dart';
 
 class MainAppShell extends StatefulWidget {
   const MainAppShell({super.key, this.initialTabIndex = 0});
@@ -30,7 +31,7 @@ class MainAppShellState extends State<MainAppShell> {
 
   void switchTab(int index) {
     if (mounted && index != _currentIndex) {
-      ScaffoldMessenger.of(context).clearSnackBars();
+      ToastMessenger.of(context).clearSnackBars();
       setState(() => _currentIndex = index);
     }
   }

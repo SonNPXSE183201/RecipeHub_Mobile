@@ -21,7 +21,9 @@ import '../practice/self_practice_timer_page.dart';
 import '../learning/notifications_page.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../sop/sop_detail_page.dart';
-import '../sop_book/sop_book_page.dart';
+import '../../core/widgets/recipe_thumb.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/rh_motion.dart';
 
 class CounterRecipeLookupPage extends StatefulWidget {
   const CounterRecipeLookupPage({super.key});
@@ -244,24 +246,52 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                     ),
                     SizedBox(
                       height: 52,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _documentTab(
-                              'Công thức',
-                              !_sopMode,
-                              () => setState(() => _sopMode = false),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: _documentTab(
-                              'SOP',
-                              _sopMode,
-                              () => setState(() => _sopMode = true),
-                            ),
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, box) {
+                          final tabW = (box.maxWidth - 20) / 2;
+                          return Stack(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _documentTab(
+                                      'Công thức',
+                                      !_sopMode,
+                                      () => setState(() => _sopMode = false),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: _documentTab(
+                                      'SOP',
+                                      _sopMode,
+                                      () => setState(() => _sopMode = true),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Gạch chân trượt giữa 2 tab (prototype: 180ms)
+                              AnimatedPositioned(
+                                duration: RhMotion.reduced(context)
+                                    ? Duration.zero
+                                    : RhMotion.tab,
+                                curve: Curves.easeInOut,
+                                left: _sopMode ? tabW + 20 : 0,
+                                bottom: 0,
+                                width: tabW,
+                                height: 3,
+                                child: IgnorePointer(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: NomadKit.sandDark,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     if (!_sopMode)
@@ -300,10 +330,6 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                           },
                         ),
                       ),
-                    _bookRows(
-                      recipeCount: allRecipes.length,
-                      sopCount: training.sops.length,
-                    ),
                     RhSectionHeading(
                       title: _sopMode
                           ? 'Quy trình tại quầy'
@@ -338,63 +364,8 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
     );
   }
 
-  Widget _bookRows({required int recipeCount, required int sopCount}) {
-    void open() => go(context, const SopBookPage());
-    return Column(
-      children: [
-        InkWell(
-          onTap: open,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 70),
-            child: Row(
-              children: [
-                const RhSvgIcon('assets/redesign/book.svg', size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Sổ tay công thức & SOP', style: NomadKit.subtitle),
-                      Text(
-                        '$recipeCount công thức · $sopCount SOP',
-                        style: NomadKit.caption,
-                      ),
-                    ],
-                  ),
-                ),
-                const RhChevron(),
-              ],
-            ),
-          ),
-        ),
-        const Divider(height: 1),
-        InkWell(
-          onTap: open,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 44),
-            child: Row(
-              children: [
-                const SizedBox(width: 36),
-                Expanded(
-                  child: Text(
-                    'Mục lục, tìm kiếm & PDF',
-                    style: NomadKit.caption.copyWith(
-                      color: NomadKit.ink,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const RhChevron(),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _sopTile(BuildContext context, SopItem sop, int index) => Material(
+  Widget _sopTile(BuildContext context, SopItem sop, int index) => PressScale(
+    child: Material(
     color: NomadKit.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
@@ -404,7 +375,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
       borderRadius: BorderRadius.circular(8),
       onTap: () => go(context, SopDetailPage(sop: sop)),
       child: SizedBox(
-        height: 76,
+        height: 78,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(
@@ -440,10 +411,12 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
         ),
       ),
     ),
+    ),
   );
 
   Widget _documentTab(String label, bool selected, VoidCallback? onTap) =>
-      InkWell(
+      PressScale(
+       child: InkWell(
         onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -460,19 +433,13 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                 ),
               ),
             ),
-            Container(
-              height: 3,
-              decoration: BoxDecoration(
-                color: selected ? NomadKit.sandDark : Colors.transparent,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SizedBox(height: 3),
           ],
         ),
+       ),
       );
 
   Widget _buildRecipeCard(BuildContext context, RecipeItem recipe) {
-    final image = _recipeImage(recipe.name);
     return Container(
       constraints: const BoxConstraints(minHeight: 110),
       decoration: const BoxDecoration(
@@ -485,7 +452,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
           onTap: () async {
             await Navigator.push(
               context,
-              MaterialPageRoute(
+              RhPageRoute(
                 builder: (_) => RecipeDetailSizePage(recipe: recipe),
               ),
             );
@@ -495,26 +462,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: image == null
-                      ? Container(
-                          width: 72,
-                          height: 82,
-                          color: NomadKit.sandLight,
-                          alignment: Alignment.center,
-                          child: const RhSvgIcon(
-                            'assets/redesign/brand_coffee.svg',
-                            size: 28,
-                          ),
-                        )
-                      : Image.asset(
-                          image,
-                          width: 72,
-                          height: 82,
-                          fit: BoxFit.cover,
-                        ),
-                ),
+                RecipeThumb(imageUrl: recipe.imageUrl),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -544,7 +492,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
                   child: IconButton(
                     tooltip: 'Lưu công thức',
                     onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
+                      final messenger = ToastMessenger.of(context);
                       final saved = await _bookmarks?.toggle(recipe.code);
                       if (!mounted || saved == null) return;
                       messenger
@@ -579,22 +527,5 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
         ),
       ),
     );
-  }
-
-  String? _recipeImage(String name) {
-    final value = name.toLowerCase();
-    if (value.contains('caramel latte')) {
-      return 'assets/redesign/recipe_caramel_latte.png';
-    }
-    if (value.contains('matcha latte')) {
-      return 'assets/redesign/recipe_matcha_latte.png';
-    }
-    if (value.contains('trà đào cam sả')) {
-      return 'assets/redesign/recipe_peach_tea.png';
-    }
-    if (value.contains('cappuccino')) {
-      return 'assets/redesign/recipe_cappuccino.png';
-    }
-    return null;
   }
 }

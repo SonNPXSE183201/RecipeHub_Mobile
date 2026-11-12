@@ -2,14 +2,14 @@
 
 **Ngày đối chiếu:** 12/11/2026
 **Phạm vi:** ứng dụng Flutter trong repository này, cấu hình Firebase được khai báo tại `firebase/`, và các dịch vụ ngoài mà mobile gọi. Không tính giao diện web Admin như một màn hình mobile.
-**Nguồn đối chiếu:** mã trong `lib/`, Firestore/Storage rules, Remote Config template, cấu hình Firebase, cùng các báo cáo kiểm thử hiện hành. Khi tài liệu cũ khác mã nguồn, báo cáo này ưu tiên hành vi trong mã nguồn và báo cáo xác minh ngày 11/11/2026.
+**Nguồn đối chiếu:** mã trong `lib/`, Firestore/Storage rules, Remote Config template, cấu hình Firebase, cùng các báo cáo kiểm thử hiện hành. Khi tài liệu cũ khác mã nguồn, báo cáo này ưu tiên hành vi trong mã nguồn và kết quả kiểm tra ngày 12/11/2026 (xem [bản cập nhật](releases/2026-11-12.md)).
 
 ## 1. Tóm tắt phạm vi và thống kê
 
 | Hạng mục | Thống kê | Cách đếm / ghi chú |
 | --- | ---: | --- |
 | Nhóm tính năng trong `lib/features` | 11 | `account`, `admin_training`, `auth`, `feedback`, `learning`, `lookup`, `practice`, `shell`, `sop`, `sop_book`, `system` |
-| Tệp giao diện tên `*_page.dart` | 23 | Đếm theo tên tệp trong `lib/features`; một số là trang phụ điều hướng từ tab |
+| Tệp giao diện tên `*_page.dart` | 22 | Đếm theo tên tệp trong `lib/features`; một số là trang phụ điều hướng từ tab |
 | Trang vỏ điều hướng | 1 | `MainAppShell` nằm trong `main_app_shell.dart`, không có hậu tố `_page.dart` |
 | `ChangeNotifier` ViewModel | 13 | Đếm theo lớp: 2 training, 2 feedback và 9 lớp còn lại |
 | Service interface | 15 | Các interface `I...` trong `lib/core/services/interfaces` |
@@ -96,7 +96,7 @@ Remote Config fetch timeout 10 giây. Debug fetch mỗi lần (minimum interval 
 | Tra cứu | `features/lookup/counter_recipe_lookup_page.dart` — cả hai | Tìm/lọc danh sách công thức; mở chi tiết và bắt đầu tự luyện |
 | Chi tiết món | `features/lookup/recipe_detail_size_page.dart` — cả hai | Công thức, size/định lượng, lưu ý, liên kết phản hồi/SOP và video nếu có |
 | Video | `features/lookup/step_video_guide_page.dart` — cả hai | Video hướng dẫn và timeline từng bước; có xem toàn màn hình ngang |
-| SOP | `features/sop/sop_catalog_page.dart`, `sop_detail_page.dart` — cả hai | Danh sách sổ tay/quy trình đã phát hành và trang chi tiết từng SOP |
+| SOP | `features/sop/sop_detail_page.dart` — cả hai | Chi tiết SOP đã phát hành; thư viện nằm ở tab SOP trong Tra cứu |
 | Sổ tay số | `features/sop_book/sop_book_page.dart` — cả hai | Lật trang, nội dung, điều hướng trang và xuất sổ tay PDF |
 | Học việc | `features/learning/my_learning_page.dart`, `learning_task_detail_page.dart`, `personal_progress_page.dart` — Barista | Danh sách nhiệm vụ, nội dung/checkbox theo phần, tiến độ cá nhân và trạng thái cần học lại |
 | Quiz | `features/practice/quiz_exam_page.dart` — Barista | Trả lời câu hỏi, nộp bài, xem điểm/đáp án/giải thích sau khi nộp |
@@ -137,7 +137,7 @@ Video được stream từ URL gắn với recipe. Storage rules cho phép ngư�
 
 ### 5.4. SOP và sổ tay
 
-**Catalog/chi tiết:** đọc `sops` đã published; trình bày mã phiên bản, ngày phát hành, tóm tắt, bước, ghi chú và các món liên kết. Lỗi tải có thể thử lại. App không cho sửa nội dung SOP.
+**Tab SOP trong Tra cứu/chi tiết:** đọc `sops` đã published; trình bày mã phiên bản, ngày phát hành, tóm tắt, bước, ghi chú và các món liên kết. Lỗi tải có thể thử lại. App không cho sửa nội dung SOP.
 
 **Sổ tay:** ghép nội dung SOP thành trang sách có lật/trang mục lục; trang hiện tại có trạng thái dùng trong phiên; có thể xuất toàn bộ sổ tay thành PDF về thiết bị (`Download/RecipeHub`). Nếu có file SOP PDF trên Storage thì app lấy URL `sop/{code}.pdf`; người đăng nhập chỉ có quyền đọc.
 
@@ -169,7 +169,7 @@ Video được stream từ URL gắn với recipe. Storage rules cho phép ngư�
 
 **Mục tiêu và ranh giới:** AI đặt câu hỏi giúp nhớ nguyên liệu, định lượng, thứ tự pha và SOP của đúng món đang luyện. Đây là hỗ trợ ghi nhớ, không chấm điểm, không đẩy câu trả lời cho Admin và không lưu transcript/lịch sử chat. Không phải chatbot tự do.
 
-**Luồng:** chọn món → bật ôn → bấm giờ → câu đầu sau 10 giây → câu kế tiếp sau 20 giây tính từ lúc tiếp tục/bỏ qua → mỗi lần chỉ một câu, tối đa 5 câu/bộ. Đồng hồ vẫn chạy khi trả lời. Người dùng chọn một đáp án; UI phản hồi, giải thích và nguồn/phiên bản. Có gợi ý, bỏ qua, thu gọn/tắt AI, tạm dừng. Khi app xuống nền thì tự pause. Đổi món/thoát khi phiên còn hoạt động yêu cầu xác nhận; reset dùng lại bộ câu đã xác minh thay vì gọi model lại.
+**Luồng:** chọn món → bật ôn → bấm giờ → câu đầu sau 3 giây → câu kế tiếp sau 5 giây tính từ lúc tiếp tục/bỏ qua (đặt ở self_practice_timer_page để demo nhanh; mặc định ViewModel 10/20 giây) → mỗi lần chỉ một câu, tối đa 5 câu/bộ. Đồng hồ vẫn chạy khi trả lời. Người dùng chọn một đáp án; UI phản hồi, giải thích và nguồn/phiên bản. Có gợi ý, bỏ qua, thu gọn/tắt AI, tạm dừng. Khi app xuống nền thì tự pause. Đổi món/thoát khi phiên còn hoạt động yêu cầu xác nhận; reset dùng lại bộ câu đã xác minh thay vì gọi model lại.
 
 **Nguồn sự thật:** `RecipeRecallBuilder` sinh candidate từ dữ liệu recipe, nguyên liệu, thứ tự bước và SOP liên kết đã phát hành. Câu/đáp án đúng/giải thích lấy từ nguồn; không suy diễn thông số chưa có, không trộn các size khác định lượng (món nhiều size chỉ lấy phần chung đã xác định). Gemini chỉ chọn thứ tự/ref trong danh sách candidate; schema và validator loại ref lạ/trùng/không hợp lệ. Vì vậy model không tự tạo đáp án hoặc kiến thức pha chế.
 
@@ -391,9 +391,9 @@ UI mới có ngôn ngữ thị giác nhất quán, phân cấp nội dung rõ v�
 
 ### P2 — chức năng mới trong Figma cần chốt phạm vi
 
-- Icon bookmark ở danh sách và nút Save ở chi tiết chưa có nghiệp vụ lưu yêu thích trong hệ thống hiện tại.
-- Ảnh thumbnail/hero của món xuất hiện trong Figma nhưng Firestore adapter/UI model hiện chưa có contract ảnh hoàn chỉnh cho mọi recipe.
-- `Cài đặt trải nghiệm` có chữ lớn/giảm chuyển động và mô phỏng mạng. Cài đặt accessibility có thể là local; mô phỏng mạng/lỗi phải chỉ xuất hiện ở debug/test, không đưa vào production cho người dùng thường.
+- Bookmark công thức ở danh sách/chi tiết và bộ lọc Đã lưu đã có qua `RecipeBookmarkViewModel`/`IRecipeBookmarkStore`, lưu local theo tài khoản; chưa đồng bộ đa thiết bị hoặc hỗ trợ bookmark SOP.
+- Ảnh Tra cứu đã nối `recipes.imageUrl` qua Firestore adapter/DTO/mapper/`RecipeItem` tới `RecipeThumb`; Storage path và quyền đã có. Hero chi tiết vẫn cần đối chiếu riêng với Figma.
+- Màn `Cài đặt trải nghiệm` riêng đã được xóa; hiệu ứng dùng cài đặt giảm chuyển động của hệ điều hành. Không đưa mô phỏng mạng của prototype vào production.
 - `Chia sẻ PDF` đã có qua capability thiết bị của file service; lỗi native được giữ ở UI và đã có test.
 - Tìm kiếm trong sổ tay có thể làm local trên dữ liệu đã tải; không cần backend nếu dữ liệu vẫn nhỏ như hiện tại.
 
@@ -407,8 +407,8 @@ Các luồng sau đã có repository/service thật: Auth/profile/role, recipe, 
 
 | Nhu cầu UI mới | Hiện trạng | Đề xuất |
 | --- | --- | --- |
-| Bookmark/yêu thích công thức và SOP | Chưa có model, interface, Firestore path hoặc rules | Nếu là chức năng thật: thêm `IFavoriteRepository`, dữ liệu theo UID, rules/index và analytics. Nếu chỉ trang trí: bỏ icon trước khi code |
-| Ảnh recipe dùng ở list/detail | Gateway model có `primaryMediaAssetRef`, nhưng Firestore adapter và `RecipeItem` chưa cung cấp URL ảnh hoàn chỉnh | Chuẩn hóa `imageUrl`/media reference trong recipe contract, quy định Storage path/quyền và fallback khi thiếu ảnh |
+| Bookmark/yêu thích công thức và SOP | Công thức đã có interface/store local theo tài khoản; chưa có sync cloud hoặc bookmark SOP | Chỉ thêm repository/Firestore/rules nếu cần đồng bộ đa thiết bị hoặc mở rộng sang SOP |
+| Ảnh recipe dùng ở list/detail | `imageUrl` đã xuyên suốt Firestore adapter/DTO/mapper/UI model; Tra cứu tải ảnh qua `RecipeThumb`, có fallback | Cần Internet; hero chi tiết đối chiếu riêng. Script upload/rules ở `tools/seed/` và `firebase/storage.rules` |
 | Đồng bộ accessibility giữa thiết bị | Chưa có user preference contract | Mặc định lưu local. Chỉ thêm `users/{uid}/preferences` và rules nếu product yêu cầu sync đa thiết bị |
 | Chia sẻ PDF | Đã có `sharePdf` qua native content URI và MIME PDF | Không cần backend; giữ fallback mở file/tải xuống nếu share sheet lỗi |
 | Draft phản hồi tồn tại qua lần mở app sau | Figma hiện ghi draft chỉ tồn tại trong phiên | Nếu cần lưu bền: ưu tiên local encrypted/preferences; chỉ thêm backend draft nếu cần đa thiết bị |

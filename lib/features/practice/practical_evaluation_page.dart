@@ -10,6 +10,7 @@ import '../../core/models/app_models.dart';
 import '../../core/models/training_models.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/widgets/app_toast.dart';
 
 class PracticalEvaluationPage extends StatefulWidget {
   const PracticalEvaluationPage({super.key});
@@ -59,7 +60,7 @@ class _PracticalEvaluationPageState extends State<PracticalEvaluationPage> {
     final staff = _selectedStaff;
     final recipe = _selectedRecipe;
     final uid = auth.user?.uid;
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ToastMessenger.of(context);
     if (staff == null || recipe == null || uid == null || _criteria.isEmpty) {
       messenger.showSnackBar(
         const SnackBar(

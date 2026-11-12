@@ -14,6 +14,7 @@ import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/viewmodels/recipe_bookmark_viewmodel.dart';
 import '../../core/services/interfaces/i_recipe_bookmark_store.dart';
 import '../../core/services/recipe_bookmark_store.dart';
+import '../../core/widgets/app_toast.dart';
 
 class RecipeDetailSizePage extends StatefulWidget {
   const RecipeDetailSizePage({
@@ -86,7 +87,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
   }
 
   Future<void> _toggleBookmark() async {
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ToastMessenger.of(context);
     final saved = await _bookmarks.toggle(widget.recipe.code);
     if (!mounted) return;
     messenger.showSnackBar(
@@ -687,7 +688,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                                 .read<TrainingViewModel>()
                                 .sopByCode(st.linkedSopId ?? '');
                             if (sop == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ToastMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
                                     'SOP liên kết chưa có trong thư viện.',

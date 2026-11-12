@@ -5,16 +5,27 @@ import '../../core/models/app_models.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
+import '../../core/widgets/rh_motion.dart';
 import '../../core/widgets/redesign_widgets.dart';
 import '../feedback/create_feedback_page.dart';
 import '../lookup/recipe_detail_size_page.dart';
 
-class SopDetailPage extends StatelessWidget {
+/// Chi tiết SOP theo Figma "SOP Detail / Quy trình SOP" (node 22:164).
+class SopDetailPage extends StatefulWidget {
   const SopDetailPage({super.key, required this.sop});
 
   final SopItem sop;
 
-  void _feedback(BuildContext context, [SopStepItem? step]) => go(
+  @override
+  State<SopDetailPage> createState() => _SopDetailPageState();
+}
+
+class _SopDetailPageState extends State<SopDetailPage> {
+  bool _metaOpen = false;
+
+  SopItem get sop => widget.sop;
+
+  void _feedback([SopStepItem? step]) => go(
     context,
     CreateFeedbackPage(
       initialSopCode: sop.code,
@@ -34,89 +45,160 @@ class SopDetailPage extends StatelessWidget {
         )
         .whereType<RecipeItem>()
         .toList();
+    final stepCount = '${sop.steps.length} bước';
+
     return RhFlowScaffold(
       title: 'Quy trình SOP',
-      bottomAction: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: null,
-              icon: const Icon(Icons.bookmark_border_rounded, size: 18),
-              label: const Text('Lưu'),
+      bottomAction: SizedBox(
+        height: 52,
+        width: double.infinity,
+        child: PressScale(
+          child: FilledButton.icon(
+            onPressed: _feedback,
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+            label: const Text('Góp ý SOP'),
+            style: FilledButton.styleFrom(
+              backgroundColor: NomadKit.sandDark,
+              foregroundColor: Colors.white,
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            flex: 2,
-            child: RhPrimaryButton(
-              label: 'Góp ý SOP',
-              icon: Icons.chat_bubble_outline_rounded,
-              onPressed: () => _feedback(context),
-            ),
-          ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'QUY TRÌNH VẬN HÀNH · ${sop.category.toUpperCase()}',
-              style: NomadKit.caption.copyWith(
-                color: NomadKit.sandDark,
-                fontWeight: FontWeight.w600,
-                letterSpacing: .6,
+            // Document Heading
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(bottom: 22),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: NomadKit.border)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quy trình vận hành',
+                    style: NomadKit.caption.copyWith(
+                      color: NomadKit.sandDark,
+                      fontWeight: FontWeight.w500,
+                      height: 19 / 12,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3, bottom: 14),
+                    child: Text(
+                      sop.title,
+                      style: NomadKit.title.copyWith(
+                        fontSize: 26,
+                        height: 34 / 26,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    stepCount,
+                    style: NomadKit.label.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: NomadKit.secondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(sop.title, style: NomadKit.title.copyWith(fontSize: 26)),
-            const SizedBox(height: 10),
-            Text(sop.summary, style: NomadKit.body),
-            const SizedBox(height: 18),
-            RhNotice(
-              icon: Icons.verified_outlined,
-              title: 'Tiêu chuẩn đang áp dụng',
-              message:
-                  'Phiên bản ${sop.version} · Ban hành ${sop.publishedDate}',
+            // Section Heading
+            Padding(
+              padding: const EdgeInsets.only(top: 22, bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Thực hiện',
+                    style: NomadKit.section.copyWith(fontSize: 17),
+                  ),
+                  Text(
+                    stepCount,
+                    style: NomadKit.label.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: NomadKit.secondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 26),
-            Text('Các bước thực hiện', style: NomadKit.section),
-            const SizedBox(height: 8),
             ...sop.steps.map(
-              (step) => _SopStep(
-                step: step,
-                onFeedback: () => _feedback(context, step),
-              ),
+              (step) => _SopStep(step: step, onFeedback: () => _feedback(step)),
             ),
-            const SizedBox(height: 22),
-            const Divider(color: NomadKit.border),
-            const SizedBox(height: 18),
-            Text('Thông tin quy trình', style: NomadKit.section),
-            const SizedBox(height: 12),
-            _Meta(label: 'Phân loại', value: sop.category),
-            _Meta(label: 'Phiên bản', value: sop.version),
-            _Meta(label: 'Ngày ban hành', value: sop.publishedDate),
-            if (linked.isNotEmpty) ...[
-              const SizedBox(height: 18),
-              Text('Công thức liên quan', style: NomadKit.section),
-              const SizedBox(height: 8),
-              ...linked.map(
-                (recipe) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  minLeadingWidth: 28,
-                  leading: const Icon(
-                    Icons.local_cafe_outlined,
-                    color: NomadKit.sandDark,
-                  ),
-                  title: Text(recipe.name, style: NomadKit.label),
-                  trailing: const RhChevron(),
-                  onTap: () => go(
-                    context,
-                    RecipeDetailSizePage(recipe: recipe, source: 'sop'),
-                  ),
+            const SizedBox(height: 24),
+            // Metadata (thu gọn mặc định, như Figma "Thông tin tài liệu  +")
+            InkWell(
+              onTap: () => setState(() => _metaOpen = !_metaOpen),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 60),
+                padding: const EdgeInsets.only(top: 12),
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: NomadKit.border)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Thông tin tài liệu',
+                      style: NomadKit.label.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      _metaOpen ? '−' : '+',
+                      style: NomadKit.body.copyWith(
+                        fontSize: 20,
+                        color: NomadKit.sandDark,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+            ),
+            if (_metaOpen) ...[
+              if (sop.summary.trim().isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(sop.summary, style: NomadKit.body),
+                const SizedBox(height: 12),
+              ],
+              _Meta(label: 'Phân loại', value: sop.category),
+              _Meta(label: 'Phiên bản', value: sop.version),
+              _Meta(label: 'Ngày ban hành', value: sop.publishedDate),
+              if (linked.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Text('Công thức liên quan', style: NomadKit.section),
+                const SizedBox(height: 8),
+                ...linked.map(
+                  (recipe) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    minLeadingWidth: 28,
+                    leading: const Icon(
+                      Icons.local_cafe_outlined,
+                      color: NomadKit.sandDark,
+                    ),
+                    title: Text(recipe.name, style: NomadKit.label),
+                    trailing: const RhChevron(),
+                    onTap: () => go(
+                      context,
+                      RecipeDetailSizePage(recipe: recipe, source: 'sop'),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ],
         ),
@@ -132,7 +214,7 @@ class _SopStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 16),
+    padding: const EdgeInsets.symmetric(vertical: 20),
     decoration: const BoxDecoration(
       border: Border(bottom: BorderSide(color: NomadKit.lineSoft)),
     ),
@@ -140,8 +222,8 @@ class _SopStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           alignment: Alignment.center,
           decoration: const BoxDecoration(
             color: NomadKit.sandLight,
@@ -149,7 +231,11 @@ class _SopStep extends StatelessWidget {
           ),
           child: Text(
             '${step.stepNumber}',
-            style: NomadKit.label.copyWith(color: NomadKit.sandDark),
+            style: NomadKit.label.copyWith(
+              color: NomadKit.sandDark,
+              fontWeight: FontWeight.w600,
+              height: 16 / 13,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -157,26 +243,47 @@ class _SopStep extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                step.title,
-                style: NomadKit.label.copyWith(fontWeight: FontWeight.w600),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      step.title,
+                      style: NomadKit.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        height: 23 / 15,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PressScale(
+                    child: IconButton(
+                      tooltip: 'Góp ý bước này',
+                      onPressed: onFeedback,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(
+                        width: 32,
+                        height: 23,
+                      ),
+                      icon: const Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 16,
+                        color: NomadKit.secondary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(step.content, style: NomadKit.body),
+              const SizedBox(height: 8),
+              Text(
+                step.content,
+                style: NomadKit.body.copyWith(height: 28 / 15),
+              ),
               if (step.note case final note?) ...[
                 const SizedBox(height: 10),
                 RhNotice(message: note, title: 'Lưu ý'),
               ],
             ],
-          ),
-        ),
-        IconButton(
-          tooltip: 'Góp ý bước này',
-          onPressed: onFeedback,
-          icon: const Icon(
-            Icons.chat_bubble_outline_rounded,
-            size: 18,
-            color: NomadKit.secondary,
           ),
         ),
       ],

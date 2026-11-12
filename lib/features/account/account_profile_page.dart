@@ -15,9 +15,8 @@ import '../practice/practice_history_page.dart';
 import '../practice/practical_evaluation_page.dart';
 import '../admin_training/admin_store_training_page.dart';
 import '../learning/notifications_page.dart';
-import '../sop_book/sop_book_page.dart';
 import 'change_password_page.dart';
-import 'experience_settings_page.dart';
+import '../../core/widgets/app_toast.dart';
 
 class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
@@ -118,7 +117,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                 ),
               );
               if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
+              ToastMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     sent
@@ -201,12 +200,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                           '${isRoleAdmin ? 'Quản lý cửa hàng' : 'Nhân viên pha chế'} · $email',
                       icon: Icons.people_outline_rounded,
                     ),
-                    _menuTile(
-                      title: 'Sổ tay SOP',
-                      subtitle: 'Công thức và hướng dẫn thao tác tại quầy',
-                      icon: Icons.menu_book_outlined,
-                      onTap: () => go(context, const SopBookPage()),
-                    ),
                     _group('Hồ sơ đào tạo & kết quả'),
                     if (auth.hasPersonalLearning)
                       _menuTile(
@@ -244,12 +237,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                       onTap: () => go(context, const ChangePasswordPage()),
                     ),
                     _menuTile(
-                      title: 'Cài đặt trải nghiệm',
-                      subtitle: 'Khả năng tiếp cận, chữ và chuyển động',
-                      icon: Icons.tune_rounded,
-                      onTap: () => go(context, const ExperienceSettingsPage()),
-                    ),
-                    _menuTile(
                       title: 'Thông báo & Âm thanh',
                       subtitle: 'Thông báo khi công thức cập nhật phiên bản',
                       icon: Icons.notifications_none_rounded,
@@ -258,7 +245,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                             .read<NotificationViewModel>()
                             .requestPermission();
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        ToastMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               p.name == 'granted' ? 'Đã bật thông báo.' : 'Thông báo đang tắt. Bật lại trong Cài đặt hệ thống.',

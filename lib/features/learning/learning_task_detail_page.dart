@@ -14,6 +14,7 @@ import '../../core/widgets/redesign_widgets.dart';
 import '../lookup/step_video_guide_page.dart';
 import '../practice/quiz_exam_page.dart';
 import '../sop/sop_detail_page.dart';
+import '../../core/widgets/app_toast.dart';
 
 class LearningTaskDetailPage extends StatefulWidget {
   const LearningTaskDetailPage({super.key, required this.task});
@@ -29,7 +30,7 @@ class _LearningTaskDetailPageState extends State<LearningTaskDetailPage> {
   bool _openingContent = false;
 
   void _snack(String msg, {Color color = NomadKit.error}) {
-    ScaffoldMessenger.of(context)
+    ToastMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 

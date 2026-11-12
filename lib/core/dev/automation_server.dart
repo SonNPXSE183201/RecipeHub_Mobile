@@ -17,7 +17,7 @@ import '../../features/auth/login_page.dart';
 import '../../features/shell/main_app_shell.dart';
 import '../../features/lookup/recipe_detail_size_page.dart';
 import '../../features/lookup/step_video_guide_page.dart';
-import '../../features/sop/sop_catalog_page.dart';
+import '../../features/sop_book/sop_book_page.dart';
 import '../../features/sop/sop_detail_page.dart';
 import '../../features/learning/learning_task_detail_page.dart';
 import '../../features/learning/personal_progress_page.dart';
@@ -86,8 +86,12 @@ Future<void> startAutomationServer() async {
           break;
 
         case 'm05_sop_catalog':
+          // Danh sách SOP nay là tab SOP của màn Tra cứu.
+          target = const MainAppShell(initialTabIndex: 0);
+          break;
+
         case '16_flow2_booklet_cover_3d':
-          target = const SopCatalogPage();
+          target = const SopBookPage();
           break;
 
         case 'm06_sop_detail':

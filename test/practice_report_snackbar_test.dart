@@ -15,6 +15,7 @@ import 'package:recipehub_mobile/core/viewmodels/practice_history_viewmodel.dart
 import 'package:recipehub_mobile/core/viewmodels/storage_viewmodel.dart';
 import 'package:recipehub_mobile/features/practice/practice_history_page.dart';
 import 'package:recipehub_mobile/features/shell/main_app_shell.dart';
+import 'package:recipehub_mobile/core/widgets/app_toast.dart';
 
 import 'support/fake_recipe_source.dart';
 
@@ -120,14 +121,14 @@ void main() {
     // Route còn mounted trong animation pop nhưng không còn là route hiện tại.
     pending.complete(null);
     await tester.pumpAndSettle();
-    expect(find.byType(SnackBar), findsNothing);
+    expect(find.byType(AppToastCard), findsNothing);
   });
 
   testWidgets('Thông báo lưu PDF tự ẩn sau 5 giây', (tester) async {
     await _showReport(tester);
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
-    expect(find.byType(SnackBar), findsNothing);
+    expect(find.byType(AppToastCard), findsNothing);
   });
 
   testWidgets('Nút Mở vẫn mở PDF đã lưu', (tester) async {
@@ -142,22 +143,29 @@ void main() {
       'Rời lịch sử bằng ${systemBack ? 'system back' : 'nút quay lại'} dọn cả hàng đợi',
       (tester) async {
         await _showReport(tester);
-        ScaffoldMessenger.of(tester.element(find.byType(PracticeHistoryPage)))
+        ToastMessenger.of(tester.element(find.byType(PracticeHistoryPage)))
             .showSnackBar(const SnackBar(content: Text('Thông báo đang chờ')));
         if (systemBack) {
           await tester.binding.handlePopRoute();
         } else {
-          await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+          // Toast phía trên che tâm nút; chạm mép trái vẫn hiển thị.
+          final backButton = find.widgetWithIcon(
+            IconButton,
+            Icons.arrow_back_rounded,
+          );
+          await tester.tapAt(
+            tester.getRect(backButton).centerLeft + const Offset(8, 0),
+          );
         }
         await tester.pumpAndSettle();
         expect(find.byType(PracticeHistoryPage), findsNothing);
-        expect(find.byType(SnackBar), findsNothing);
+        expect(find.byType(AppToastCard), findsNothing);
         await tester.tap(find.text('Phản hồi').last);
         await tester.pumpAndSettle();
         await tester.tap(find.text('Tạo phản hồi'));
         await tester.pumpAndSettle();
         expect(find.text('Gửi phản hồi'), findsWidgets);
-        expect(find.byType(SnackBar), findsNothing);
+        expect(find.byType(AppToastCard), findsNothing);
       },
     );
   }
@@ -170,7 +178,7 @@ void main() {
         Navigator.of(tester.element(find.byType(PracticeHistoryPage))).pop();
         await tester.pumpAndSettle();
         final context = tester.element(find.byType(MainAppShell));
-        ScaffoldMessenger.of(context)
+        ToastMessenger.of(context)
           ..showSnackBar(
             const SnackBar(
               content: Text('Đã lưu: Download/RecipeHub/test.pdf'),
@@ -186,7 +194,7 @@ void main() {
           await tester.tap(find.text('Phản hồi').last);
         }
         await tester.pumpAndSettle();
-        expect(find.byType(SnackBar), findsNothing);
+        expect(find.byType(AppToastCard), findsNothing);
       },
     );
   }

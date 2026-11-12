@@ -237,6 +237,9 @@ class RecipeDetailResponse {
   final int rowVersion;
   final String? primaryMediaAssetRef;
   final String? videoUrl;
+
+  /// Ảnh món trên Firebase Storage (Firestore `recipes/{id}.imageUrl`).
+  final String? imageUrl;
   final List<RecipeIngredientResponse> ingredients;
   final List<RecipeStepResponse> steps;
   final DateTime createdAt;
@@ -254,6 +257,7 @@ class RecipeDetailResponse {
     required this.rowVersion,
     this.primaryMediaAssetRef,
     this.videoUrl,
+    this.imageUrl,
     required this.ingredients,
     required this.steps,
     required this.createdAt,
@@ -290,6 +294,7 @@ class RecipeDetailResponse {
       rowVersion: json['rowVersion'] as int? ?? 0,
       primaryMediaAssetRef: json['primaryMediaAssetRef'] as String?,
       videoUrl: json['videoUrl'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       ingredients: rawIngr
           .map(
             (i) => RecipeIngredientResponse.fromJson(i as Map<String, dynamic>),

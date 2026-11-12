@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/nomad_kit.dart';
+import '../widgets/app_toast.dart';
 
 class ErrorHandler {
   ErrorHandler._();
@@ -77,8 +78,8 @@ class ErrorHandler {
   /// Displays an English error notification banner in NomadKit style
   static void showErrorSnackBar(BuildContext context, dynamic error) {
     final message = getErrorMessage(error);
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    ToastMessenger.of(context).hideCurrentSnackBar();
+    ToastMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: NomadKit.ink,
         behavior: SnackBarBehavior.floating,
@@ -113,8 +114,8 @@ class ErrorHandler {
 
   /// Displays an English success notification banner in NomadKit style
   static void showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    ToastMessenger.of(context).hideCurrentSnackBar();
+    ToastMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: NomadKit.ink,
         behavior: SnackBarBehavior.floating,

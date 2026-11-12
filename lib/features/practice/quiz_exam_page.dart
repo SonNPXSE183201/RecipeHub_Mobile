@@ -10,6 +10,7 @@ import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
 import '../../core/widgets/redesign_widgets.dart';
+import '../../core/widgets/app_toast.dart';
 
 class QuizExamPage extends StatefulWidget {
   const QuizExamPage({super.key, this.quiz});
@@ -33,7 +34,7 @@ class _QuizExamPageState extends State<QuizExamPage> {
   bool get _isSubmitted => _attempt != null;
 
   void _snack(String msg, Color color) {
-    ScaffoldMessenger.of(context)
+    ToastMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 

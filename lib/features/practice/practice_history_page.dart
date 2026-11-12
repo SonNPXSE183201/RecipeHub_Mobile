@@ -10,6 +10,7 @@ import '../../core/viewmodels/practice_history_viewmodel.dart';
 import '../../core/viewmodels/storage_viewmodel.dart';
 import '../../core/widgets/personal_learning_blocked.dart';
 import '../../core/widgets/redesign_widgets.dart';
+import '../../core/widgets/app_toast.dart';
 
 class PracticeHistoryPage extends StatelessWidget {
   const PracticeHistoryPage({super.key});
@@ -25,7 +26,7 @@ class PracticeHistoryPage extends StatelessWidget {
       traineeLabel: label,
     );
     if (!context.mounted || ModalRoute.of(context)?.isCurrent == false) return;
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ToastMessenger.of(context);
     final saved = storage.savedFile;
     final saveError = storage.saveError;
     final String message;
@@ -76,7 +77,7 @@ class PracticeHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ToastMessenger.of(context);
     return PopScope<void>(
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) messenger.clearSnackBars();

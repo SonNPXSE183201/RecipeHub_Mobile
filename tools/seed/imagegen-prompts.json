@@ -1,0 +1,62 @@
+[
+  {
+    "code": "TS-OLSUAN",
+    "file": "TS-OLSUAN.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Asset type: square recipe catalogue photograph for RecipeHub. Subject: Ô Long Sữa Phê La (Nóng), category Trà sữa. Recipe ingredients: Bột sữa, Hỗn hợp sữa đặc (HHSD). Create one photorealistic serving of the finished product. Hot milk tea in a simple ivory ceramic cup with gentle steam; natural creamy tan tea, smooth surface. Warm ivory studio background, pale stone counter, soft side daylight, elegant realistic beverage photography, centered entire vessel with generous safe margins, 3/4 front view, square image. Accurate food colors, appetizing realistic texture. No text, logos, labels, collage, people, watermark, artificial fruit garnish, or exposed ingredient powders. This is an AI illustrative product shot."
+  },
+  {
+    "code": "TS-OLNHAID",
+    "file": "TS-OLNHAID.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Ô Long Nhài Sữa (Lạnh). Category: Trà sữa. Recipe ingredients: Bột sữa, Hỗn hợp sữa đặc (HHSD), Đường nước, Trà Ô Long Nhài. Serve smooth pale beige jasmine oolong milk tea in a plain clear tall glass with ice, gentle condensation, no pearls or garnish unless in recipe."
+  },
+  {
+    "code": "TS-OLNHAIN",
+    "file": "TS-OLNHAIN.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Ô Long Nhài Sữa (Nóng). Category: Trà sữa. Recipe ingredients: Bột sữa, Hỗn hợp sữa đặc (HHSD). Serve smooth creamy tan milk tea in an ivory ceramic cup with subtle steam and no ice."
+  },
+  {
+    "code": "TS-MATNHANN",
+    "file": "TS-MATNHANN.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Mật Nhãn Sữa (Nóng). Category: Trà sữa. Recipe ingredients: Bột sữa, Hỗn hợp sữa đặc (HHSD). Serve smooth creamy tan milk tea in an ivory ceramic cup with subtle steam and no ice."
+  },
+  {
+    "code": "TS-TAMN",
+    "file": "TS-TAMN.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Tấm (Nóng). Category: Trà sữa. Recipe ingredients: Bột sữa, Hỗn hợp sữa đặc (HHSD). Serve smooth creamy tan milk tea in an ivory ceramic cup with subtle steam and no ice."
+  },
+  {
+    "code": "TT-GAM",
+    "file": "TT-GAM.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Gấm. Recipe ingredients: Đường nước, Cốt chanh vàng, Syrup vải, Trà Vải, Thạch Trà Chanh Vàng, Lát chanh vàng decor. Serving: Iced clear golden lychee tea with translucent pale lemon-tea jelly cubes and one thin yellow lemon wheel, in a tall clear glass. Do not add milk."
+  },
+  {
+    "code": "TT-LANGBIANG",
+    "file": "TT-LANGBIANG.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: LangBiang. Recipe ingredients: Cam vàng, Cốt chanh xanh, Trà Nitro Cold Brew, Đường nước, Mứt hoa nhài, Lát cam vàng decor, Húng lủi. Serving: Iced amber nitro cold brew tea, thin orange slice and fresh mint tip garnish, a few tiny jasmine blossoms, in a clear tall glass. No milk."
+  },
+  {
+    "code": "DX-MATCHAPXP850",
+    "file": "DX-MATCHAPXP850.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Matcha Phan Xi Păng (máy HBH 850). Recipe ingredients: Sữa đặc, Cốt dừa, Sữa béo, Đá viên, Nước sôi, Kem Mây, Thạch Ô Long Matcha, Dừa khô bóp vụn. Serving: Green matcha and white coconut blended ice beverage in a clear tall glass, creamy pale green base, soft vivid green matcha coconut cream topping, small toasted coconut flakes and green matcha jelly cubes. No machine visible."
+  },
+  {
+    "code": "CF-ESPRESSO",
+    "file": "CF-ESPRESSO.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Espresso. Recipe ingredients: Cà phê bột Espresso 1 (70% Arabica Brazil + 30% Robusta Việt Nam). Serving: A single espresso in a small white ceramic demitasse on saucer, dark rich coffee with golden hazelnut crema, no milk or ice."
+  },
+  {
+    "code": "CF-AMERICANOD",
+    "file": "CF-AMERICANOD.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: product-mockup. Square photorealistic food-and-drink catalogue image for RecipeHub. One finished product centered fully in frame, three-quarter front view, warm ivory studio background and pale stone countertop, soft natural side light, realistic appetizing texture. No text, labels, logo, people, watermark, collage or grid. Match the actual serving and temperature. Do not show ingredient powders, measuring tools or production machinery. Subject: Americano Đá. Recipe ingredients: Cà phê bột Espresso 1 (70% Arabica Brazil + 30% Robusta Việt Nam), Đá viên, Nước lọc. Serving: Iced Americano in a plain clear tall glass, translucent dark brown black coffee and visible clear ice cubes with condensation, no milk or cream."
+  }
+]

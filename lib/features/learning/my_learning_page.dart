@@ -16,6 +16,7 @@ import 'notifications_page.dart';
 import 'personal_progress_page.dart';
 import '../practice/quiz_exam_page.dart';
 import '../practice/practical_evaluation_page.dart';
+import '../../core/widgets/rh_motion.dart';
 
 class MyLearningPage extends StatefulWidget {
   const MyLearningPage({super.key});
@@ -193,7 +194,7 @@ class _MyLearningPageState extends State<MyLearningPage>
         Future<void> open() async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
+            RhPageRoute(
               builder: (_) => LearningTaskDetailPage(task: task),
             ),
           );

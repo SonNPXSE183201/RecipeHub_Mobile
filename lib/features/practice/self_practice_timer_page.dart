@@ -20,6 +20,7 @@ import '../../core/widgets/redesign_widgets.dart';
 import '../../core/utils/navigation.dart';
 import 'practice_history_page.dart';
 import 'widgets/ai_recall_card.dart';
+import '../../core/widgets/app_toast.dart';
 
 class SelfPracticeTimerPage extends StatelessWidget {
   const SelfPracticeTimerPage({
@@ -54,6 +55,10 @@ class SelfPracticeTimerPage extends StatelessWidget {
             ai: services.aiPractice,
             analytics: services.analytics,
             clock: clock,
+            // Rút ngắn để demo: câu đầu sau 3 giây, các câu sau cách nhau 5 giây
+            // (mặc định của ViewModel vẫn là 10/20 giây để giữ nguyên test).
+            firstDelay: const Duration(seconds: 3),
+            nextDelay: const Duration(seconds: 5),
           );
         },
         child: const _PracticeBody(),
@@ -205,7 +210,7 @@ class _PracticeBodyState extends State<_PracticeBody>
     final vm = context.read<AiPracticeViewModel>();
     if (_saving) return;
     if (vm.seconds == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vui lòng bấm giờ thực hành trước khi lưu.'),
         ),
@@ -233,7 +238,7 @@ class _PracticeBodyState extends State<_PracticeBody>
     setState(() => _saving = false);
     vm.reset();
     setState(() => _aiMode = false);
-    ScaffoldMessenger.of(context).showSnackBar(
+    ToastMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Đã lưu phiên tự luyện vào lịch sử cá nhân.'),
       ),

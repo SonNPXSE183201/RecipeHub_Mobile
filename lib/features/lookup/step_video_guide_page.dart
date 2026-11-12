@@ -15,6 +15,8 @@ import 'package:video_player/video_player.dart';
 import '../../core/viewmodels/step_video_viewmodel.dart';
 import '../sop/sop_detail_page.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/rh_motion.dart';
 
 class StepVideoGuidePage extends StatefulWidget {
   const StepVideoGuidePage({
@@ -76,7 +78,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       if (!mounted) return;
       await Navigator.of(context).push<void>(
-        MaterialPageRoute(
+        RhPageRoute(
           fullscreenDialog: true,
           builder: (fullscreenContext) => Scaffold(
             backgroundColor: Colors.black,
@@ -528,7 +530,7 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
                               .read<TrainingViewModel>()
                               .sopByCode(currentStep.linkedSopId ?? '');
                           if (sop == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            ToastMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
                                   'SOP liên kết chưa có trong thư viện.',

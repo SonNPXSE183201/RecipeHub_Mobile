@@ -1,7 +1,9 @@
 # Ma trận Truy vết Thiết kế – Yêu cầu → Màn hình → MVVM → Dịch vụ → Kiểm thử
 
-Nguồn yêu cầu: `requirements-draft.md` mục 10 (M-01 → M-18). Thiết kế UI ban đầu: `docs/lab2/DESIGN.md`, `docs/lab2/ux/`.  
-Mã ca kiểm thử: `FT-xx` = unit/widget test Flutter trong `test/`; `FT-xx` là alias tài liệu cho nhãn `TC-xx` cũ trong `test/artemis_e2e_test.dart` và `test/admin_link_test.dart`. `ART-xx` = mã runner adb lịch sử (`docs/artemis-test-plan.md`), không phải kết quả của suite ARTEMIS mới. Suite ARTEMIS hiện tại dùng `TC-01`–`TC-24` trong `e2e_test/`, xem `docs/test-plan.md` (chưa chạy).
+Nguồn yêu cầu: `requirements-draft.md` mục 10 (M-01 → M-18). Thiết kế UI ban đầu: `docs/lab2/DESIGN.md`, `docs/lab2/ux/`.
+Mã ca kiểm thử: `FT-xx` = unit/widget test Flutter trong `test/`; `FT-xx` là alias tài liệu cho nhãn `TC-xx` cũ trong `test/artemis_e2e_test.dart` và `test/admin_link_test.dart`. `ART-xx` = mã runner adb lịch sử (`docs/artemis-test-plan.md`), không phải kết quả của suite ARTEMIS mới. Suite ARTEMIS dùng `TC-01`–`TC-24` trong `e2e_test/`; kết quả 3 vòng ở `docs/test-plan.md` mục 5.1.
+
+Cập nhật 12/11/2026: thiết kế hiện tại là [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?t=b7uALQ2dLq3WUN2d-0). `docs/lab2/` lưu thiết kế gốc. Thay đổi triển khai và kiểm chứng: [bản cập nhật 12/11](releases/2026-11-12.md).
 
 ---
 
@@ -17,7 +19,7 @@ Mã ca kiểm thử: `FT-xx` = unit/widget test Flutter trong `test/`; `FT-xx` l
 | **M-02** | Tra cứu tại quầy | `features/lookup/counter_recipe_lookup_page.dart` | `RecipeViewModel`<br>`AppConfigViewModel` | `IRecipeSource` → `FirestoreRecipeSource` (hoặc `GatewayRecipeSource`)<br>`IRemoteConfigService` → `FirebaseRemoteConfigService` | – | FT-04, FT-05, FT-09, FT-10, ART-04, ART-05, ART-10 |
 | **M-03** | Chi tiết công thức | `features/lookup/recipe_detail_size_page.dart` | `RecipeViewModel` | `IRecipeSource` → `FirestoreRecipeSource`<br>`IAnalyticsService` → `FirebaseAnalyticsService` | `view_recipe` | FT-08, ART-04, ART-09 |
 | **M-04** | Hướng dẫn bước / Video chuẩn | `features/lookup/step_video_guide_page.dart` | `StepVideoViewModel` | `video_player` (stream video thật từ Cloud Storage URL `recipe.videoUrl`, hỗ trợ toàn màn hình) | – | Khám phá, kiểm thử playback |
-| **M-05** | Thư viện SOP | `features/sop/sop_catalog_page.dart` | `TrainingViewModel` | `ITrainingRepository` → `FirestoreTrainingRepository` (bộ sưu tập `sops` real-time) | – | Khám phá |
+| **M-05** | Thư viện SOP trong Tra cứu | `features/lookup/counter_recipe_lookup_page.dart` | `TrainingViewModel` | `ITrainingRepository` → `FirestoreTrainingRepository` (bộ sưu tập `sops` real-time) | – | `test/pages_smoke_test.dart` |
 | **M-06** | Chi tiết SOP | `features/sop/sop_detail_page.dart` | `TrainingViewModel`<br>`StorageViewModel` | `ITrainingRepository` → `FirestoreTrainingRepository`<br>`IStorageService` → `FirebaseStorageService` (PDF SOP gốc) | – | Khám phá, deep link FCM |
 | **M-07** | Việc học của tôi | `features/learning/my_learning_page.dart` | `TrainingViewModel`<br>`AuthViewModel` | `ITrainingRepository` → `FirestoreTrainingRepository` (`learningTasks`, `users/{uid}/taskProgress`) | – | Khám phá |
 | **M-08** | Chi tiết nhiệm vụ học | `features/learning/learning_task_detail_page.dart` | `TrainingViewModel` | `ITrainingRepository` → `FirestoreTrainingRepository` (`setSectionDone`) | – | Khám phá, deep link FCM |
@@ -84,10 +86,10 @@ Các điều chỉnh dưới đây do chủ dự án yêu cầu khi chạy thử
    - *Ban đầu*: Cho phép chọn hoặc xem phạm vi chi nhánh trên giao diện Tài khoản.
    - *Hiện tại*: Bỏ thẻ này, chỉ hiển thị thông tin tài khoản và vai trò.
    - *Lý do*: Yêu cầu của chủ dự án: thông tin chi nhánh chưa được quản lý thật (chưa có collection `stores`), nên không hiển thị số liệu không có nguồn.
-4. **SOP chuyển vào "Sổ tay SOP" tại Tài khoản (Bỏ chip Thư viện SOP ở Tra cứu)**:
+4. **SOP và entry Sổ tay (cập nhật 12/11/2026)**:
    - *Ban đầu*: Màn Tra cứu có chip "Thư viện SOP" dẫn sang danh mục SOP.
-   - *Hiện tại*: Màn Tra cứu chỉ tập trung vào đồ uống; SOP được tổ chức thành mục "Sổ tay SOP" trong màn Tài khoản với tính năng lật trang 3D và xuất PDF toàn diện.
-   - *Lý do*: Yêu cầu của chủ dự án: Tra cứu đã hiển thị và tìm được mọi công thức; SOP gom vào một sổ tay duy nhất.
+   - *Hiện tại*: SOP nằm ở sub-tab Tra cứu, mở `SopDetailPage`. Entry Sổ tay tại Tài khoản đã bị gỡ; `SopBookPage` còn trong source/test/debug automation nhưng chưa thấy entry production.
+   - *Lịch sử*: Trước đợt đổi UI, SOP được gom vào Sổ tay tại Tài khoản. Mục này ghi nhận source hiện tại, không xác nhận phê duyệt việc gỡ entry Sổ tay.
 5. **Admin không có tiến độ đào tạo cá nhân và đồng hồ tự luyện**:
    - *Ban đầu*: Mọi vai trò đều thấy thanh tiến độ đào tạo và nút tự luyện.
    - *Hiện tại*: Kiểm tra thuộc tính `hasPersonalLearning` (`false` khi là Admin) để ẩn thanh tiến độ cá nhân, ẩn mục Lịch sử tự luyện cá nhân và ẩn nút FAB tự luyện.

@@ -6,6 +6,7 @@ analyzer:
   errors:
     deprecated_member_use: ignore
   exclude:
+    - _backup_ui_old_*/**
     - build/**
     - android/**
     - ios/**

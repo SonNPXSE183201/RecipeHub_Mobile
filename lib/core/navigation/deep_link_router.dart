@@ -11,6 +11,7 @@ import '../../features/sop/sop_detail_page.dart';
 import '../models/session_models.dart';
 import '../viewmodels/training_viewmodel.dart';
 import '../viewmodels/recipe_viewmodel.dart';
+import '../widgets/rh_motion.dart';
 
 /// Ánh xạ DeepLink (payload FCM) → màn hình đích. Không tìm thấy → trung tâm thông báo.
 class DeepLinkRouter {
@@ -58,6 +59,6 @@ class DeepLinkRouter {
         page = RecipeDetailSizePage(recipe: recipe, source: 'notification');
       }
     }
-    await navigator.push(MaterialPageRoute<void>(builder: (_) => page));
+    await navigator.push(RhPageRoute<void>(builder: (_) => page));
   }
 }

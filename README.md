@@ -2,7 +2,7 @@
 
 Ứng dụng Flutter cho Barista và quản lý cửa hàng chuỗi đồ uống: tra cứu công thức chuẩn, sổ tay SOP, việc học + quiz, chấm thực hành tại quầy, phản hồi có ảnh với quản lý (real-time). Dữ liệu thật trên **Cloud Firestore** (dự án Firebase `recipehub-mobile`); nội dung công thức lấy từ *Bộ công thức Phê La* (61 món, 25 SOP) đã chuẩn hóa.
 
-Thiết kế Figma (Lab 2): https://www.figma.com/design/FycUpbP0PtH6Q4sg6IvZr6/RecipeHub
+Thiết kế Figma hiện tại: [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?t=b7uALQ2dLq3WUN2d-0). Tài liệu `docs/lab2/` giữ nguồn thiết kế Lab 2 để truy vết lịch sử.
 
 > Repo nộp Lab 3 theo cấu trúc §9 của đề. Final Assignment sẽ tiếp tục chính repo này (đổi tên `PRM393_Final_SE183201`, dời app vào `mobile/`).
 
@@ -50,7 +50,7 @@ flutter analyze --no-pub
 flutter test --no-pub
 ```
 
-Kết quả 09/11/2026: `flutter analyze` 0 issue; `flutter test` 286/286 pass.
+Kết quả 12/11/2026: `flutter analyze` 0 issue; `flutter test` 320/320 pass; build APK release thành công. Chi tiết thay đổi và giới hạn kiểm chứng: [docs/releases/2026-11-12.md](docs/releases/2026-11-12.md).
 
 ARTEMIS (Google, commit ghim `351ca8422f7b5b54e80a9c1ce03a222e02415b6b`, model Gemini 3.5/3.1 Flash-Lite): cách chạy ở `e2e_test/README.md`, kết quả 3 vòng ở `docs/test-plan.md` mục 5.1. FCM thủ công có ảnh trong `docs/test-plan.md` §6. Analytics có ảnh `evidence/lab3/06-firebase-console/01-analytics-events.jpg` (GA4 Events); repo không có file log logcat Analytics.
 
@@ -60,6 +60,12 @@ Security Rules được ghi nhận đã kiểm bằng Firebase Emulator (57 ca a
 
 - `tools/seed/*.json`: dữ liệu chuẩn hóa từ Bộ công thức Phê La (công thức theo size, SOP, quiz, nhiệm vụ học, tiêu chí chấm). Nạp bằng nút "Nạp bộ công thức Phê La" trên web Admin (Admin ghi qua Security Rules).
 - `tools/video/make_videos.py`: dựng video minh hoạ từng bước từ dữ liệu công thức (Python + Pillow + ffmpeg); mỗi đoạn dài đúng thời lượng bước để khớp mốc video trong app.
+- `tools/seed/upload_recipe_images.mjs`: tải ảnh trong `tools/seed/images/` lên Storage và cập nhật `recipes.imageUrl` trên Firestore; dùng Application Default Credentials ở máy chạy, không lưu credential vào repo.
+- `tools/build_apk.ps1`: chạy kiểm tra, lấy Web OAuth client ID từ cấu hình Firebase cục bộ và build APK release vào `dist/` (`-Debug` cho bản debug). Cấu hình release hiện ký bằng debug key để cài thử; cần signing config riêng khi phát hành chính thức.
+
+Ảnh Tra cứu tải từ `imageUrl` qua `RecipeThumb`; khi tải lỗi/thiếu URL sẽ hiện biểu tượng thay thế. Điện thoại cần Internet để tải ảnh và đồng bộ Firestore; kết nối scrcpy qua USB không tự cấp Internet. Thông báo trong app dùng toast phía trên; sổ tay dùng trang cố định và hiệu ứng lật quanh gáy trái.
+
+SOP hiện truy cập qua sub-tab Tra cứu. `SopBookPage` còn trong source/test nhưng entry ở Tài khoản đã bị gỡ; cần nối lại entry production trước khi coi luồng sổ tay/PDF là truy cập được từ app hiện tại.
 
 ## Phiên bản chính
 

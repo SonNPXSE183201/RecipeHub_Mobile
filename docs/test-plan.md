@@ -4,6 +4,8 @@ Tài liệu kế hoạch kiểm thử tự động toàn diện (Lab 3, Appendix
 
 > Kết quả chạy thực tế ở mục 5.1. TC-04 và TC-09 là ca thủ công bị chặn bởi điều kiện UI/phiên; không tính là đã pass.
 
+> Cập nhật 12/11/2026: `flutter analyze` 0 issue; `flutter test` 320/320 pass; APK release build thành công. Các ca ARTEMIS và ảnh Console bên dưới là bằng chứng lịch sử, chưa chạy lại suite ARTEMIS sau đợt đổi UI. Thông báo hiện tại dùng `ToastMessenger` phía trên thay cho vị trí SnackBar cũ; câu chữ/action nghiệp vụ giữ nguyên. Xem [bản cập nhật 12/11](releases/2026-11-12.md) cho thay đổi sổ tay, ảnh món và kiểm tra mạng Redmi 7.
+
 ---
 
 ## 1. Flow quan trọng → Màn hình

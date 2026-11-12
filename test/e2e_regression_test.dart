@@ -23,7 +23,7 @@ import 'package:recipehub_mobile/core/services/recipe_mapper.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/recipe_viewmodel.dart';
 import 'package:recipehub_mobile/features/lookup/recipe_detail_size_page.dart';
-import 'package:recipehub_mobile/features/sop/sop_catalog_page.dart';
+import 'package:recipehub_mobile/core/widgets/app_toast.dart';
 
 import 'support/fake_recipe_source.dart';
 
@@ -79,7 +79,7 @@ void main() {
       await _frames(tester, 3);
       expect(find.byKey(AppKeys.bannerOpen), findsOneWidget);
       // Font test (1em/ký tự) làm nội dung SnackBar tràn, lệch vùng chạm → kích hoạt action trực tiếp.
-      tester.widget<SnackBarAction>(find.byKey(AppKeys.bannerOpen)).onPressed();
+      tester.widget<TextButton>(find.byKey(AppKeys.bannerOpen)).onPressed!();
       await _frames(tester, 6);
       expect(find.byType(RecipeDetailSizePage), findsOneWidget);
       expect(
@@ -128,7 +128,7 @@ void main() {
       }
 
       expect(find.byType(NotificationsPage), findsOneWidget);
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byType(AppToastCard), findsNothing);
       expect(find.byKey(AppKeys.bannerOpen), findsNothing);
       final context = tester.element(find.byType(NotificationsPage));
       final vm = context.read<NotificationViewModel>();
@@ -136,33 +136,6 @@ void main() {
       expect(vm.items.single.isRead, isTrue);
     });
   }
-
-  testWidgets('E2E-02 Thư viện SOP không tràn ngang trên màn 720px', (
-    tester,
-  ) async {
-    _redmi7(tester);
-    final services = AppServices.mock(recipes: FakeRecipeSource());
-    final overflows = <String>[];
-    final original = FlutterError.onError;
-    FlutterError.onError = (d) {
-      final msg = d.exceptionAsString();
-      // Chỉ bắt tràn trong card SOP (hàng mã/phiên bản/phân loại và hàng "Áp dụng").
-      if (msg.contains('overflowed') &&
-          d.toString().contains('sop_catalog_page.dart')) {
-        overflows.add(msg);
-      }
-    };
-    addTearDown(() => FlutterError.onError = original);
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [Provider<AppServices>.value(value: services)],
-        child: const MaterialApp(home: SopCatalogPage()),
-      ),
-    );
-    await _frames(tester, 3);
-    FlutterError.onError = original;
-    expect(overflows, isEmpty);
-  });
 
   testWidgets(
     'E2E-03 Chi tiết món: không hiện nhãn "Quy cách phục vụ chuẩn:" trống',

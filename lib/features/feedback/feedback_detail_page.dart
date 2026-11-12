@@ -8,6 +8,8 @@ import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/feedback_viewmodel.dart';
 import '../../core/widgets/redesign_widgets.dart';
 import 'feedback_widgets.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/rh_motion.dart';
 
 /// Chi tiết phản hồi: thông tin đầy đủ, ảnh đính kèm (phóng to), luồng trả lời real-time.
 /// Admin trả lời và đổi trạng thái; Barista trả lời bổ sung.
@@ -54,7 +56,7 @@ class _DetailViewState extends State<_DetailView> {
     FeedbackStatus? status,
   }) async {
     if (_replyCtrl.text.trim().isEmpty && vm.isAdmin) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vui lòng nhập nội dung xử lý.'),
           backgroundColor: NomadKit.error,
@@ -72,7 +74,7 @@ class _DetailViewState extends State<_DetailView> {
       setState(() => _statusOnSend = null);
       FocusScope.of(context).unfocus();
     } else if (vm.actionError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(vm.actionError!),
           backgroundColor: NomadKit.error,
@@ -87,7 +89,7 @@ class _DetailViewState extends State<_DetailView> {
   ) async {
     final ok = await vm.changeStatus(s);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    ToastMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           ok
@@ -102,7 +104,7 @@ class _DetailViewState extends State<_DetailView> {
   void _openImage(String url) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      RhPageRoute(
         fullscreenDialog: true,
         builder: (_) => Scaffold(
           backgroundColor: Colors.black,

@@ -65,7 +65,7 @@ class AiPracticeViewModel extends ChangeNotifier {
       collapsed = false,
       hint = false;
   int _generation = 0, _nextIndex = 0, _tries = 0;
-  Duration _due = const Duration(seconds: 10);
+  late Duration _due = firstDelay;
   RecallContext? _context;
   List<RecallQuestion> _batch = [];
   RecallQuestion? question;

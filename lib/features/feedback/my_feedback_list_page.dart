@@ -11,6 +11,7 @@ import '../learning/notifications_page.dart';
 import 'create_feedback_page.dart';
 import 'feedback_detail_page.dart';
 import 'feedback_widgets.dart';
+import '../../core/widgets/rh_motion.dart';
 
 /// M-12 Phản hồi: Barista xem phản hồi của mình, Admin xem mọi phản hồi. Real-time từ Firestore.
 class MyFeedbackListPage extends StatelessWidget {
@@ -71,7 +72,7 @@ class _FeedbackListView extends StatelessWidget {
                             child: OutlinedButton.icon(
                               onPressed: () => Navigator.push(
                                 context,
-                                MaterialPageRoute(
+                                RhPageRoute(
                                   builder: (_) => const CreateFeedbackPage(),
                                 ),
                               ),
@@ -176,7 +177,7 @@ class _FeedbackListView extends StatelessWidget {
             showSender: isAdmin,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              RhPageRoute(
                 builder: (_) => FeedbackDetailPage(feedbackId: fb.id),
               ),
             ),

@@ -20,7 +20,7 @@ import 'package:recipehub_mobile/features/learning/my_learning_page.dart';
 import 'package:recipehub_mobile/features/learning/personal_progress_page.dart';
 import 'package:recipehub_mobile/features/lookup/step_video_guide_page.dart';
 import 'package:recipehub_mobile/features/practice/quiz_exam_page.dart';
-import 'package:recipehub_mobile/features/sop/sop_catalog_page.dart';
+import 'package:recipehub_mobile/core/widgets/app_toast.dart';
 
 import 'support/fake_recipe_source.dart';
 import 'support/deferred_training_repository.dart';
@@ -246,7 +246,7 @@ void main() {
     );
     expect(find.byType(StepVideoGuidePage), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    ScaffoldMessenger.of(tester.element(find.byType(LearningTaskDetailPage)))
+    ToastMessenger.of(tester.element(find.byType(LearningTaskDetailPage)))
         .removeCurrentSnackBar();
     await tester.pumpAndSettle();
     await tester.tap(find.text('Mở học ngay'));
@@ -296,26 +296,6 @@ void main() {
       expect(find.byType(StepVideoGuidePage), findsNothing);
     },
   );
-
-  testWidgets('SOP: lọc theo danh mục thật, mở chi tiết', (tester) async {
-    _ignoreOverflow();
-    await _pump(tester, testTrainingRepo(), const SopCatalogPage());
-    expect(find.text('Vệ sinh máy pha'), findsOneWidget);
-    expect(find.text('Kỹ thuật lắc trà'), findsOneWidget);
-    final chip = find.widgetWithText(ChoiceChip, 'Kỹ thuật pha chế');
-    await tester.ensureVisible(chip);
-    await tester.pump();
-    await tester.tap(chip);
-    await tester.pump();
-    expect(find.text('Vệ sinh máy pha'), findsNothing);
-    expect(find.text('Kỹ thuật lắc trà'), findsOneWidget);
-  });
-
-  testWidgets('SOP: chưa có dữ liệu → empty state', (tester) async {
-    _ignoreOverflow();
-    await _pump(tester, MockTrainingRepository(), const SopCatalogPage());
-    expect(find.text('Chưa có SOP nào được ban hành.'), findsOneWidget);
-  });
 
   testWidgets('Việc học + chi tiết: tick mục lưu tiến độ, có nút Làm quiz', (
     tester,
