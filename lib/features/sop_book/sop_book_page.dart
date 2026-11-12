@@ -190,87 +190,63 @@ class _SopBookScaffoldState extends State<_SopBookScaffold> {
     final ready =
         vm.state == SopBookLoad.ready && !_book.isEmpty && _ctrl != null;
 
+    final onToc = ready && _book.pages[_current].kind == BookPageKind.toc;
     return Scaffold(
       backgroundColor: NomadKit.canvas,
-      appBar: AppBar(
-        bottom: vm.exporting
-            ? const PreferredSize(
-                preferredSize: Size.fromHeight(32),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _BookHeader(onBack: () => Navigator.pop(context)),
+            if (vm.exporting)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: Column(
                   children: [
-                    Text(
-                      'Đang tạo PDF sổ tay...',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    Text('Đang tạo PDF sổ tay...', style: NomadKit.caption),
                     SizedBox(height: 6),
                     LinearProgressIndicator(color: NomadKit.sand),
                   ],
                 ),
-              )
-            : null,
-        backgroundColor: NomadKit.canvas,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Quay lại',
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: NomadKit.ink,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Sổ tay công thức & SOP',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
-          ),
-        ),
-        actions: [
-          if (ready) ...[
-            IconButton(
-              tooltip: vm.exporting ? 'Đang tạo PDF' : 'Xuất PDF',
-              onPressed: vm.exporting ? null : _export,
-              icon: vm.exporting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(
-                      Icons.picture_as_pdf_outlined,
-                      color: NomadKit.ink,
-                    ),
+              ),
+            Expanded(
+              child: switch (vm.state) {
+                SopBookLoad.loading => const LoadStateView.loading(),
+                SopBookLoad.error => LoadStateView.error(
+                  message: vm.error ?? 'Không tải được sổ tay.',
+                  onRetry: vm.load,
+                ),
+                SopBookLoad.ready when _book.isEmpty =>
+                  const LoadStateView.empty(
+                    message: 'Chưa có công thức hoặc SOP nào được ban hành.',
+                  ),
+                SopBookLoad.ready when !ready => const LoadStateView.loading(),
+                SopBookLoad.ready => _buildBook(vm),
+              },
             ),
-            IconButton(
-              tooltip: 'Tìm món',
-              icon: const Icon(Icons.search_rounded, color: NomadKit.ink),
-              onPressed: _search,
-            ),
-            IconButton(
-              tooltip: 'Mục lục',
-              icon: const Icon(Icons.list_alt_rounded, color: NomadKit.ink),
-              onPressed: () => _goto(1),
-            ),
+            if (ready)
+              _BookNavBar(
+                onToc: onToc,
+                exporting: vm.exporting,
+                onRead: () => _goto(_lastReadPage()),
+                onTocTap: () => _goto(1),
+                onExport: _export,
+                onSearch: _search,
+              ),
           ],
-        ],
-      ),
-      body: SafeArea(
-        child: switch (vm.state) {
-          SopBookLoad.loading => const LoadStateView.loading(),
-          SopBookLoad.error => LoadStateView.error(
-            message: vm.error ?? 'Không tải được sổ tay.',
-            onRetry: vm.load,
-          ),
-          SopBookLoad.ready when _book.isEmpty => const LoadStateView.empty(
-            message: 'Chưa có công thức hoặc SOP nào được ban hành.',
-          ),
-          SopBookLoad.ready when !ready => const LoadStateView.loading(),
-          SopBookLoad.ready => _buildBook(vm),
-        },
+        ),
       ),
     );
+  }
+
+  /// Trang đọc gần nhất không phải mục lục (mặc định trang đầu của món đầu tiên).
+  int _lastReadPage() {
+    if (_current > 0 && _book.pages[_current].kind != BookPageKind.toc) {
+      return _current;
+    }
+    final first = _book.pages.indexWhere(
+      (p) => p.kind == BookPageKind.recipe || p.kind == BookPageKind.sop,
+    );
+    return first >= 0 ? first : 0;
   }
 
   Widget _buildBook(SopBookViewModel vm) {
@@ -546,15 +522,37 @@ class _SearchSheetState extends State<_SearchSheet> {
         height: MediaQuery.of(context).size.height * 0.7,
         child: Column(
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Tìm trong sổ tay', style: NomadKit.title),
+              ),
+            ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
               child: TextField(
                 autofocus: true,
                 onChanged: (v) => setState(() => _q = v),
-                decoration: const InputDecoration(
-                  hintText: 'Tìm món theo tên hoặc mã...',
-                  prefixIcon: Icon(Icons.search_rounded),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: 'Tìm món trong sổ tay...',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  filled: true,
+                  fillColor: NomadKit.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: NomadKit.border),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${hits.length} công thức phù hợp',
+                  style: NomadKit.caption,
                 ),
               ),
             ),
@@ -566,17 +564,216 @@ class _SearchSheetState extends State<_SearchSheet> {
                       itemBuilder: (context, i) {
                         final p = hits[i];
                         final idx = widget.book.indexOfRecipe(p.recipe!.code);
-                        return ListTile(
-                          minTileHeight: 48,
-                          title: Text(p.title),
-                          subtitle: Text(p.group),
-                          trailing: Text('Tr. ${idx + 1}'),
-                          onTap: () => Navigator.pop(context, idx),
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                          child: Material(
+                            color: NomadKit.surface,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(color: NomadKit.border),
+                            ),
+                            child: ListTile(
+                              minTileHeight: 56,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              title: Text(p.title, style: NomadKit.label),
+                              subtitle: Text(
+                                'Công thức · ${p.group}',
+                                style: NomadKit.caption,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${idx + 1}',
+                                    style: NomadKit.caption.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: NomadKit.sandDark,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 18,
+                                    color: NomadKit.sandDark,
+                                  ),
+                                ],
+                              ),
+                              onTap: () => Navigator.pop(context, idx),
+                            ),
+                          ),
                         );
                       },
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BookHeader extends StatelessWidget {
+  const _BookHeader({required this.onBack});
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: IconButton(
+            tooltip: 'Quay lại',
+            style: IconButton.styleFrom(backgroundColor: NomadKit.sandLight),
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              size: 20,
+              color: NomadKit.sandDark,
+            ),
+            onPressed: onBack,
+          ),
+        ),
+        const SizedBox(width: 14),
+        const Expanded(
+          child: Text(
+            'RecipeHub / Sổ tay',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: NomadKit.secondary,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _BookNavBar extends StatelessWidget {
+  const _BookNavBar({
+    required this.onToc,
+    required this.exporting,
+    required this.onRead,
+    required this.onTocTap,
+    required this.onExport,
+    required this.onSearch,
+  });
+  final bool onToc;
+  final bool exporting;
+  final VoidCallback onRead;
+  final VoidCallback onTocTap;
+  final VoidCallback onExport;
+  final VoidCallback onSearch;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+    child: Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 66,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: NomadKit.sandLight,
+              borderRadius: BorderRadius.circular(33),
+              border: Border.all(color: NomadKit.border),
+            ),
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.menu_book_outlined,
+                  label: 'Đọc tiếp',
+                  active: !onToc,
+                  onTap: onRead,
+                ),
+                _NavItem(
+                  icon: Icons.format_list_bulleted_rounded,
+                  label: 'Mục lục',
+                  active: onToc,
+                  onTap: onTocTap,
+                ),
+                _NavItem(
+                  icon: Icons.download_rounded,
+                  label: 'Xuất PDF',
+                  active: false,
+                  tooltip: exporting ? 'Đang tạo PDF' : 'Xuất PDF',
+                  onTap: exporting ? null : onExport,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 66,
+          height: 66,
+          child: IconButton(
+            tooltip: 'Tìm món',
+            style: IconButton.styleFrom(
+              backgroundColor: NomadKit.sandLight,
+              side: const BorderSide(color: NomadKit.border),
+            ),
+            icon: const Icon(
+              Icons.search_rounded,
+              size: 24,
+              color: NomadKit.sandDark,
+            ),
+            onPressed: onSearch,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+    this.tooltip,
+  });
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback? onTap;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = active ? Colors.white : NomadKit.sandDark;
+    return Expanded(
+      child: Tooltip(
+        message: tooltip ?? label,
+        child: Material(
+          color: active ? NomadKit.sandDark : Colors.transparent,
+          borderRadius: BorderRadius.circular(27),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(27),
+            onTap: onTap,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 20, color: fg),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: fg,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

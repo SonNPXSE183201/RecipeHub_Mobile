@@ -15,6 +15,7 @@ import 'package:recipehub_mobile/core/services/mock/mock_notification_service.da
 import 'package:recipehub_mobile/core/viewmodels/app_config_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/notification_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/practice_history_viewmodel.dart';
+import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/storage_viewmodel.dart';
 import 'package:recipehub_mobile/features/learning/notifications_page.dart';
 import 'package:recipehub_mobile/features/shell/main_app_shell.dart';
@@ -245,6 +246,10 @@ void main() {
                 analytics: s.analytics,
                 crash: s.crash,
               ),
+            ),
+            ChangeNotifierProvider(
+              create: (_) =>
+                  TrainingViewModel(repo: s.training, crash: s.crash),
             ),
             ChangeNotifierProvider(
               create: (_) => NotificationViewModel(

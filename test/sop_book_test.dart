@@ -169,7 +169,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'Cà Phê Muối');
       await tester.pumpAndSettle();
       expect(find.textContaining('RC-CFE-01'), findsNothing);
-      expect(find.text('Cà phê & Cold Brew'), findsOneWidget);
+      expect(find.text('Công thức · Cà phê & Cold Brew'), findsOneWidget);
       // Ô tìm kiếm cũng chứa cùng chuỗi; chạm vào dòng kết quả.
       await tester.tap(find.text('Cà Phê Muối').last);
       await tester.pumpAndSettle();

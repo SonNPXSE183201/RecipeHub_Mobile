@@ -147,14 +147,14 @@ void main() {
         if (systemBack) {
           await tester.binding.handlePopRoute();
         } else {
-          await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+          await tester.tap(find.byIcon(Icons.arrow_back_rounded));
         }
         await tester.pumpAndSettle();
         expect(find.byType(PracticeHistoryPage), findsNothing);
         expect(find.byType(SnackBar), findsNothing);
         await tester.tap(find.text('Phản hồi').last);
         await tester.pumpAndSettle();
-        await tester.tap(find.byTooltip('Gửi phản hồi'));
+        await tester.tap(find.text('Tạo phản hồi'));
         await tester.pumpAndSettle();
         expect(find.text('Gửi phản hồi'), findsWidgets);
         expect(find.byType(SnackBar), findsNothing);

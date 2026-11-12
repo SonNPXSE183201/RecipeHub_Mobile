@@ -9,6 +9,7 @@ import '../../core/theme/nomad_kit.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
+import '../../core/widgets/redesign_widgets.dart';
 
 class QuizExamPage extends StatefulWidget {
   const QuizExamPage({super.key, this.quiz});
@@ -21,6 +22,8 @@ class QuizExamPage extends StatefulWidget {
 }
 
 class _QuizExamPageState extends State<QuizExamPage> {
+  static const _title = 'Kiểm tra kiến thức';
+
   final Map<int, int> _userAnswers = {};
   QuizSet? _picked;
   QuizAnswerKey? _key;
@@ -77,26 +80,8 @@ class _QuizExamPageState extends State<QuizExamPage> {
     });
   }
 
-  PreferredSizeWidget _appBar() => AppBar(
-    backgroundColor: NomadKit.canvas,
-    elevation: 0,
-    leading: IconButton(
-      icon: const Icon(
-        Icons.arrow_back_ios_new_rounded,
-        size: 18,
-        color: NomadKit.ink,
-      ),
-      onPressed: () => Navigator.pop(context),
-    ),
-    title: const Text(
-      'Bài kiểm tra kiến thức (Quiz)',
-      style: TextStyle(
-        fontSize: 17,
-        fontWeight: FontWeight.w800,
-        color: NomadKit.ink,
-      ),
-    ),
-  );
+  Widget _stateScaffold(Widget body) =>
+      RhFlowScaffold(title: _title, body: body);
 
   Widget _picker(TrainingViewModel training) {
     final Widget content;
@@ -115,63 +100,55 @@ class _QuizExamPageState extends State<QuizExamPage> {
       );
     } else {
       content = ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         children: [
-          const Text(
-            'Chọn bộ đề',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: NomadKit.ink,
-            ),
-          ),
-          const SizedBox(height: 10),
+          const Text('Chọn bộ đề', style: NomadKit.title),
+          const SizedBox(height: 14),
           for (final q in training.quizzes)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Material(
-                color: NomadKit.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: NomadKit.border),
-                ),
-                child: ListTile(
-                  minVerticalPadding: 14,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => setState(() => _picked = q),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                  decoration: _cardDecoration,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              q.title,
+                              style: NomadKit.body.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '${q.questions.length} câu',
+                              style: NomadKit.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const RhChevron(),
+                    ],
                   ),
-                  title: Text(
-                    q.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: NomadKit.ink,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${q.questions.length} câu',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: NomadKit.secondary,
-                    ),
-                  ),
-                  trailing: const Icon(
-                    Icons.chevron_right_rounded,
-                    color: NomadKit.sandDark,
-                  ),
-                  onTap: () => setState(() => _picked = q),
                 ),
               ),
             ),
         ],
       );
     }
-    return Scaffold(
-      backgroundColor: NomadKit.canvas,
-      appBar: _appBar(),
-      body: SafeArea(child: content),
-    );
+    return _stateScaffold(content);
   }
+
+  static final _cardDecoration = BoxDecoration(
+    color: NomadKit.surface,
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: NomadKit.border),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -180,19 +157,15 @@ class _QuizExamPageState extends State<QuizExamPage> {
     }
     final training = context.watch<TrainingViewModel>();
     if (training.attemptsState != LoadState.ready) {
-      return Scaffold(
-        backgroundColor: NomadKit.canvas,
-        appBar: _appBar(),
-        body: SafeArea(
-          child: training.attemptsState == LoadState.error
-              ? LoadStateView.error(
-                  message: training.error ?? 'Không tải được lịch sử làm bài.',
-                  onRetry: training.retry,
-                )
-              : const LoadStateView.loading(
-                  message: 'Đang tải lịch sử làm bài...',
-                ),
-        ),
+      return _stateScaffold(
+        training.attemptsState == LoadState.error
+            ? LoadStateView.error(
+                message: training.error ?? 'Không tải được lịch sử làm bài.',
+                onRetry: training.retry,
+              )
+            : const LoadStateView.loading(
+                message: 'Đang tải lịch sử làm bài...',
+              ),
       );
     }
     final quiz = widget.quiz ?? _picked;
@@ -200,378 +173,216 @@ class _QuizExamPageState extends State<QuizExamPage> {
 
     final questions = quiz.questions;
     if (questions.isEmpty) {
-      return Scaffold(
-        backgroundColor: NomadKit.canvas,
-        appBar: _appBar(),
-        body: const SafeArea(
-          child: LoadStateView.empty(
-            message: 'Bộ đề này chưa có câu hỏi.',
-            icon: Icons.quiz_outlined,
-          ),
+      return _stateScaffold(
+        const LoadStateView.empty(
+          message: 'Bộ đề này chưa có câu hỏi.',
+          icon: Icons.quiz_outlined,
         ),
       );
     }
+    return _isSubmitted ? _buildResult(quiz) : _buildExam(quiz);
+  }
 
+  Widget _buildExam(QuizSet quiz) {
+    final questions = quiz.questions;
+    return RhFlowScaffold(
+      title: _title,
+      bottomAction: RhPrimaryButton(
+        label: _submitting ? 'Đang nộp bài...' : 'Nộp bài',
+        icon: null,
+        onPressed: _submitting ? null : () => _submitQuiz(quiz),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Bài kiểm tra kiến thức', style: NomadKit.title),
+            const SizedBox(height: 12),
+            Text(
+              '${quiz.title} · ${questions.length} câu hỏi',
+              style: NomadKit.label.copyWith(fontWeight: FontWeight.w400),
+            ),
+            const SizedBox(height: 16),
+            for (var qIdx = 0; qIdx < questions.length; qIdx++)
+              _questionCard(questions[qIdx], qIdx),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _questionCard(QuizQuestionView q, int qIdx) {
+    final selected = _userAnswers[qIdx];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Câu ${qIdx + 1}', style: NomadKit.caption),
+          const SizedBox(height: 2),
+          Text(q.text, style: NomadKit.subtitle),
+          const SizedBox(height: 12),
+          for (var optIdx = 0; optIdx < q.options.length; optIdx++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _option(
+                text: q.options[optIdx],
+                chosen: selected == optIdx,
+                onTap: _submitting
+                    ? null
+                    : () => setState(() => _userAnswers[qIdx] = optIdx),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _option({
+    required String text,
+    required bool chosen,
+    required VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          color: chosen ? NomadKit.sandLight : NomadKit.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: chosen ? NomadKit.sandDark : NomadKit.border,
+            width: chosen ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          text,
+          style: NomadKit.label.copyWith(
+            fontWeight: chosen ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResult(QuizSet quiz) {
+    final questions = quiz.questions;
     final key = _key;
-    final correctCount = _attempt?.score ?? 0;
+    final score = _attempt?.score ?? 0;
+    final passed = score >= (questions.length * 0.7);
     bool isCorrect(int i) =>
         key != null &&
         i < key.correct.length &&
         _userAnswers[i] == key.correct[i];
-    final isPassed = correctCount >= (questions.length * 0.7);
-
-    return Scaffold(
-      backgroundColor: NomadKit.canvas,
-      appBar: _appBar(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Result Card if Submitted
-              if (_isSubmitted) ...[
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: isPassed
-                        ? NomadKit.forestLight
-                        : const Color(0xFFFEE2E2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isPassed ? NomadKit.forest : NomadKit.error,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        isPassed
-                            ? Icons.check_circle_rounded
-                            : Icons.cancel_rounded,
-                        color: isPassed ? NomadKit.forest : NomadKit.error,
-                        size: 44,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isPassed
-                            ? 'KẾT QUẢ: ĐẠT YÊU CẦU LÝ THUYẾT'
-                            : 'KẾT QUẢ: CHƯA ĐẠT · CẦN ÔN TẬP',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: isPassed ? NomadKit.forest : NomadKit.error,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Điểm số của bạn: $correctCount / ${questions.length} câu đúng',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: NomadKit.ink,
-                          side: const BorderSide(color: NomadKit.border),
-                          minimumSize: const Size(0, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: _retryQuiz,
-                        child: const Text(
-                          'Làm lại bài kiểm tra',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ] else ...[
-                // Intro Header
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: NomadKit.sandLight,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: NomadKit.border),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.quiz_rounded,
-                        color: NomadKit.sandDark,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          '${quiz.title}: ${questions.length} câu trắc nghiệm theo tiêu chuẩn ban hành.',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: NomadKit.ink,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Question Cards
-              ...List.generate(questions.length, (qIdx) {
-                final q = questions[qIdx];
-                final selectedOption = _userAnswers[qIdx];
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: NomadKit.surface,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: NomadKit.border),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x06000000),
-                        blurRadius: 10,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: NomadKit.oceanLight,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Câu ${qIdx + 1}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.ocean,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          if (_isSubmitted)
-                            Text(
-                              isCorrect(qIdx) ? '✓ Đúng' : '✗ Sai',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: isCorrect(qIdx)
-                                    ? NomadKit.forest
-                                    : NomadKit.error,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      Text(
-                        q.text,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.ink,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Options
-                      ...List.generate(q.options.length, (optIdx) {
-                        final isChosen = selectedOption == optIdx;
-                        Color optBorder = NomadKit.border;
-                        Color optBg = NomadKit.canvas;
-
-                        if (_isSubmitted) {
-                          if (key != null &&
-                              qIdx < key.correct.length &&
-                              optIdx == key.correct[qIdx]) {
-                            optBg = NomadKit.forestLight;
-                            optBorder = NomadKit.forest;
-                          } else if (isChosen) {
-                            optBg = const Color(0xFFFEE2E2);
-                            optBorder = NomadKit.error;
-                          }
-                        } else if (isChosen) {
-                          optBg = NomadKit.sandLight;
-                          optBorder = NomadKit.sand;
-                        }
-
-                        return GestureDetector(
-                          onTap: _isSubmitted || _submitting
-                              ? null
-                              : () =>
-                                    setState(() => _userAnswers[qIdx] = optIdx),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: optBg,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: optBorder,
-                                width: isChosen ? 1.5 : 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  '${String.fromCharCode(65 + optIdx)}.',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: isChosen
-                                        ? NomadKit.sandDark
-                                        : NomadKit.secondary,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    q.options[optIdx],
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isChosen
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
-                                      color: NomadKit.ink,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-
-                      // Explanation if Submitted
-                      if (_isSubmitted) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: NomadKit.sandLight,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/icons/icon_sparkle_ai.png',
-                                    width: 14,
-                                    height: 14,
-                                    filterQuality: FilterQuality.medium,
-                                    errorBuilder: (ctx, err, stack) =>
-                                        const Icon(
-                                          Icons.lightbulb_outline_rounded,
-                                          size: 14,
-                                          color: NomadKit.sandDark,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    'GIẢI THÍCH CHI TIẾT:',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      color: NomadKit.sandDark,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                key != null && qIdx < key.explanations.length
-                                    ? key.explanations[qIdx]
-                                    : '',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: NomadKit.ink,
-                                  height: 1.35,
-                                ),
-                              ),
-                              if (q.reviewSection.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Tài liệu ôn tập: ${q.reviewSection}',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontStyle: FontStyle.italic,
-                                    color: NomadKit.ocean,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              }),
-
-              // Submit Button
-              if (!_isSubmitted) ...[
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: NomadKit.sand,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: _submitting ? null : () => _submitQuiz(quiz),
-                    child: _submitting
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Nộp bài kiểm tra',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ],
-          ),
+    return RhFlowScaffold(
+      title: _title,
+      bottomAction: RhPrimaryButton(
+        label: 'Làm lại bài kiểm tra',
+        icon: null,
+        onPressed: _retryQuiz,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'KẾT QUẢ BÀI KIỂM TRA',
+              style: NomadKit.caption.copyWith(
+                color: NomadKit.sandDark,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.4,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('$score/${questions.length} câu đúng', style: NomadKit.title),
+            const SizedBox(height: 8),
+            Text(
+              passed
+                  ? 'Đạt yêu cầu lý thuyết. Xem lại giải thích rồi thử pha một ly theo đúng quy trình.'
+                  : 'Chưa đạt, cần ôn tập. Xem lại giải thích rồi làm lại bài kiểm tra.',
+              style: NomadKit.label.copyWith(
+                color: NomadKit.secondary,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 20),
+            for (var i = 0; i < questions.length; i++)
+              _resultCard(questions[i], i, correct: isCorrect(i), key: key),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _resultCard(
+    QuizQuestionView q,
+    int i, {
+    required bool correct,
+    required QuizAnswerKey? key,
+  }) {
+    final explanation = key != null && i < key.explanations.length
+        ? key.explanations[i]
+        : '';
+    final correctIdx = key != null && i < key.correct.length
+        ? key.correct[i]
+        : null;
+    final chosenIdx = _userAnswers[i];
+    String optionText(int? idx) =>
+        idx != null && idx >= 0 && idx < q.options.length ? q.options[idx] : '';
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Câu ${i + 1} · ${correct ? 'Đúng' : 'Cần xem lại'}',
+            style: NomadKit.label.copyWith(
+              fontWeight: FontWeight.w600,
+              color: correct ? NomadKit.forest : NomadKit.sandDark,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            q.text,
+            style: NomadKit.label.copyWith(fontWeight: FontWeight.w500),
+          ),
+          if (!correct) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Bạn chọn: ${optionText(chosenIdx)}',
+              style: NomadKit.caption.copyWith(color: NomadKit.error),
+            ),
+            Text(
+              'Đáp án đúng: ${optionText(correctIdx)}',
+              style: NomadKit.caption.copyWith(color: NomadKit.forest),
+            ),
+          ],
+          if (explanation.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              explanation,
+              style: NomadKit.label.copyWith(fontWeight: FontWeight.w400),
+            ),
+          ],
+          if (q.reviewSection.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Tài liệu ôn tập: ${q.reviewSection}',
+              style: NomadKit.caption.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ],
       ),
     );
   }

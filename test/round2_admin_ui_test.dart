@@ -121,7 +121,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Cà phê Americano'), findsOneWidget);
+    expect(find.textContaining('Cà phê Americano'), findsOneWidget);
     expect(find.text('Khổng lồ'), findsOneWidget);
     expect(find.textContaining('CF-AMERICANON'), findsNothing);
     expect(history.records.single.recipeCode, 'CF-AMERICANON');
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpAndSettle();
       final card = find
           .ancestor(
-            of: find.text('Ảnh đính kèm (tùy chọn, tối đa 5MB)'),
+            of: find.text('Ảnh minh họa (tùy chọn, tối đa 5MB)'),
             matching: find.byType(Container),
           )
           .first;
@@ -150,7 +150,7 @@ void main() {
 
   testWidgets('Account password action opens working form', (tester) async {
     await _pump(tester, const AccountProfilePage(), admin: false);
-    final action = find.text('Đổi mật khẩu tài khoản');
+    final action = find.text('Đổi mật khẩu');
     await tester.ensureVisible(action);
     await tester.tap(action);
     await tester.pumpAndSettle();
@@ -179,7 +179,7 @@ void main() {
     expect(auth.hasPersonalLearning, isFalse);
     expect(find.text('Tiến độ đào tạo cá nhân'), findsNothing);
     expect(find.text('Lịch sử tự luyện với Timer'), findsNothing);
-    expect(find.text('Bảng theo dõi đào tạo chi nhánh'), findsOneWidget);
+    expect(find.text('Đào tạo chi nhánh'), findsOneWidget);
     expect(find.text('Sổ tay SOP'), findsOneWidget);
   });
 
@@ -307,53 +307,44 @@ void main() {
     },
   );
 
-  testWidgets('Feedback action uses rate_review and still opens send form', (
-    tester,
-  ) async {
-    await _pump(tester, const MyFeedbackListPage(), admin: false);
-    final send = find.byTooltip('Gửi phản hồi');
-    expect(
-      find.descendant(of: send, matching: find.byType(Text)),
-      findsNothing,
-    );
-    expect(
-      find.descendant(
-        of: send,
-        matching: find.byIcon(Icons.rate_review_rounded),
-      ),
-      findsOneWidget,
-    );
-    expect(tester.getSize(send).height, greaterThanOrEqualTo(48));
-    await tester.ensureVisible(send);
-    await tester.tap(send);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(CreateFeedbackPage), findsOneWidget);
-    expect(
-      tester
-          .widget<ElevatedButton>(find.byKey(AppKeys.feedbackSubmit))
-          .onPressed,
-      isNull,
-    );
-    expect(find.text('Chọn món cần phản hồi'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('feedback_recipe_picker')));
-    await tester.pumpAndSettle();
-    final search = find.byType(TextField).last;
-    await tester.enterText(search, 'ca phe muoi');
-    await tester.pump();
-    expect(find.text('Cà Phê Muối'), findsOneWidget);
-    expect(find.text('Trà Sữa Oolong'), findsNothing);
-    expect(find.textContaining('RC-CFE'), findsNothing);
-    await tester.tap(find.text('Cà Phê Muối'));
-    await tester.pumpAndSettle();
-    expect(find.text('Cà Phê Muối'), findsOneWidget);
-    expect(
-      tester
-          .widget<ElevatedButton>(find.byKey(AppKeys.feedbackSubmit))
-          .onPressed,
-      isNotNull,
-    );
-  });
+  testWidgets(
+    'Feedback create action matches Figma and still opens send form',
+    (tester) async {
+      await _pump(tester, const MyFeedbackListPage(), admin: false);
+      final send = find.widgetWithText(OutlinedButton, 'Tạo phản hồi');
+      expect(send, findsOneWidget);
+      expect(tester.getSize(send).height, greaterThanOrEqualTo(44));
+      await tester.ensureVisible(send);
+      await tester.tap(send);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(CreateFeedbackPage), findsOneWidget);
+      expect(
+        tester
+            .widget<ElevatedButton>(find.byKey(AppKeys.feedbackSubmit))
+            .onPressed,
+        isNull,
+      );
+      expect(find.text('Chọn món cần phản hồi'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('feedback_recipe_picker')));
+      await tester.pumpAndSettle();
+      final search = find.byType(TextField).last;
+      await tester.enterText(search, 'ca phe muoi');
+      await tester.pump();
+      expect(find.text('Cà Phê Muối'), findsOneWidget);
+      expect(find.text('Trà Sữa Oolong'), findsNothing);
+      expect(find.textContaining('RC-CFE'), findsNothing);
+      await tester.tap(find.text('Cà Phê Muối'));
+      await tester.pumpAndSettle();
+      expect(find.text('Cà Phê Muối'), findsOneWidget);
+      expect(
+        tester
+            .widget<ElevatedButton>(find.byKey(AppKeys.feedbackSubmit))
+            .onPressed,
+        isNotNull,
+      );
+    },
+  );
 
   testWidgets('Recipe context can change without retaining the original step', (
     tester,

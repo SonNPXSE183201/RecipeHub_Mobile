@@ -8,7 +8,8 @@ class PersonalLearningBlocked extends StatefulWidget {
   const PersonalLearningBlocked({super.key});
 
   @override
-  State<PersonalLearningBlocked> createState() => _PersonalLearningBlockedState();
+  State<PersonalLearningBlocked> createState() =>
+      _PersonalLearningBlockedState();
 }
 
 class _PersonalLearningBlockedState extends State<PersonalLearningBlocked> {
@@ -20,11 +21,16 @@ class _PersonalLearningBlockedState extends State<PersonalLearningBlocked> {
       final messenger = ScaffoldMessenger.maybeOf(context);
       Navigator.of(context).popUntil((r) => r.isFirst);
       messenger?.showSnackBar(
-        const SnackBar(content: Text('Tài khoản Admin không có mục học và tự luyện cá nhân.')),
+        const SnackBar(
+          content: Text(
+            'Tài khoản Admin không có mục học và tự luyện cá nhân.',
+          ),
+        ),
       );
     });
   }
 
   @override
-  Widget build(BuildContext context) => const Scaffold(backgroundColor: NomadKit.canvas);
+  Widget build(BuildContext context) =>
+      const Scaffold(backgroundColor: NomadKit.canvas);
 }

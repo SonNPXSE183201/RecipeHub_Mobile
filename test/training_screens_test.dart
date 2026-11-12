@@ -12,6 +12,7 @@ import 'package:recipehub_mobile/core/services/interfaces/i_training_repository.
 import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/viewmodels/app_config_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/auth_viewmodel.dart';
+import 'package:recipehub_mobile/core/viewmodels/notification_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/recipe_viewmodel.dart';
 import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
 import 'package:recipehub_mobile/features/learning/learning_task_detail_page.dart';
@@ -62,6 +63,10 @@ Future<void> _pump(
         ChangeNotifierProvider(
           create: (_) =>
               TrainingViewModel(repo: s.training, crash: s.crash)..bind('u1'),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              NotificationViewModel(service: s.notifications, crash: s.crash),
         ),
       ],
       child: MaterialApp(home: page),
@@ -340,16 +345,16 @@ void main() {
     await _pump(tester, testTrainingRepo(), const QuizExamPage());
     await tester.tap(find.text('Quiz vệ sinh máy'));
     await tester.pump();
-    await tester.tap(find.text('Nộp bài kiểm tra'));
+    await tester.tap(find.text('Nộp bài'));
     await tester.pump();
     expect(find.textContaining('trả lời đầy đủ'), findsOneWidget);
     await tester.tap(find.text('30 giây'));
     await tester.tap(find.text('Nóng'));
     await tester.pump();
-    await tester.ensureVisible(find.text('Nộp bài kiểm tra'));
-    await tester.tap(find.text('Nộp bài kiểm tra'));
+    await tester.ensureVisible(find.text('Nộp bài'));
+    await tester.tap(find.text('Nộp bài'));
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.textContaining('2 / 2 câu đúng'), findsOneWidget);
+    expect(find.textContaining('2/2 câu đúng'), findsOneWidget);
     expect(find.text('Xả 30 giây.'), findsOneWidget);
   });
 

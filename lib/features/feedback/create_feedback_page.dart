@@ -274,454 +274,506 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
 
     setState(() => _isSubmitting = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã gửi phản hồi thành công đến Quản lý Admin.'),
-        backgroundColor: NomadKit.forest,
+    // Quay về màn trước rồi hiện snackbar thành công (Figma 112:324).
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: NomadKit.sandDark,
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+          padding: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Text(
+            'Đã gửi phản hồi thành công đến Quản lý Admin.',
+            style: NomadKit.label.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              height: 1.5,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+  }
+
+  bool get _hasDraft =>
+      _contentCtrl.text.trim().isNotEmpty ||
+      context.read<StorageViewModel>().attachment != null;
+
+  Future<void> _requestClose() async {
+    if (_isSubmitting) return;
+    if (!_hasDraft) {
+      Navigator.pop(context);
+      return;
+    }
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Bản nháp chưa lưu'),
+        content: const Text(
+          'Nội dung phản hồi chưa được gửi. Bạn có muốn bỏ bản nháp này không?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Tiếp tục chỉnh sửa'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Bỏ bản nháp'),
+          ),
+        ],
       ),
     );
+    if (discard == true && mounted) Navigator.pop(context);
+  }
 
-    Navigator.pop(context);
+  TextStyle get _fieldLabel =>
+      NomadKit.label.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
+
+  Widget _fieldLabelRow(String text, {bool required = false, String? hint}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text.rich(
+        TextSpan(
+          style: _fieldLabel,
+          children: [
+            TextSpan(text: '$text '),
+            if (required)
+              const TextSpan(
+                text: '*',
+                style: TextStyle(color: NomadKit.error),
+              ),
+            if (hint != null)
+              TextSpan(
+                text: hint,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: NomadKit.secondary,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _dashedButton({
+    Key? key,
+    required IconData icon,
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
+    return InkWell(
+      key: key,
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8),
+      child: CustomPaint(
+        painter: const _DashedBorderPainter(),
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: NomadKit.surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: NomadKit.ink),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _fieldLabel,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _attachmentSection() {
     final st = context.watch<StorageViewModel>();
     final media = st.attachment;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: NomadKit.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: NomadKit.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Ảnh đính kèm (tùy chọn, tối đa 5MB)',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: NomadKit.ink,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabelRow('Ảnh minh họa', hint: '(tùy chọn, tối đa 5MB)'),
+        if (media != null) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.memory(
+              media.bytes,
+              height: 120,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 10),
-          if (media != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                media.bytes,
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '${media.fileName} · ${media.sizeMb.toStringAsFixed(2)} MB',
-              style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
-            ),
-            if (st.attachmentStatus == UploadStatus.uploading) ...[
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: st.attachmentProgress,
-                color: NomadKit.sand,
-              ),
-            ],
-            if (st.attachmentUrl != null)
-              const Text(
-                'Đã tải ảnh lên',
-                key: AppKeys.attachmentUrl,
-                style: TextStyle(fontSize: 11, color: NomadKit.forest),
-              ),
+          const SizedBox(height: 6),
+          Text(
+            '${media.fileName} · ${media.sizeMb.toStringAsFixed(2)} MB',
+            style: NomadKit.caption,
+          ),
+          if (st.attachmentStatus == UploadStatus.uploading) ...[
             const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: st.attachmentProgress,
+              color: NomadKit.sand,
+            ),
           ],
-          if (st.attachmentError != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                st.attachmentError!,
-                style: const TextStyle(fontSize: 12, color: NomadKit.error),
-              ),
+          if (st.attachmentUrl != null)
+            Text(
+              'Đã tải ảnh lên',
+              key: AppKeys.attachmentUrl,
+              style: NomadKit.caption.copyWith(color: NomadKit.forest),
             ),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: AppKeys.pickFromGallery,
-                  onPressed: st.isUploadingAttachment
-                      ? null
-                      : () => st.pickAttachment(fromCamera: false),
-                  icon: const Icon(Icons.photo_library_outlined, size: 16),
-                  label: const Text('Thư viện'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: AppKeys.pickFromCamera,
-                  onPressed: st.isUploadingAttachment
-                      ? null
-                      : () => st.pickAttachment(fromCamera: true),
-                  icon: const Icon(Icons.photo_camera_outlined, size: 16),
-                  label: const Text('Chụp ảnh'),
-                ),
-              ),
-            ],
-          ),
-          if (media != null)
-            TextButton(
-              onPressed: st.isUploadingAttachment
-                  ? st.cancelUpload
-                  : st.clearAttachment,
-              child: Text(st.isUploadingAttachment ? 'Hủy tải' : 'Bỏ ảnh'),
-            ),
+          const SizedBox(height: 8),
         ],
-      ),
+        if (st.attachmentError != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              st.attachmentError!,
+              style: NomadKit.caption.copyWith(color: NomadKit.error),
+            ),
+          ),
+        Row(
+          children: [
+            Expanded(
+              child: _dashedButton(
+                key: AppKeys.pickFromGallery,
+                icon: Icons.photo_library_outlined,
+                label: 'Chọn ảnh',
+                onPressed: st.isUploadingAttachment
+                    ? null
+                    : () => st.pickAttachment(fromCamera: false),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _dashedButton(
+                key: AppKeys.pickFromCamera,
+                icon: Icons.photo_camera_outlined,
+                label: 'Chụp ảnh',
+                onPressed: st.isUploadingAttachment
+                    ? null
+                    : () => st.pickAttachment(fromCamera: true),
+              ),
+            ),
+          ],
+        ),
+        if (media != null)
+          TextButton(
+            onPressed: st.isUploadingAttachment
+                ? st.cancelUpload
+                : st.clearAttachment,
+            child: Text(st.isUploadingAttachment ? 'Hủy tải' : 'Bỏ ảnh'),
+          ),
+      ],
     );
   }
 
+  Widget _section({required Widget child}) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.only(top: 20),
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: NomadKit.border)),
+    ),
+    child: child,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: NomadKit.canvas,
-      appBar: AppBar(
+    const borderSide = BorderSide(color: NomadKit.border);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _requestClose();
+      },
+      child: Scaffold(
         backgroundColor: NomadKit.canvas,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: NomadKit.ink,
+        appBar: AppBar(
+          backgroundColor: NomadKit.canvas,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 64,
+          shape: const Border(bottom: BorderSide(color: NomadKit.border)),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, size: 22),
+            onPressed: _requestClose,
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Tạo phản hồi tiêu chuẩn',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
+          title: Text(
+            'Gửi phản hồi',
+            style: NomadKit.label.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: NomadKit.secondary,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Target Context Card
-                    InkWell(
-                      key: const ValueKey('feedback_recipe_picker'),
-                      onTap: widget.initialSopCode != null || _isSubmitting
-                          ? null
-                          : _chooseRecipe,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: NomadKit.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: NomadKit.border),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x06000000),
-                              blurRadius: 10,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _stepNote != null
+                            ? 'Về ${_stepNote!.split(':').first.trim().toLowerCase()}'
+                            : 'Góp ý tài liệu',
+                        style: NomadKit.caption.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: NomadKit.sandDark,
                         ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Điều gì cần cải thiện?',
+                        style: NomadKit.title.copyWith(
+                          fontSize: 24,
+                          height: 34 / 24,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _fieldLabelRow('Về công thức / SOP', required: true),
+                      InkWell(
+                        key: const ValueKey('feedback_recipe_picker'),
+                        onTap: widget.initialSopCode != null || _isSubmitting
+                            ? null
+                            : _chooseRecipe,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          width: double.infinity,
+                          height: 52,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: NomadKit.surface,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: NomadKit.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _targetCode.isEmpty
+                                      ? 'Chọn món cần phản hồi'
+                                      : _targetName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: NomadKit.body.copyWith(
+                                    fontSize: 16,
+                                    height: 24 / 16,
+                                    color: _targetCode.isEmpty
+                                        ? NomadKit.secondary
+                                        : NomadKit.ink,
+                                  ),
+                                ),
+                              ),
+                              if (widget.initialSopCode == null)
+                                const Icon(
+                                  Icons.expand_more_rounded,
+                                  size: 18,
+                                  color: NomadKit.secondary,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (_version.isNotEmpty || _stepNote != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          [
+                            if (_version.isNotEmpty) 'Bản $_version',
+                            if (_stepNote != null) 'Vị trí: $_stepNote',
+                          ].join(' · '),
+                          style: NomadKit.caption.copyWith(fontSize: 13),
+                        ),
+                      ],
+                      const SizedBox(height: 26),
+                      _section(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'NGỮ CẢNH ĐANG XEM',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.sandDark,
-                                letterSpacing: 0.6,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
+                            _fieldLabelRow('Loại phản hồi'),
                             Row(
                               children: [
-                                Text(
-                                  _version.isEmpty
-                                      ? 'Chọn món cần phản hồi'
-                                      : 'Bản $_version',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: NomadKit.secondary,
-                                  ),
+                                _typeChip(
+                                  FeedbackType.issue,
+                                  'Báo cáo vấn đề',
+                                  Icons.report_problem_outlined,
+                                  NomadKit.error,
+                                ),
+                                const SizedBox(width: 10),
+                                _typeChip(
+                                  FeedbackType.inquiry,
+                                  'Hỏi cách làm',
+                                  Icons.help_outline_rounded,
+                                  NomadKit.ocean,
+                                ),
+                                const SizedBox(width: 10),
+                                _typeChip(
+                                  FeedbackType.suggestion,
+                                  'Đề xuất đổi',
+                                  Icons.lightbulb_outline_rounded,
+                                  NomadKit.sandDark,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _targetName,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: NomadKit.ink,
+                            const SizedBox(height: 20),
+                            _fieldLabelRow('Hạng mục liên quan tại quầy'),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _quickTopics.map((topic) {
+                                final isSelected = _selectedTopic == topic;
+                                return GestureDetector(
+                                  onTap: () =>
+                                      setState(() => _selectedTopic = topic),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? NomadKit.sandLight
+                                          : NomadKit.surface,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? NomadKit.sand
+                                            : NomadKit.border,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      topic,
+                                      style: NomadKit.caption.copyWith(
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? NomadKit.sandDark
+                                            : NomadKit.secondary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (widget.initialSopCode == null)
-                                  const Icon(
-                                    Icons.expand_more_rounded,
-                                    color: NomadKit.sandDark,
-                                  ),
-                              ],
+                                );
+                              }).toList(),
                             ),
-                            if (_stepNote != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Vị trí: $_stepNote',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: NomadKit.ocean,
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Feedback Type Choice (Uniform 3-button row)
-                    const Text(
-                      'LOẠI PHẢN HỒI',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: NomadKit.sandDark,
-                        letterSpacing: 0.7,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    Row(
-                      children: [
-                        _typeChip(
-                          FeedbackType.issue,
-                          'Báo cáo vấn đề',
-                          Icons.report_problem_outlined,
-                          NomadKit.error,
-                        ),
-                        const SizedBox(width: 10),
-                        _typeChip(
-                          FeedbackType.inquiry,
-                          'Hỏi cách làm',
-                          Icons.help_outline_rounded,
-                          NomadKit.ocean,
-                        ),
-                        const SizedBox(width: 10),
-                        _typeChip(
-                          FeedbackType.suggestion,
-                          'Đề xuất đổi',
-                          Icons.lightbulb_outline_rounded,
-                          NomadKit.sandDark,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Quick Topic Selector
-                    const Text(
-                      'HẠNG MỤC LIÊN QUAN TẠI QUẦY',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: NomadKit.sandDark,
-                        letterSpacing: 0.7,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _quickTopics.map((topic) {
-                        final isSelected = _selectedTopic == topic;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedTopic = topic),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? NomadKit.sandLight
-                                  : NomadKit.surface,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? NomadKit.sand
-                                    : NomadKit.border,
-                                width: isSelected ? 1.4 : 1.0,
+                      const SizedBox(height: 24),
+                      _section(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _fieldLabelRow('Vấn đề bạn gặp', required: true),
+                            TextField(
+                              controller: _contentCtrl,
+                              maxLength: _maxContentLength,
+                              minLines: 6,
+                              maxLines: 6,
+                              style: NomadKit.body.copyWith(
+                                fontSize: 16,
+                                height: 28 / 16,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Mô tả rõ vấn đề bạn gặp phải tại quầy bar: định lượng bị lệch, hiện tượng tách tầng, thời gian làm không kịp...',
+                                hintStyle: NomadKit.caption.copyWith(
+                                  fontSize: 13,
+                                ),
+                                filled: true,
+                                fillColor: NomadKit.surface,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: borderSide,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: borderSide,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: NomadKit.sand,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 13,
+                                ),
                               ),
                             ),
-                            child: Text(
-                              topic,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: isSelected
-                                    ? NomadKit.sandDark
-                                    : NomadKit.secondary,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Content Input
-                    const Text(
-                      'NỘI DUNG CHI TIẾT',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: NomadKit.sandDark,
-                        letterSpacing: 0.7,
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    TextField(
-                      controller: _contentCtrl,
-                      maxLength: _maxContentLength,
-                      maxLines: 6,
-                      style: const TextStyle(fontSize: 14, color: NomadKit.ink),
-                      decoration: InputDecoration(
-                        hintText: 'Mô tả rõ vấn đề bạn gặp phải tại quầy bar: định lượng bị lệch, hiện tượng tách tầng, thời gian làm không kịp...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: NomadKit.secondary,
-                        ),
-                        filled: true,
-                        fillColor: NomadKit.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: NomadKit.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: NomadKit.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: NomadKit.sand,
-                            width: 1.5,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _attachmentSection(),
-                    const SizedBox(height: 16),
-                  ],
+                      const SizedBox(height: 24),
+                      _section(child: _attachmentSection()),
+                    ],
+                  ),
                 ),
               ),
-            ),
-
-            // Pinned Bottom Action Bar with Balanced Submit Button
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-              decoration: const BoxDecoration(
-                color: NomadKit.surface,
-                border: Border(top: BorderSide(color: NomadKit.border)),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 115,
-                    height: 48,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: NomadKit.secondary,
-                        side: const BorderSide(
-                          color: NomadKit.border,
-                          width: 1.2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+                decoration: const BoxDecoration(
+                  color: NomadKit.surface,
+                  border: Border(top: BorderSide(color: NomadKit.border)),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: NomadKit.sandDark,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Hủy bỏ',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      elevation: 0,
+                    ),
+                    key: AppKeys.feedbackSubmit,
+                    onPressed: _isSubmitting || _targetCode.isEmpty
+                        ? null
+                        : _submitFeedback,
+                    icon: _isSubmitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.send_rounded, size: 18),
+                    label: Text(
+                      'Gửi phản hồi',
+                      style: NomadKit.label.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: NomadKit.sand,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
-                        key: AppKeys.feedbackSubmit,
-                        onPressed: _isSubmitting || _targetCode.isEmpty
-                            ? null
-                            : _submitFeedback,
-                        icon: _isSubmitting
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.send_rounded, size: 17),
-                        label: const Text(
-                          'Gửi phản hồi',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -741,8 +793,10 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
           height: 68,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.10) : NomadKit.surface,
-            borderRadius: BorderRadius.circular(14),
+            color: isSelected
+                ? color.withValues(alpha: 0.10)
+                : NomadKit.surface,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected ? color : NomadKit.border,
               width: isSelected ? 1.5 : 1,
@@ -762,9 +816,9 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: NomadKit.caption.copyWith(
                   fontSize: 11.5,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? color : NomadKit.ink,
                 ),
               ),
@@ -774,4 +828,30 @@ class _CreateFeedbackPageState extends State<CreateFeedbackPage> {
       ),
     );
   }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = NomadKit.border
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(8)),
+      );
+    for (final metric in path.computeMetrics()) {
+      var d = 0.0;
+      while (d < metric.length) {
+        canvas.drawPath(metric.extractPath(d, d + 5), paint);
+        d += 9;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

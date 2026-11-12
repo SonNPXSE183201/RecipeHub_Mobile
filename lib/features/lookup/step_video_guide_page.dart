@@ -8,6 +8,7 @@ import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/utils/video_time.dart';
+import '../../core/widgets/redesign_widgets.dart';
 
 import 'package:video_player/video_player.dart';
 
@@ -112,109 +113,180 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
     }
   }
 
+  Widget _statusPanel({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+  }) {
+    return Container(
+      height: 220,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF30231B),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 28, color: Colors.white),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.white70),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _videoPlayer({bool fullscreen = false}) {
     if (_fullscreen && !fullscreen) return const SizedBox(height: 228);
     final controller = _playback.videoController;
     if (!_playback.loading && !_playback.hasVideo) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _statusPanel(
+            icon: _playback.videoFailed
+                ? Icons.error_outline_rounded
+                : Icons.videocam_off_outlined,
+            title: _playback.videoFailed
+                ? 'Chưa tải được video'
+                : 'Chưa có video cho món này',
+            subtitle: _playback.videoFailed
+                ? 'Kiểm tra kết nối rồi thử lại.'
+                : 'Hướng dẫn từng bước vẫn có bên dưới.',
+          ),
+          if (_playback.videoFailed) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 52,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: NomadKit.sandDark,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: _playback.initialize,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text(
+                  'Thử tải lại video',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+    if (_playback.loading || controller == null) {
+      return _statusPanel(
+        icon: Icons.sync_rounded,
+        title: 'Đang tải video...',
+        subtitle: 'Hướng dẫn từng bước vẫn có bên dưới.',
+      );
+    }
+    final duration = _playback.duration.inMilliseconds.toDouble();
+    final picture = Center(
+      child: AspectRatio(
+        aspectRatio: controller.value.aspectRatio,
+        child: VideoPlayer(controller),
+      ),
+    );
+    final controls = Row(
+      children: [
+        IconButton(
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          tooltip: _playback.isPlaying ? 'Tạm dừng' : 'Phát video',
+          onPressed: _playback.loading ? null : _playback.togglePlayback,
+          icon: Icon(
+            _playback.isPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            color: fullscreen ? Colors.white : NomadKit.sandDark,
+          ),
+        ),
+        Text(
+          formatVideoTime(_playback.position),
+          style: TextStyle(
+            fontSize: 13,
+            color: fullscreen ? Colors.white : NomadKit.ink,
+          ),
+        ),
+        Expanded(
+          child: Slider(
+            activeColor: NomadKit.sandDark,
+            inactiveColor: NomadKit.border,
+            value: _playback.position.inMilliseconds.toDouble().clamp(
+              0,
+              duration,
+            ),
+            max: duration > 0 ? duration : 1,
+            onChanged: _playback.loading
+                ? null
+                : (value) =>
+                      _playback.seek(Duration(milliseconds: value.round())),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Text(
+            formatVideoTime(_playback.duration),
+            style: TextStyle(
+              fontSize: 13,
+              color: fullscreen ? Colors.white70 : NomadKit.ink,
+            ),
+          ),
+        ),
+        if (!fullscreen)
+          IconButton(
+            tooltip: 'Phóng to toàn màn hình',
+            onPressed: _openFullscreen,
+            icon: const Icon(
+              Icons.fullscreen_rounded,
+              color: NomadKit.sandDark,
+            ),
+          ),
+      ],
+    );
+    if (fullscreen) {
       return Container(
-        height: 180,
-        width: double.infinity,
         color: const Color(0xFF1C1917),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              _playback.videoFailed
-                  ? 'Không tải được video'
-                  : 'Chưa có video cho món này',
-              style: const TextStyle(fontSize: 14, color: Colors.white),
-            ),
-            if (_playback.videoFailed)
-              TextButton.icon(
-                onPressed: _playback.initialize,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Thử lại'),
-                style: TextButton.styleFrom(foregroundColor: NomadKit.sand),
-              ),
+            Expanded(child: picture),
+            controls,
           ],
         ),
       );
     }
-    final duration = _playback.duration.inMilliseconds.toDouble();
-    final picture = _playback.loading || controller == null
-        ? const Center(child: CircularProgressIndicator(color: NomadKit.sand))
-        : Center(
-            child: AspectRatio(
-              aspectRatio: controller.value.aspectRatio,
-              child: VideoPlayer(controller),
-            ),
-          );
-    return Container(
-      color: const Color(0xFF1C1917),
-      child: Column(
-        children: [
-          if (fullscreen)
-            Expanded(child: picture)
-          else
-            SizedBox(height: 180, width: double.infinity, child: picture),
-          if (_playback.hasVideo)
-            Row(
-              children: [
-                IconButton(
-                  constraints: const BoxConstraints(
-                    minWidth: 48,
-                    minHeight: 48,
-                  ),
-                  tooltip: _playback.isPlaying ? 'Tạm dừng' : 'Phát video',
-                  onPressed: _playback.loading
-                      ? null
-                      : _playback.togglePlayback,
-                  icon: Icon(
-                    _playback.isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  formatVideoTime(_playback.position),
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
-                ),
-                Expanded(
-                  child: Slider(
-                    activeColor: NomadKit.sand,
-                    value: _playback.position.inMilliseconds.toDouble().clamp(
-                      0,
-                      duration,
-                    ),
-                    max: duration > 0 ? duration : 1,
-                    onChanged: _playback.loading
-                        ? null
-                        : (value) => _playback.seek(
-                            Duration(milliseconds: value.round()),
-                          ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Text(
-                    formatVideoTime(_playback.duration),
-                    style: const TextStyle(fontSize: 14, color: Colors.white70),
-                  ),
-                ),
-                if (!fullscreen)
-                  IconButton(
-                    tooltip: 'Phóng to toàn màn hình',
-                    onPressed: _openFullscreen,
-                    icon: const Icon(
-                      Icons.fullscreen_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-              ],
-            ),
-        ],
-      ),
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 220,
+            width: double.infinity,
+            color: const Color(0xFF1C1917),
+            child: picture,
+          ),
+        ),
+        controls,
+      ],
     );
   }
 
@@ -242,200 +314,96 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
     final hasPrev = _activeStepNumber > 1;
     final hasNext = _activeStepNumber < totalSteps;
 
+    final stepTimestamp = _playback.hasVideo
+        ? ' · ${formatVideoTime(Duration(seconds: currentStep.videoStartSeconds))}'
+        : '';
+    final stepButtons = [
+      for (final st in recipe.steps)
+        _StepPill(
+          label: 'Bước ${st.stepNumber}',
+          active: st.stepNumber == _activeStepNumber,
+          onTap: () => _syncPlaybackToStep(st.stepNumber),
+        ),
+    ];
+
     return Scaffold(
       backgroundColor: NomadKit.canvas,
-      appBar: AppBar(
-        backgroundColor: NomadKit.canvas,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: NomadKit.ink,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Video chuẩn: ${recipe.name}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
-            _videoPlayer(),
-
-            // Step Selector Scroller
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: NomadKit.surface,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: recipe.steps.map((st) {
-                    final isActive = st.stepNumber == _activeStepNumber;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        materialTapTargetSize: MaterialTapTargetSize.padded,
-                        avatar: Icon(
-                          Icons.play_arrow_rounded,
-                          size: 16,
-                          color: isActive ? Colors.white : NomadKit.sandDark,
-                        ),
-                        label: Text(
-                          _playback.hasVideo
-                              ? 'Bước ${st.stepNumber} (${formatVideoTime(Duration(seconds: st.videoStartSeconds))})'
-                              : 'Bước ${st.stepNumber}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: isActive
-                                ? FontWeight.w800
-                                : FontWeight.w600,
-                            color: isActive ? Colors.white : NomadKit.ink,
-                          ),
-                        ),
-                        selected: isActive,
-                        selectedColor: NomadKit.sand,
-                        backgroundColor: NomadKit.canvas,
-                        side: BorderSide(
-                          color: isActive ? NomadKit.sand : NomadKit.border,
-                        ),
-                        showCheckmark: false,
-                        onSelected: (val) {
-                          if (val) _syncPlaybackToStep(st.stepNumber);
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
+            RhBrandHeader(
+              trailing: IconButton(
+                tooltip: 'Quay lại',
+                icon: const Icon(Icons.arrow_back_rounded, color: NomadKit.ink),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
-
-            const Divider(height: 1, color: NomadKit.border),
-
-            // Step Detail Body (Balanced vertical distribution)
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Step Number, Title & Progress Indicator
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: NomadKit.sand,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            'BƯỚC ${currentStep.stepNumber}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            currentStep.title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: NomadKit.ink,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: NomadKit.sandLight,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: NomadKit.border),
-                          ),
-                          child: Text(
-                            '${currentStep.stepNumber}/$totalSteps bước',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: NomadKit.sandDark,
-                            ),
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      'HỌC QUA VIDEO',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: NomadKit.sandDark,
+                        letterSpacing: 0.4,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-
-                    // 1. Instruction Card
+                    const SizedBox(height: 6),
+                    Text(recipe.name, style: NomadKit.title),
+                    const SizedBox(height: 14),
+                    _videoPlayer(),
+                    const SizedBox(height: 12),
+                    stepButtons.length <= 4
+                        ? Row(
+                            children: [
+                              for (var i = 0; i < stepButtons.length; i++) ...[
+                                if (i > 0) const SizedBox(width: 8),
+                                Expanded(child: stepButtons[i]),
+                              ],
+                            ],
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final b in stepButtons)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: SizedBox(width: 84, child: b),
+                                  ),
+                              ],
+                            ),
+                          ),
+                    const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: NomadKit.surface,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: NomadKit.border),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x06000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Image.asset(
-                                'assets/icons/icon_video_guide.png',
-                                width: 20,
-                                height: 20,
-                                filterQuality: FilterQuality.medium,
-                                errorBuilder: (ctx, err, stack) => const Icon(
-                                  Icons.play_circle_outline,
-                                  size: 18,
-                                  color: NomadKit.sandDark,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text(
-                                  'HƯỚNG DẪN THAO TÁC QUẦY BAR',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: NomadKit.sandDark,
-                                    letterSpacing: 0.6,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
                           Text(
-                            currentStep.instruction,
+                            'BƯỚC ${currentStep.stepNumber} / $totalSteps$stepTimestamp',
                             style: const TextStyle(
-                              fontSize: 14,
-                              color: NomadKit.ink,
-                              height: 1.5,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: NomadKit.sandDark,
+                              letterSpacing: 0.4,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          Text(currentStep.title, style: NomadKit.section),
+                          const SizedBox(height: 8),
+                          Text(currentStep.instruction, style: NomadKit.body),
                         ],
                       ),
                     ),
@@ -635,72 +603,59 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
               ),
             ),
 
-            // Pinned Bottom Action Bar (Step Navigation + Feedback)
+            // Thanh điều hướng bước.
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               decoration: const BoxDecoration(
-                color: NomadKit.surface,
+                color: NomadKit.canvas,
                 border: Border(top: BorderSide(color: NomadKit.border)),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(48, 48),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: const BorderSide(color: NomadKit.border),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            foregroundColor: NomadKit.ink,
-                          ),
-                          onPressed: hasPrev
-                              ? () => _syncPlaybackToStep(_activeStepNumber - 1)
-                              : null,
-                          icon: const Icon(Icons.arrow_back_rounded, size: 16),
-                          label: const Text(
-                            'Bước trước',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        side: const BorderSide(color: NomadKit.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        foregroundColor: NomadKit.ink,
+                      ),
+                      onPressed: hasPrev
+                          ? () => _syncPlaybackToStep(_activeStepNumber - 1)
+                          : null,
+                      child: const Text(
+                        'Bước trước',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(48, 48),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            backgroundColor: NomadKit.sand,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: hasNext
-                              ? () => _syncPlaybackToStep(_activeStepNumber + 1)
-                              : null,
-                          icon: const Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 16,
-                          ),
-                          label: const Text(
-                            'Bước tiếp theo',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        backgroundColor: NomadKit.sandDark,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                    ],
+                      onPressed: hasNext
+                          ? () => _syncPlaybackToStep(_activeStepNumber + 1)
+                          : null,
+                      child: const Text(
+                        'Bước tiếp theo',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -710,4 +665,42 @@ class _StepVideoGuidePageState extends State<StepVideoGuidePage> {
       ),
     );
   }
+}
+
+class _StepPill extends StatelessWidget {
+  const _StepPill({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: active ? NomadKit.sandDark : NomadKit.surface,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: active ? NomadKit.sandDark : NomadKit.border),
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: onTap,
+      child: SizedBox(
+        height: 48,
+        child: Center(
+          child: Text(
+            label,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: active ? Colors.white : NomadKit.ink,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

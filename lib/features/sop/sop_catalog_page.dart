@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/nomad_kit.dart';
+import '../../core/utils/navigation.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
-import '../../core/utils/navigation.dart';
+import '../../core/widgets/redesign_widgets.dart';
 import '../sop_book/sop_book_page.dart';
 import 'sop_detail_page.dart';
 
 class SopCatalogPage extends StatefulWidget {
   const SopCatalogPage({super.key});
-
   @override
   State<SopCatalogPage> createState() => _SopCatalogPageState();
 }
 
 class _SopCatalogPageState extends State<SopCatalogPage> {
-  final TextEditingController _searchCtrl = TextEditingController();
-  String _selectedCategory = 'Tất cả';
+  final _searchCtrl = TextEditingController();
+  String _category = 'Tất cả';
 
   @override
   void dispose() {
@@ -28,374 +28,158 @@ class _SopCatalogPageState extends State<SopCatalogPage> {
   @override
   Widget build(BuildContext context) {
     final training = context.watch<TrainingViewModel>();
-    final sops = training.sops;
     final categories = [
       'Tất cả',
-      ...{for (final s in sops) s.category}.where((c) => c.isNotEmpty),
+      ...{for (final sop in training.sops) sop.category},
     ];
-    if (!categories.contains(_selectedCategory)) _selectedCategory = 'Tất cả';
+    if (!categories.contains(_category)) _category = 'Tất cả';
     final query = _searchCtrl.text.trim().toLowerCase();
-
-    final filtered = sops.where((s) {
-      final matchesCat =
-          _selectedCategory == 'Tất cả' || s.category == _selectedCategory;
-      final matchesQuery =
-          query.isEmpty ||
-          s.title.toLowerCase().contains(query) ||
-          s.code.toLowerCase().contains(query);
-      return matchesCat && matchesQuery;
+    final filtered = training.sops.where((sop) {
+      final categoryMatch = _category == 'Tất cả' || sop.category == _category;
+      return categoryMatch &&
+          (query.isEmpty || sop.title.toLowerCase().contains(query));
     }).toList();
+
+    Widget content;
+    if (training.sopState == LoadState.loading && training.sops.isEmpty) {
+      content = const LoadStateView.loading();
+    } else if (training.sopState == LoadState.error && training.sops.isEmpty) {
+      content = LoadStateView.error(
+        message: training.error ?? 'Không tải được quy trình SOP.',
+        onRetry: training.retry,
+      );
+    } else if (training.sops.isEmpty) {
+      content = const LoadStateView.empty(
+        message: 'Chưa có SOP nào được ban hành.',
+      );
+    } else if (filtered.isEmpty) {
+      content = const LoadStateView.empty(
+        message: 'Không tìm thấy quy trình phù hợp.',
+      );
+    } else {
+      content = ListView.separated(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        itemCount: filtered.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 10),
+        itemBuilder: (context, index) {
+          final sop = filtered[index];
+          return Material(
+            color: NomadKit.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: NomadKit.border),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => go(context, SopDetailPage(sop: sop)),
+              child: SizedBox(
+                height: 78,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.description_outlined,
+                        color: NomadKit.sandDark,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sop.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: NomadKit.label.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${sop.category} · Phiên bản ${sop.version}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: NomadKit.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const RhChevron(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
       appBar: AppBar(
+        toolbarHeight: 64,
         backgroundColor: NomadKit.canvas,
-        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: NomadKit.ink,
-          ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
+          icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text(
-          'Thư viện SOP kỹ thuật chuỗi',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
+        title: Text('Quy trình SOP', style: NomadKit.title),
+        actions: [
+          IconButton(
+            tooltip: 'Mở sổ tay',
+            onPressed: () => go(context, const SopBookPage()),
+            icon: const Icon(Icons.menu_book_outlined),
           ),
-        ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            // Search & Filter Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: NomadKit.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: NomadKit.border),
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      onChanged: (_) => setState(() {}),
-                      style: const TextStyle(fontSize: 14, color: NomadKit.ink),
-                      decoration: InputDecoration(
-                        hintText: 'Tìm SOP theo tên hoặc mã quy trình...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: NomadKit.secondary,
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Tìm quy trình',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _searchCtrl.text.isEmpty
+                      ? null
+                      : IconButton(
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.close_rounded),
                         ),
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(11),
-                          child: Image.asset(
-                            'assets/icons/icon_search.png',
-                            width: 22,
-                            height: 22,
-                            filterQuality: FilterQuality.medium,
-                            errorBuilder: (ctx, err, stack) => const Icon(
-                              Icons.search_rounded,
-                              color: NomadKit.ocean,
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                        suffixIcon: _searchCtrl.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  Icons.clear_rounded,
-                                  size: 18,
-                                  color: NomadKit.secondary,
-                                ),
-                                onPressed: () {
-                                  _searchCtrl.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Filter Chips
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: categories.map((cat) {
-                        final isSelected = _selectedCategory == cat;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(
-                              cat,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: isSelected ? Colors.white : NomadKit.ink,
-                              ),
-                            ),
-                            selected: isSelected,
-                            selectedColor: NomadKit.ocean,
-                            backgroundColor: NomadKit.surface,
-                            side: BorderSide(
-                              color: isSelected
-                                  ? NomadKit.ocean
-                                  : NomadKit.border,
-                            ),
-                            showCheckmark: false,
-                            onSelected: (val) {
-                              if (val) setState(() => _selectedCategory = cat);
-                            },
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: SizedBox(
-                height: 48,
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => go(context, const SopBookPage()),
-                  icon: const Icon(Icons.menu_book_rounded),
-                  label: const Text('Mở sổ tay'),
                 ),
               ),
             ),
-            const Divider(height: 1, color: NomadKit.border),
-
-            // SOP List
-            Expanded(
-              child: training.sopState == LoadState.loading && sops.isEmpty
-                  ? const LoadStateView.loading()
-                  : training.sopState == LoadState.error && sops.isEmpty
-                  ? LoadStateView.error(
-                      message: training.error ?? 'Không tải được thư viện SOP.',
-                      onRetry: training.retry,
-                    )
-                  : sops.isEmpty
-                  ? const LoadStateView.empty(
-                      message: 'Chưa có SOP nào được ban hành.',
-                    )
-                  : filtered.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/illustrations/empty_search_2k.png',
-                            width: 130,
-                            height: 130,
-                            fit: BoxFit.contain,
-                            errorBuilder: (ctx, err, stack) => const Icon(
-                              Icons.search_off_rounded,
-                              size: 70,
-                              color: NomadKit.secondary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Không tìm thấy SOP phù hợp',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: NomadKit.ink,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(20),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, idx) {
-                        final sop = filtered[idx];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 14),
-                          decoration: BoxDecoration(
-                            color: NomadKit.surface,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: NomadKit.border),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x06000000),
-                                blurRadius: 10,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(18),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(18),
-                              onTap: () => go(context, SopDetailPage(sop: sop)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // SOP type and published version.
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          'assets/icons/icon_sop_protocol.png',
-                                          width: 22,
-                                          height: 22,
-                                          filterQuality: FilterQuality.medium,
-                                          errorBuilder: (ctx, err, stack) =>
-                                              const Icon(
-                                                Icons.description_outlined,
-                                                size: 18,
-                                                color: NomadKit.ocean,
-                                              ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: NomadKit.oceanLight,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'SOP',
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              fontFamily: 'monospace',
-                                              color: NomadKit.ocean,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          flex: 3,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: NomadKit.canvas,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: NomadKit.border,
-                                              ),
-                                            ),
-                                            child: Text(
-                                              'Phiên bản ${sop.version}',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: NomadKit.secondary,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            sop.category,
-                                            textAlign: TextAlign.end,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              color: NomadKit.secondary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-
-                                    // Title
-                                    Text(
-                                      sop.title,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        color: NomadKit.ink,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      sop.summary,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: NomadKit.secondary,
-                                        height: 1.35,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 12),
-
-                                    // Bottom row: Linked recipe chips
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.link_rounded,
-                                          size: 16,
-                                          color: NomadKit.sandDark,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            'Áp dụng cho ${sop.linkedRecipeCodes.length} món',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                              color: NomadKit.sandDark,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 12,
-                                          color: NomadKit.secondary,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+            SizedBox(
+              height: 42,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: category == _category,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() => _category = category),
+                  );
+                },
+              ),
             ),
+            Expanded(child: content),
           ],
         ),
       ),

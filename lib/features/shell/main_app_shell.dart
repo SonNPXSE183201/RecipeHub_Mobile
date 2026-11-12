@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/nomad_kit.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
-import '../../core/navigation/app_keys.dart';
-import '../../core/viewmodels/notification_viewmodel.dart';
-import '../../core/widgets/recipe_hub_logo.dart';
 import '../lookup/counter_recipe_lookup_page.dart';
 import '../learning/my_learning_page.dart';
-import '../learning/notifications_page.dart';
 import '../feedback/my_feedback_list_page.dart';
 import '../account/account_profile_page.dart';
 import '../admin_training/admin_store_training_page.dart';
@@ -42,7 +39,6 @@ class MainAppShellState extends State<MainAppShell> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthViewModel>();
     final isRoleAdmin = auth.isAdmin;
-    final unreadNotifs = context.watch<NotificationViewModel>().unreadCount;
 
     final List<Widget> pages = isRoleAdmin
         ? const [
@@ -60,225 +56,77 @@ class MainAppShellState extends State<MainAppShell> {
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
-      appBar: AppBar(
-        backgroundColor: NomadKit.canvas,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: Row(
-          children: [
-            const RecipeHubLogo(size: 32, iconSize: 18, radius: 10),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'RecipeHub',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: NomadKit.ink,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isRoleAdmin
-                            ? NomadKit.sandLight
-                            : NomadKit.forestLight,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isRoleAdmin ? 'ADMIN' : 'VIEWER',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          color: isRoleAdmin
-                              ? NomadKit.sandDark
-                              : NomadKit.forest,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                key: AppKeys.notificationBell,
-                tooltip: 'Thông báo & Thay đổi',
-                icon: Image.asset(
-                  unreadNotifs > 0
-                      ? 'assets/icons/nav_bell_active.png'
-                      : 'assets/icons/nav_bell.png',
-                  width: 26,
-                  height: 26,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.notifications_none_rounded, size: 22),
-                ),
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsPage(),
-                    ),
-                  );
-                  // Shell có thể đã bị gỡ (đăng xuất/bị khóa khi đang ở trang Thông báo).
-                  if (mounted) setState(() {});
-                },
-              ),
-              if (unreadNotifs > 0)
-                Positioned(
-                  top: 10,
-                  right: 12,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: NomadKit.error,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
       body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: NomadKit.border)),
-        ),
-        child: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            backgroundColor: Colors.white,
-            indicatorColor: Colors.transparent,
-            labelTextStyle: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: NomadKit.ink,
-                );
-              }
-              return const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: NomadKit.secondary,
-              );
-            }),
+      bottomNavigationBar: _RedesignBottomNavigation(
+        currentIndex: _currentIndex,
+        isAdmin: isRoleAdmin,
+        onSelected: switchTab,
+      ),
+    );
+  }
+}
+
+class _RedesignBottomNavigation extends StatelessWidget {
+  const _RedesignBottomNavigation({
+    required this.currentIndex,
+    required this.isAdmin,
+    required this.onSelected,
+  });
+
+  final int currentIndex;
+  final bool isAdmin;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <(String, String)>[
+      ('Tra cứu', 'assets/redesign/nav_lookup.svg'),
+      (isAdmin ? 'Đào tạo' : 'Việc học', 'assets/redesign/nav_learning.svg'),
+      ('Phản hồi', 'assets/redesign/nav_feedback.svg'),
+      ('Tài khoản', 'assets/redesign/nav_account.svg'),
+    ];
+    return Container(
+      decoration: const BoxDecoration(
+        color: NomadKit.surface,
+        border: Border(top: BorderSide(color: NomadKit.border)),
+      ),
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.1,
+        child: NavigationBar(
+          height: 80,
+          elevation: 0,
+          backgroundColor: NomadKit.surface,
+          indicatorColor: NomadKit.sandLight,
+          indicatorShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
           ),
-          child: NavigationBar(
-            selectedIndex: _currentIndex,
-            onDestinationSelected: switchTab,
-            backgroundColor: Colors.white,
-            indicatorColor: Colors.transparent,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            elevation: 0,
-            destinations: [
+          selectedIndex: currentIndex,
+          onDestinationSelected: onSelected,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: [
+            for (final item in items)
               NavigationDestination(
-                icon: Image.asset(
-                  'assets/icons/nav_home.png',
-                  width: 26,
-                  height: 26,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.search_rounded, size: 24),
-                ),
-                selectedIcon: Image.asset(
-                  'assets/icons/nav_home_active.png',
-                  width: 28,
-                  height: 28,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.search_rounded, size: 24),
-                ),
-                label: 'Tra cứu',
-              ),
-              NavigationDestination(
-                icon: Image.asset(
-                  isRoleAdmin
-                      ? 'assets/icons/nav_training.png'
-                      : 'assets/icons/nav_learning.png',
-                  width: 26,
-                  height: 26,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) => Icon(
-                    isRoleAdmin
-                        ? Icons.storefront_rounded
-                        : Icons.school_outlined,
-                    size: 24,
+                icon: SvgPicture.asset(
+                  item.$2,
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    NomadKit.secondary,
+                    BlendMode.srcIn,
                   ),
                 ),
-                selectedIcon: Image.asset(
-                  isRoleAdmin
-                      ? 'assets/icons/nav_training_active.png'
-                      : 'assets/icons/nav_learning_active.png',
-                  width: 28,
-                  height: 28,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) => Icon(
-                    isRoleAdmin
-                        ? Icons.storefront_rounded
-                        : Icons.school_rounded,
-                    size: 24,
+                selectedIcon: SvgPicture.asset(
+                  item.$2,
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    NomadKit.sandDark,
+                    BlendMode.srcIn,
                   ),
                 ),
-                label: isRoleAdmin ? 'Đào tạo' : 'Việc học',
+                label: item.$1,
               ),
-              NavigationDestination(
-                icon: Image.asset(
-                  'assets/icons/nav_feedback.png',
-                  width: 26,
-                  height: 26,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.forum_outlined, size: 24),
-                ),
-                selectedIcon: Image.asset(
-                  'assets/icons/nav_feedback_active.png',
-                  width: 28,
-                  height: 28,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.forum_rounded, size: 24),
-                ),
-                label: 'Phản hồi',
-              ),
-              NavigationDestination(
-                icon: Image.asset(
-                  'assets/icons/nav_account.png',
-                  width: 26,
-                  height: 26,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.person_outline_rounded, size: 24),
-                ),
-                selectedIcon: Image.asset(
-                  'assets/icons/nav_account_active.png',
-                  width: 28,
-                  height: 28,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.person_rounded, size: 24),
-                ),
-                label: 'Tài khoản',
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

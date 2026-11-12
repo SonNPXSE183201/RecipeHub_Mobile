@@ -2,49 +2,53 @@ import 'package:flutter/material.dart';
 
 /// NomadKit Design System Tokens - Calibrated 100% to Figma Design
 class NomadKit {
-  static const sand = Color(0xFFC49A6C); // Figma primary sand/caramel
-  static const sandDark = Color(0xFFA07040); // Figma overline brown
-  static const sandLight = Color(0xFFFAF6F0); // Figma quick action card bg
+  static const sand = Color(0xFF734129);
+  static const sandDark = Color(0xFF734129);
+  static const sandLight = Color(0xFFF6E6D3);
   static const ocean = Color(0xFF0891B2); // Figma link & info cyan
   static const oceanLight = Color(0xFFF0F9FF);
-  static const forest = Color(0xFF166534); // Figma approved green
-  static const forestLight = Color(0xFFDCFCE7);
+  static const forest = Color(0xFF1F4D32);
+  static const forestLight = Color(0xFFE0F2E5);
   static const warning = Color(0xFFCA8A04); // Figma draft gold/orange
   static const warningLight = Color(0xFFFEF9C3);
-  static const ink = Color(0xFF292524); // Figma headline text
-  static const secondary = Color(0xFF78716C); // Figma body text
-  static const canvas = Color(0xFFFFFDF7); // Warm paper background
+  static const ink = Color(0xFF30231B);
+  static const secondary = Color(0xFF695A50);
+  static const canvas = Color(0xFFFDFAF5);
   static const surface = Colors.white;
-  static const border = Color(0xFFE7E0D5);
-  static const error = Color(0xFFDC2626);
+  static const border = Color(0xFFDED8D1);
+  static const lineSoft = Color(0xFFF2EDE7);
+  static const error = Color(0xFF9F2D2D);
 
   // Shared mobile typography: practice/AI reuse these rather than screen constants.
   static const title = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.w800,
-    color: ink,
-  );
-  static const subtitle = TextStyle(
-    fontSize: 15,
+    fontSize: 21,
+    height: 30 / 21,
     fontWeight: FontWeight.w700,
     color: ink,
   );
-  static const body = TextStyle(fontSize: 14, height: 1.4, color: ink);
+  static const subtitle = TextStyle(
+    fontSize: 18,
+    height: 26 / 18,
+    fontWeight: FontWeight.w600,
+    color: ink,
+  );
+  static const body = TextStyle(fontSize: 15, height: 24 / 15, color: ink);
   static const caption = TextStyle(
     fontSize: 12,
-    height: 1.35,
+    height: 18 / 12,
     color: secondary,
   );
   static const label = TextStyle(
     fontSize: 13,
-    fontWeight: FontWeight.w700,
+    height: 21 / 13,
+    fontWeight: FontWeight.w500,
     color: ink,
   );
   static const section = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w800,
-    color: sandDark,
-    letterSpacing: .6,
+    fontSize: 18,
+    height: 26 / 18,
+    fontWeight: FontWeight.w600,
+    color: ink,
   );
   static const timer = TextStyle(
     fontSize: 48,

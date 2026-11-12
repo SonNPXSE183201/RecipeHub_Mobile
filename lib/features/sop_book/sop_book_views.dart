@@ -105,7 +105,7 @@ class BookToc extends StatelessWidget {
                   if (e.isHeader)
                     Padding(
                       padding: const EdgeInsets.only(top: 10, bottom: 2),
-                      child: Text(e.label.toUpperCase(), style: _h2),
+                      child: Text(e.label, style: _h2),
                     )
                   else
                     InkWell(
@@ -130,6 +130,12 @@ class BookToc extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                                 color: NomadKit.secondary,
                               ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: NomadKit.secondary,
                             ),
                           ],
                         ),
