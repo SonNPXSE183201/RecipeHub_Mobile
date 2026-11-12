@@ -63,6 +63,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Xem lại công thức'));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('18 g'));
       expect(tester.getRect(find.text('18 g')).right, lessThanOrEqualTo(360));
       expect(find.text('PRIVATE-CODE'), findsNothing);

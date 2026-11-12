@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/nomad_kit.dart';
 import '../../core/widgets/screen_frame.dart';
+import '../../core/widgets/app_toast.dart';
 
 class ErrorRecoveryPage extends StatelessWidget {
   const ErrorRecoveryPage({super.key});
@@ -148,7 +149,7 @@ class ErrorRecoveryPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      ToastMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
                             'Re-attempting connection to RecipeHub Gateway...',

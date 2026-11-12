@@ -33,19 +33,23 @@ class LoadStateView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon == null)
-              const CircularProgressIndicator(color: NomadKit.ocean)
+              const CircularProgressIndicator(color: NomadKit.sandDark)
             else
-              Icon(icon, size: 56, color: NomadKit.secondary),
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: NomadKit.sandLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 28, color: NomadKit.sandDark),
+              ),
             const SizedBox(height: 14),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: NomadKit.ink,
-                height: 1.4,
-              ),
+              style: NomadKit.body.copyWith(fontWeight: FontWeight.w500),
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 14),

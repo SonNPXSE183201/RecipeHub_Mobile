@@ -8,6 +8,8 @@ import 'package:recipehub_mobile/core/models/recipe_models.dart';
 import 'package:recipehub_mobile/core/services/i_recipe_source.dart';
 import 'package:recipehub_mobile/core/services/mock/mock_training_repository.dart';
 import 'package:recipehub_mobile/core/viewmodels/training_viewmodel.dart';
+import 'package:recipehub_mobile/features/sop_book/book_leaves.dart';
+import 'package:recipehub_mobile/features/sop_book/book_reader.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_page.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_pages.dart';
 import 'package:recipehub_mobile/features/sop_book/sop_book_views.dart';
@@ -169,29 +171,26 @@ void main() {
       await tester.enterText(find.byType(TextField), 'Cà Phê Muối');
       await tester.pumpAndSettle();
       expect(find.textContaining('RC-CFE-01'), findsNothing);
-      expect(find.text('Cà phê & Cold Brew'), findsOneWidget);
+      expect(find.text('Công thức · Cà phê & Cold Brew'), findsOneWidget);
       // Ô tìm kiếm cũng chứa cùng chuỗi; chạm vào dòng kết quả.
       await tester.tap(find.text('Cà Phê Muối').last);
       await tester.pumpAndSettle();
-      expect(find.byType(RecipeBookPage), findsWidgets);
+      expect(find.byType(LeafView), findsWidgets);
       expect(
-        tester
-            .widget<RecipeBookPage>(find.byType(RecipeBookPage).last)
-            .recipe
-            .code,
+        tester.widget<LeafView>(find.byType(LeafView).last).page.recipe!.code,
         'RC-CFE-01',
       );
       expect(find.text('Cà Phê Muối'), findsWidgets);
       expect(find.textContaining('RC-CFE-01'), findsNothing);
     });
 
-    testWidgets('lật trang bằng nút và nhảy qua mục lục', (tester) async {
+    testWidgets('vuốt lật trang và nhảy qua mục lục', (tester) async {
       await _pump(tester, FakeRecipeSource());
       expect(find.text('Sổ tay công thức & SOP'), findsWidgets);
       expect(find.byTooltip('Xuất PDF'), findsOneWidget);
       expect(find.textContaining('Trang 1/'), findsOneWidget);
 
-      await tester.tap(find.text('Sau'));
+      await tester.drag(find.byType(BookReaderStage), const Offset(-240, 0));
       await tester.pumpAndSettle();
       expect(find.textContaining('Trang 2/'), findsOneWidget);
       expect(find.text('Mục lục'), findsWidgets);
@@ -203,7 +202,7 @@ void main() {
       expect(find.text('Trà Sữa Oolong'), findsWidgets);
       expect(find.textContaining('Phiên bản'), findsWidgets);
 
-      await tester.tap(find.text('Trước'));
+      await tester.drag(find.byType(BookReaderStage), const Offset(240, 0));
       await tester.pumpAndSettle();
       expect(find.textContaining('Trang 2/'), findsOneWidget);
     });

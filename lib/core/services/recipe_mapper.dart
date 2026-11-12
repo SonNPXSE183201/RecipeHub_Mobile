@@ -119,6 +119,7 @@ class RecipeMapper {
             ],
       steps: stepItems,
       videoUrl: d.videoUrl ?? '',
+      imageUrl: (d.imageUrl ?? '').trim().isEmpty ? null : d.imageUrl!.trim(),
     );
   }
 

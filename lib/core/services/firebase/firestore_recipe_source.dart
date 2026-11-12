@@ -141,6 +141,7 @@ class FirestoreRecipeSource
       'description': d['description'],
       'category': d['category'],
       'videoUrl': d['videoUrl'],
+      'imageUrl': d['imageUrl'],
       'sizes': d['sizes'] ?? const [],
       'servingNotes': d['servingNotes'] ?? const [],
       'specialRequests': d['specialRequests'] ?? const [],

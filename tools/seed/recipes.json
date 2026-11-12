@@ -181,7 +181,9 @@
       "SOP-DAD"
     ],
     "sourcePage": 13,
-    "videoUrl": "https://recipehub-mobile.web.app/media/videos/TS-OLSUAD.mp4"
+    "videoUrl": "https://recipehub-mobile.web.app/media/videos/TS-OLSUAD.mp4",
+    "imageFile": "TS-OLSUAD.jpg",
+    "imagePath": "recipe-images/TS-OLSUAD/cover-20261112.jpg"
   },
   {
     "code": "TS-OLSUAN",
@@ -328,7 +330,9 @@
     "sopCodes": [
       "SOP-TSNONG"
     ],
-    "sourcePage": 11
+    "sourcePage": 11,
+    "imageFile": "TS-OLSUAN.png",
+    "imagePath": "recipe-images/TS-OLSUAN/cover-20261112.png"
   },
   {
     "code": "TS-OLNHAID",
@@ -473,7 +477,9 @@
       "SOP-TSLANH",
       "SOP-DAD"
     ],
-    "sourcePage": 14
+    "sourcePage": 14,
+    "imageFile": "TS-OLNHAID.png",
+    "imagePath": "recipe-images/TS-OLNHAID/cover-20261112.png"
   },
   {
     "code": "TS-OLNHAIN",
@@ -595,7 +601,9 @@
     "sopCodes": [
       "SOP-TSNONG"
     ],
-    "sourcePage": 12
+    "sourcePage": 12,
+    "imageFile": "TS-OLNHAIN.png",
+    "imagePath": "recipe-images/TS-OLNHAIN/cover-20261112.png"
   },
   {
     "code": "TS-MATNHAND",
@@ -740,7 +748,9 @@
       "SOP-TSLANH",
       "SOP-DAD"
     ],
-    "sourcePage": 14
+    "sourcePage": 14,
+    "imageFile": "TS-MATNHAND.jpg",
+    "imagePath": "recipe-images/TS-MATNHAND/cover-20261112.jpg"
   },
   {
     "code": "TS-MATNHANN",
@@ -862,7 +872,9 @@
     "sopCodes": [
       "SOP-TSNONG"
     ],
-    "sourcePage": 12
+    "sourcePage": 12,
+    "imageFile": "TS-MATNHANN.png",
+    "imagePath": "recipe-images/TS-MATNHANN/cover-20261112.png"
   },
   {
     "code": "TS-TAMD",
@@ -1045,7 +1057,9 @@
       "SOP-TSLANH",
       "SOP-DAD"
     ],
-    "sourcePage": 15
+    "sourcePage": 15,
+    "imageFile": "TS-TAMD.jpg",
+    "imagePath": "recipe-images/TS-TAMD/cover-20261112.jpg"
   },
   {
     "code": "TS-TAMN",
@@ -1192,7 +1206,9 @@
     "sopCodes": [
       "SOP-TSNONG"
     ],
-    "sourcePage": 11
+    "sourcePage": 11,
+    "imageFile": "TS-TAMN.png",
+    "imagePath": "recipe-images/TS-TAMN/cover-20261112.png"
   },
   {
     "code": "TS-KHOID",
@@ -1337,7 +1353,9 @@
       "SOP-TSLANH",
       "SOP-DAD"
     ],
-    "sourcePage": 16
+    "sourcePage": 16,
+    "imageFile": "TS-KHOID.jpg",
+    "imagePath": "recipe-images/TS-KHOID/cover-20261112.jpg"
   },
   {
     "code": "TS-KHOIN",
@@ -1459,7 +1477,9 @@
     "sopCodes": [
       "SOP-TSNONG"
     ],
-    "sourcePage": 12
+    "sourcePage": 12,
+    "imageFile": "TS-KHOIN.png",
+    "imagePath": "recipe-images/TS-KHOIN/cover-20261112.png"
   },
   {
     "code": "TS-PHONGLAND",
@@ -1578,7 +1598,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 17
+    "sourcePage": 17,
+    "imageFile": "TS-PHONGLAND.png",
+    "imagePath": "recipe-images/TS-PHONGLAND/cover-20261112.png"
   },
   {
     "code": "TS-PHONGLANN",
@@ -1705,7 +1727,9 @@
     "sopCodes": [
       "SOP-SHAKER"
     ],
-    "sourcePage": 18
+    "sourcePage": 18,
+    "imageFile": "TS-PHONGLANN.png",
+    "imagePath": "recipe-images/TS-PHONGLANN/cover-20261112.png"
   },
   {
     "code": "TT-GAM",
@@ -1867,7 +1891,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 21
+    "sourcePage": 21,
+    "imageFile": "TT-GAM.png",
+    "imagePath": "recipe-images/TT-GAM/cover-20261112.png"
   },
   {
     "code": "TT-OLDAOHONG",
@@ -2035,7 +2061,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 22
+    "sourcePage": 22,
+    "imageFile": "TT-OLDAOHONG.jpg",
+    "imagePath": "recipe-images/TT-OLDAOHONG/cover-20261112.jpg"
   },
   {
     "code": "TS-LUADAO",
@@ -2242,7 +2270,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 23
+    "sourcePage": 23,
+    "imageFile": "TS-LUADAO.png",
+    "imagePath": "recipe-images/TS-LUADAO/cover-20261112.png"
   },
   {
     "code": "TT-TRAVOCF",
@@ -2462,7 +2492,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 24
+    "sourcePage": 24,
+    "imageFile": "TT-TRAVOCF.png",
+    "imagePath": "recipe-images/TT-TRAVOCF/cover-20261112.png"
   },
   {
     "code": "TT-LANGBIANG",
@@ -2701,7 +2733,9 @@
       "SOP-HUNGLUI",
       "SOP-DAD"
     ],
-    "sourcePage": 25
+    "sourcePage": 25,
+    "imageFile": "TT-LANGBIANG.png",
+    "imagePath": "recipe-images/TT-LANGBIANG/cover-20261112.png"
   },
   {
     "code": "TT-SIMO",
@@ -2864,7 +2898,9 @@
       "SOP-SHAKER",
       "SOP-DAD"
     ],
-    "sourcePage": 26
+    "sourcePage": 26,
+    "imageFile": "TT-SIMO.png",
+    "imagePath": "recipe-images/TT-SIMO/cover-20261112.png"
   },
   {
     "code": "TT-BONGBUOI",
@@ -3017,7 +3053,9 @@
       "SOP-DAD"
     ],
     "sourcePage": 27,
-    "videoUrl": "https://recipehub-mobile.web.app/media/videos/TT-BONGBUOI.mp4"
+    "videoUrl": "https://recipehub-mobile.web.app/media/videos/TT-BONGBUOI.mp4",
+    "imageFile": "TT-BONGBUOI.jpg",
+    "imagePath": "recipe-images/TT-BONGBUOI/cover-20261112.jpg"
   },
   {
     "code": "DX-MATCHACOCO",
@@ -3147,7 +3185,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 28
+    "sourcePage": 28,
+    "imageFile": "DX-MATCHACOCO.jpg",
+    "imagePath": "recipe-images/DX-MATCHACOCO/cover-20261112.jpg"
   },
   {
     "code": "DX-MATCHAPXP850",
@@ -3385,7 +3425,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 29
+    "sourcePage": 29,
+    "imageFile": "DX-MATCHAPXP850.png",
+    "imagePath": "recipe-images/DX-MATCHAPXP850/cover-20261112.png"
   },
   {
     "code": "DX-MATCHAPXP855",
@@ -3676,7 +3718,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 30
+    "sourcePage": 30,
+    "imageFile": "DX-MATCHAPXP855.png",
+    "imagePath": "recipe-images/DX-MATCHAPXP855/cover-20261112.png"
   },
   {
     "code": "DX-SCBONGBUOI850",
@@ -3923,7 +3967,9 @@
       "SOP-VOBUOI",
       "SOP-DAD"
     ],
-    "sourcePage": 31
+    "sourcePage": 31,
+    "imageFile": "DX-SCBONGBUOI850.png",
+    "imagePath": "recipe-images/DX-SCBONGBUOI850/cover-20261112.png"
   },
   {
     "code": "DX-SCBONGBUOI855",
@@ -4175,7 +4221,9 @@
       "SOP-VOBUOI",
       "SOP-DAD"
     ],
-    "sourcePage": 32
+    "sourcePage": 32,
+    "imageFile": "DX-SCBONGBUOI855.png",
+    "imagePath": "recipe-images/DX-SCBONGBUOI855/cover-20261112.png"
   },
   {
     "code": "DX-PHINDACSAN850",
@@ -4390,7 +4438,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 33
+    "sourcePage": 33,
+    "imageFile": "DX-PHINDACSAN850.png",
+    "imagePath": "recipe-images/DX-PHINDACSAN850/cover-20261112.png"
   },
   {
     "code": "DX-PHINDACSAN855",
@@ -4605,7 +4655,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 34
+    "sourcePage": 34,
+    "imageFile": "DX-PHINDACSAN855.png",
+    "imagePath": "recipe-images/DX-PHINDACSAN855/cover-20261112.png"
   },
   {
     "code": "CF-PHEDEN",
@@ -4675,7 +4727,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 36
+    "sourcePage": 36,
+    "imageFile": "CF-PHEDEN.png",
+    "imagePath": "recipe-images/CF-PHEDEN/cover-20261112.png"
   },
   {
     "code": "CF-PHENAU",
@@ -4752,7 +4806,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 37
+    "sourcePage": 37,
+    "imageFile": "CF-PHENAU.jpg",
+    "imagePath": "recipe-images/CF-PHENAU/cover-20261112.jpg"
   },
   {
     "code": "CF-XIUVANI",
@@ -4853,7 +4909,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 38
+    "sourcePage": 38,
+    "imageFile": "CF-XIUVANI.png",
+    "imagePath": "recipe-images/CF-XIUVANI/cover-20261112.png"
   },
   {
     "code": "CF-OLBUOICAM",
@@ -4986,7 +5044,9 @@
       "SOP-LATCAM",
       "SOP-DAD"
     ],
-    "sourcePage": 39
+    "sourcePage": 39,
+    "imageFile": "CF-OLBUOICAM.png",
+    "imagePath": "recipe-images/CF-OLBUOICAM/cover-20261112.png"
   },
   {
     "code": "CF-OLBUOICHANH",
@@ -5111,7 +5171,9 @@
     "sopCodes": [
       "SOP-DAD"
     ],
-    "sourcePage": 40
+    "sourcePage": 40,
+    "imageFile": "CF-OLBUOICHANH.png",
+    "imagePath": "recipe-images/CF-OLBUOICHANH/cover-20261112.png"
   },
   {
     "code": "CF-DALAT",
@@ -5201,7 +5263,9 @@
       "SOP-ESPRESSO",
       "SOP-DAD"
     ],
-    "sourcePage": 41
+    "sourcePage": 41,
+    "imageFile": "CF-DALAT.png",
+    "imagePath": "recipe-images/CF-DALAT/cover-20261112.png"
   },
   {
     "code": "CF-ESPRESSO",
@@ -5251,7 +5315,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 44
+    "sourcePage": 44,
+    "imageFile": "CF-ESPRESSO.png",
+    "imagePath": "recipe-images/CF-ESPRESSO/cover-20261112.png"
   },
   {
     "code": "CF-AMERICANON",
@@ -5309,7 +5375,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 45
+    "sourcePage": 45,
+    "imageFile": "CF-AMERICANON.png",
+    "imagePath": "recipe-images/CF-AMERICANON/cover-20261112.png"
   },
   {
     "code": "CF-AMERICANOD",
@@ -5372,7 +5440,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 45
+    "sourcePage": 45,
+    "imageFile": "CF-AMERICANOD.png",
+    "imagePath": "recipe-images/CF-AMERICANOD/cover-20261112.png"
   },
   {
     "code": "CF-CAPUCHINON",
@@ -5432,7 +5502,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 46
+    "sourcePage": 46,
+    "imageFile": "CF-CAPUCHINON.png",
+    "imagePath": "recipe-images/CF-CAPUCHINON/cover-20261112.png"
   },
   {
     "code": "CF-CAPUCHINOD",
@@ -5501,7 +5573,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 46
+    "sourcePage": 46,
+    "imageFile": "CF-CAPUCHINOD.jpg",
+    "imagePath": "recipe-images/CF-CAPUCHINOD/cover-20261112.jpg"
   },
   {
     "code": "CF-LATTEN",
@@ -5561,7 +5635,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 47
+    "sourcePage": 47,
+    "imageFile": "CF-LATTEN.png",
+    "imagePath": "recipe-images/CF-LATTEN/cover-20261112.png"
   },
   {
     "code": "CF-LATTED",
@@ -5626,7 +5702,9 @@
       "SOP-ESPRESSO"
     ],
     "sourcePage": 47,
-    "videoUrl": "https://recipehub-mobile.web.app/media/videos/CF-LATTED.mp4"
+    "videoUrl": "https://recipehub-mobile.web.app/media/videos/CF-LATTED.mp4",
+    "imageFile": "CF-LATTED.jpg",
+    "imagePath": "recipe-images/CF-LATTED/cover-20261112.jpg"
   },
   {
     "code": "CF-PHELANN",
@@ -5697,7 +5775,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 48
+    "sourcePage": 48,
+    "imageFile": "CF-PHELANN.png",
+    "imagePath": "recipe-images/CF-PHELANN/cover-20261112.png"
   },
   {
     "code": "CF-PHELAND",
@@ -5772,7 +5852,9 @@
     "sopCodes": [
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 48
+    "sourcePage": 48,
+    "imageFile": "CF-PHELAND.png",
+    "imagePath": "recipe-images/CF-PHELAND/cover-20261112.png"
   },
   {
     "code": "TS-PLUSOLSUA",
@@ -5877,7 +5959,9 @@
       "SOP-DONGGOI",
       "SOP-TSLANH"
     ],
-    "sourcePage": 49
+    "sourcePage": 49,
+    "imageFile": "TS-PLUSOLSUA.png",
+    "imagePath": "recipe-images/TS-PLUSOLSUA/cover-20261112.png"
   },
   {
     "code": "TS-PLUSOLNHAI",
@@ -5982,7 +6066,9 @@
       "SOP-DONGGOI",
       "SOP-TSLANH"
     ],
-    "sourcePage": 49
+    "sourcePage": 49,
+    "imageFile": "TS-PLUSOLNHAI.png",
+    "imagePath": "recipe-images/TS-PLUSOLNHAI/cover-20261112.png"
   },
   {
     "code": "TS-PLUSMATNHAN",
@@ -6087,7 +6173,9 @@
       "SOP-DONGGOI",
       "SOP-TSLANH"
     ],
-    "sourcePage": 49
+    "sourcePage": 49,
+    "imageFile": "TS-PLUSMATNHAN.png",
+    "imagePath": "recipe-images/TS-PLUSMATNHAN/cover-20261112.png"
   },
   {
     "code": "TS-PLUSTAM",
@@ -6192,7 +6280,9 @@
       "SOP-DONGGOI",
       "SOP-TSLANH"
     ],
-    "sourcePage": 50
+    "sourcePage": 50,
+    "imageFile": "TS-PLUSTAM.png",
+    "imagePath": "recipe-images/TS-PLUSTAM/cover-20261112.png"
   },
   {
     "code": "TS-PLUSKHOI",
@@ -6297,7 +6387,9 @@
       "SOP-DONGGOI",
       "SOP-TSLANH"
     ],
-    "sourcePage": 52
+    "sourcePage": 52,
+    "imageFile": "TS-PLUSKHOI.png",
+    "imagePath": "recipe-images/TS-PLUSKHOI/cover-20261112.png"
   },
   {
     "code": "TS-PLUSPHONGLAN",
@@ -6387,7 +6479,9 @@
       "SOP-DONGGOI",
       "SOP-SHAKER"
     ],
-    "sourcePage": 51
+    "sourcePage": 51,
+    "imageFile": "TS-PLUSPHONGLAN.png",
+    "imagePath": "recipe-images/TS-PLUSPHONGLAN/cover-20261112.png"
   },
   {
     "code": "TS-PLUSLUADAO",
@@ -6490,7 +6584,9 @@
       "SOP-DAOHONG",
       "SOP-SHAKER"
     ],
-    "sourcePage": 53
+    "sourcePage": 53,
+    "imageFile": "TS-PLUSLUADAO.png",
+    "imagePath": "recipe-images/TS-PLUSLUADAO/cover-20261112.png"
   },
   {
     "code": "DX-PLUSMATCHA",
@@ -6563,7 +6659,9 @@
     "sopCodes": [
       "SOP-DONGGOI"
     ],
-    "sourcePage": 54
+    "sourcePage": 54,
+    "imageFile": "DX-PLUSMATCHA.png",
+    "imagePath": "recipe-images/DX-PLUSMATCHA/cover-20261112.png"
   },
   {
     "code": "CF-PLUSDALAT",
@@ -6643,7 +6741,9 @@
       "SOP-DONGGOI",
       "SOP-ESPRESSO"
     ],
-    "sourcePage": 55
+    "sourcePage": 55,
+    "imageFile": "CF-PLUSDALAT.png",
+    "imagePath": "recipe-images/CF-PLUSDALAT/cover-20261112.png"
   },
   {
     "code": "TT-PLUSCBOLONG",
@@ -6710,7 +6810,9 @@
     "sopCodes": [
       "SOP-DONGGOI"
     ],
-    "sourcePage": 56
+    "sourcePage": 56,
+    "imageFile": "TT-PLUSCBOLONG.png",
+    "imagePath": "recipe-images/TT-PLUSCBOLONG/cover-20261112.png"
   },
   {
     "code": "DX-THACHTRAVO",
@@ -6801,7 +6903,9 @@
       "SOP-LAMLANH",
       "SOP-CATTHACH"
     ],
-    "sourcePage": 84
+    "sourcePage": 84,
+    "imageFile": "DX-THACHTRAVO.png",
+    "imagePath": "recipe-images/DX-THACHTRAVO/cover-20261112.png"
   },
   {
     "code": "DX-THACHOLMATCHA",
@@ -6886,7 +6990,9 @@
       "SOP-LAMLANH",
       "SOP-CATTHACH"
     ],
-    "sourcePage": 85
+    "sourcePage": 85,
+    "imageFile": "DX-THACHOLMATCHA.png",
+    "imagePath": "recipe-images/DX-THACHOLMATCHA/cover-20261112.png"
   },
   {
     "code": "DX-THACHCHANH",
@@ -6980,7 +7086,9 @@
       "SOP-CATTHACH",
       "SOP-BAOVOCHANH"
     ],
-    "sourcePage": 86
+    "sourcePage": 86,
+    "imageFile": "DX-THACHCHANH.png",
+    "imagePath": "recipe-images/DX-THACHCHANH/cover-20261112.png"
   },
   {
     "code": "DX-THACHDAOHONG",
@@ -7066,7 +7174,9 @@
       "SOP-CATTHACH",
       "SOP-DAOHONG"
     ],
-    "sourcePage": 87
+    "sourcePage": 87,
+    "imageFile": "DX-THACHDAOHONG.png",
+    "imagePath": "recipe-images/DX-THACHDAOHONG/cover-20261112.png"
   },
   {
     "code": "DX-THACHXIUVANI",
@@ -7163,7 +7273,9 @@
       "SOP-LAMLANH",
       "SOP-CATTHACH"
     ],
-    "sourcePage": 88
+    "sourcePage": 88,
+    "imageFile": "DX-THACHXIUVANI.png",
+    "imagePath": "recipe-images/DX-THACHXIUVANI/cover-20261112.png"
   },
   {
     "code": "DX-KEMMATCHA",
@@ -7242,7 +7354,9 @@
     "sopCodes": [
       "SOP-BAOQUAN"
     ],
-    "sourcePage": 82
+    "sourcePage": 82,
+    "imageFile": "DX-KEMMATCHA.png",
+    "imagePath": "recipe-images/DX-KEMMATCHA/cover-20261112.png"
   },
   {
     "code": "DX-HHSD",
@@ -7294,7 +7408,9 @@
     "sopCodes": [
       "SOP-BAOQUAN"
     ],
-    "sourcePage": 83
+    "sourcePage": 83,
+    "imageFile": "DX-HHSD.png",
+    "imagePath": "recipe-images/DX-HHSD/cover-20261112.png"
   },
   {
     "code": "DX-PHIN200",
@@ -7374,7 +7490,9 @@
     "sopCodes": [
       "SOP-BAOQUAN"
     ],
-    "sourcePage": 80
+    "sourcePage": 80,
+    "imageFile": "DX-PHIN200.png",
+    "imagePath": "recipe-images/DX-PHIN200/cover-20261112.png"
   },
   {
     "code": "DX-PHIN100",
@@ -7449,7 +7567,9 @@
     "sopCodes": [
       "SOP-BAOQUAN"
     ],
-    "sourcePage": 81
+    "sourcePage": 81,
+    "imageFile": "DX-PHIN100.png",
+    "imagePath": "recipe-images/DX-PHIN100/cover-20261112.png"
   },
   {
     "code": "DX-TRANCHAU",
@@ -7664,6 +7784,8 @@
     "sopCodes": [
       "SOP-BAOQUAN"
     ],
-    "sourcePage": 95
+    "sourcePage": 95,
+    "imageFile": "DX-TRANCHAU.png",
+    "imagePath": "recipe-images/DX-TRANCHAU/cover-20261112.png"
   }
 ]

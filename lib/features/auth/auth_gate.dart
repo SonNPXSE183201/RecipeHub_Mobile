@@ -20,6 +20,7 @@ import '../../core/viewmodels/training_viewmodel.dart';
 import '../shell/main_app_shell.dart';
 import '../system/loading_transition_page.dart';
 import 'login_page.dart';
+import '../../core/widgets/app_toast.dart';
 
 /// Bảo vệ route theo authStateChanges: Loading → Login | (tải công thức) → Shell.
 /// Điều phối phiên: nạp dữ liệu khi đăng nhập, dọn state khi đăng xuất,
@@ -87,7 +88,7 @@ class _AuthGateState extends State<AuthGate> {
     if (notice != null) {
       _auth.clearNotice();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.maybeOf(context)
+        ToastMessenger.maybeOf(context)
             ?.showSnackBar(SnackBar(content: Text(notice)));
       });
     }
@@ -123,7 +124,7 @@ class _AuthGateState extends State<AuthGate> {
     if (!mounted) return;
     final banner = _notif.takePendingBanner();
     if (banner != null) {
-      ScaffoldMessenger.maybeOf(context)
+      ToastMessenger.maybeOf(context)
         ?..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(

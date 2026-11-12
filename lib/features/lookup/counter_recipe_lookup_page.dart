@@ -2,18 +2,29 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/models/session_models.dart';
 import '../../core/navigation/app_keys.dart';
+import '../../core/services/recipe_bookmark_store.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
+import '../../core/viewmodels/recipe_bookmark_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
+import '../../core/widgets/redesign_widgets.dart';
 import '../../core/viewmodels/app_config_viewmodel.dart';
 import '../../core/viewmodels/recipe_viewmodel.dart';
 import '../../core/utils/navigation.dart';
 import 'recipe_detail_size_page.dart';
 import '../practice/self_practice_timer_page.dart';
+import '../learning/notifications_page.dart';
+import '../../core/viewmodels/training_viewmodel.dart';
+import '../sop/sop_detail_page.dart';
+import '../sop_book/sop_book_page.dart';
+import '../../core/widgets/recipe_thumb.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/rh_motion.dart';
 
 class CounterRecipeLookupPage extends StatefulWidget {
   const CounterRecipeLookupPage({super.key});
@@ -26,12 +37,41 @@ class CounterRecipeLookupPage extends StatefulWidget {
 class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _selectedCategory = 'Tất cả';
+  bool _sopMode = false;
   Timer? _debounce;
   String _remoteQuery = '';
   List<RecipeItem> _remote = const [];
+  static const _savedLabel = 'Đã lưu';
+  RecipeBookmarkViewModel? _bookmarks;
+
+  @override
+  void initState() {
+    super.initState();
+    String? uid;
+    try {
+      uid = context.read<TrainingViewModel>().uid;
+    } catch (_) {
+      uid = null;
+    }
+    _bookmarks =
+        RecipeBookmarkViewModel(
+          store: const PrefsRecipeBookmarkStore(),
+          uid: uid,
+        )..addListener(() {
+          if (mounted) setState(() {});
+        });
+    _bookmarks!.load();
+  }
+
+  bool _matchesCategory(RecipeItem r) =>
+      _selectedCategory == 'Tất cả' ||
+      (_selectedCategory == _savedLabel
+          ? (_bookmarks?.isBookmarked(r.code) ?? false)
+          : r.category == _selectedCategory);
 
   @override
   void dispose() {
+    _bookmarks?.dispose();
     _debounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
@@ -66,6 +106,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
     final allRecipes = recipeVm.items;
     final categories = [
       'Tất cả',
+      _savedLabel,
       ...{for (final r in allRecipes) r.category}.where((c) => c.isNotEmpty),
     ];
     if (!categories.contains(_selectedCategory)) _selectedCategory = 'Tất cả';
@@ -75,8 +116,7 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
 
     final filtered = (browsing ? allRecipes.take(maxResults) : allRecipes)
         .where((r) {
-          final matchesCategory =
-              _selectedCategory == 'Tất cả' || r.category == _selectedCategory;
+          final matchesCategory = _matchesCategory(r);
           final matchesQuery = RecipeViewModel.matchesQuery(r, query);
           return matchesCategory && matchesQuery;
         })
@@ -84,212 +124,230 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
     if (query.isNotEmpty && _remoteQuery == _searchCtrl.text.trim()) {
       final shown = {for (final r in filtered) r.code};
       filtered.addAll(
-        _remote.where(
-          (r) =>
-              !shown.contains(r.code) &&
-              (_selectedCategory == 'Tất cả' ||
-                  r.category == _selectedCategory),
-        ),
+        _remote.where((r) => !shown.contains(r.code) && _matchesCategory(r)),
       );
     }
+
+    final content = allRecipes.isEmpty && recipeVm.state == ViewState.error
+        ? LoadStateView.error(
+            message: recipeVm.error ?? 'Không tải được danh sách công thức.',
+            onRetry: recipeVm.load,
+          )
+        : allRecipes.isEmpty && recipeVm.state == ViewState.empty
+        ? const LoadStateView.empty(
+            message: 'Chưa có công thức nào được ban hành.',
+            icon: Icons.local_cafe_outlined,
+          )
+        : allRecipes.isEmpty
+        ? const LoadStateView.loading()
+        : filtered.isEmpty
+        ? const LoadStateView.empty(
+            message: 'Không tìm thấy công thức phù hợp.',
+            icon: Icons.search_off_rounded,
+          )
+        : ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: filtered.length,
+            itemBuilder: (context, idx) =>
+                _buildRecipeCard(context, filtered[idx]),
+          );
+
+    final training = context.watch<TrainingViewModel>();
+    final sops = training.sops
+        .where(
+          (s) =>
+              query.isEmpty ||
+              s.title.toLowerCase().contains(query.toLowerCase()),
+        )
+        .toList();
+    final sopContent =
+        training.sopState == LoadState.error && training.sops.isEmpty
+        ? LoadStateView.error(
+            message: training.error ?? 'Không tải được quy trình SOP.',
+            onRetry: training.retry,
+          )
+        : training.sops.isEmpty && training.sopState == LoadState.loading
+        ? const LoadStateView.loading()
+        : training.sops.isEmpty
+        ? const LoadStateView.empty(message: 'Chưa có SOP nào được ban hành.')
+        : sops.isEmpty
+        ? const LoadStateView.empty(
+            message: 'Không tìm thấy quy trình phù hợp.',
+          )
+        : ListView.separated(
+            padding: const EdgeInsets.only(bottom: 20),
+            itemCount: sops.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 2),
+            itemBuilder: (context, i) => _sopTile(context, sops[i], i + 1),
+          );
 
     return Scaffold(
       backgroundColor: NomadKit.canvas,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
-            // Top Section: Store Info & Search
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-              color: NomadKit.canvas,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Headline
-                  const Text(
-                    'Tra cứu tại quầy',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: NomadKit.ink,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Search Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: NomadKit.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: NomadKit.border),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x06000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      key: AppKeys.recipeSearch,
-                      controller: _searchCtrl,
-                      onChanged: (_) => _onQueryChanged(),
-                      style: const TextStyle(fontSize: 14, color: NomadKit.ink),
-                      decoration: InputDecoration(
-                        hintText: 'Tìm theo tên món...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: NomadKit.secondary,
-                        ),
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(11),
-                          child: Image.asset(
-                            'assets/icons/icon_search.png',
-                            width: 22,
-                            height: 22,
-                            filterQuality: FilterQuality.medium,
-                            errorBuilder: (ctx, err, stack) => const Icon(
-                              Icons.search_rounded,
-                              color: NomadKit.sand,
-                              size: 22,
+            RhBrandHeader(
+              trailing: IconButton(
+                key: AppKeys.notificationBell,
+                tooltip: 'Thông báo',
+                onPressed: () => go(context, const NotificationsPage()),
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: NomadKit.sandDark,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: NomadKit.sandLight,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        key: AppKeys.recipeSearch,
+                        controller: _searchCtrl,
+                        onChanged: (_) => _onQueryChanged(),
+                        style: NomadKit.body.copyWith(fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: _sopMode
+                              ? 'Tìm quy trình...'
+                              : 'Tìm công thức...',
+                          hintStyle: NomadKit.body.copyWith(
+                            fontSize: 16,
+                            color: NomadKit.secondary,
+                          ),
+                          prefixIcon: const Padding(
+                            padding: EdgeInsets.all(16.5),
+                            child: RhSvgIcon(
+                              'assets/redesign/search.svg',
+                              size: 21,
                             ),
                           ),
-                        ),
-                        suffixIcon: _searchCtrl.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  Icons.clear_rounded,
-                                  size: 18,
-                                  color: NomadKit.secondary,
+                          suffixIcon: _searchCtrl.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    _onQueryChanged();
+                                  },
+                                  icon: const Icon(Icons.close, size: 18),
                                 ),
-                                onPressed: () {
-                                  _searchCtrl.clear();
-                                  _onQueryChanged();
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Categories & SOP Shortcut Row
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        ...categories.map((cat) {
-                          final isSelected = _selectedCategory == cat;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(
-                                cat,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : NomadKit.ink,
+                    SizedBox(
+                      height: 52,
+                      child: LayoutBuilder(
+                        builder: (context, box) {
+                          final tabW = (box.maxWidth - 20) / 2;
+                          return Stack(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _documentTab(
+                                      'Công thức',
+                                      !_sopMode,
+                                      () => setState(() => _sopMode = false),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: _documentTab(
+                                      'SOP',
+                                      _sopMode,
+                                      () => setState(() => _sopMode = true),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Gạch chân trượt giữa 2 tab (prototype: 180ms)
+                              AnimatedPositioned(
+                                duration: RhMotion.reduced(context)
+                                    ? Duration.zero
+                                    : RhMotion.tab,
+                                curve: Curves.easeInOut,
+                                left: _sopMode ? tabW + 20 : 0,
+                                bottom: 0,
+                                width: tabW,
+                                height: 3,
+                                child: IgnorePointer(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: NomadKit.sandDark,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              selected: isSelected,
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    if (!_sopMode)
+                      SizedBox(
+                        height: 62,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(top: 14, bottom: 8),
+                          itemCount: categories.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (_, index) {
+                            final cat = categories[index];
+                            final selected = cat == _selectedCategory;
+                            return ChoiceChip(
+                              label: Text(cat),
+                              selected: selected,
+                              onSelected: (_) =>
+                                  setState(() => _selectedCategory = cat),
+                              showCheckmark: false,
                               selectedColor: NomadKit.sandDark,
-                              backgroundColor: NomadKit.surface,
+                              backgroundColor: NomadKit.canvas,
+                              labelStyle: NomadKit.label.copyWith(
+                                color: selected
+                                    ? Colors.white
+                                    : NomadKit.secondary,
+                              ),
                               side: BorderSide(
-                                color: isSelected
+                                color: selected
                                     ? NomadKit.sandDark
                                     : NomadKit.border,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              showCheckmark: false,
-                              onSelected: (val) {
-                                if (val) {
-                                  setState(() => _selectedCategory = cat);
-                                }
-                              },
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 1, color: NomadKit.border),
-
-            // Recipe List
-            Expanded(
-              child: allRecipes.isEmpty && recipeVm.state == ViewState.error
-                  ? LoadStateView.error(
-                      message:
-                          recipeVm.error ??
-                          'Không tải được danh sách công thức.',
-                      onRetry: recipeVm.load,
-                    )
-                  : allRecipes.isEmpty && recipeVm.state == ViewState.empty
-                  ? const LoadStateView.empty(
-                      message: 'Chưa có công thức nào được ban hành.',
-                      icon: Icons.local_cafe_outlined,
-                    )
-                  : allRecipes.isEmpty
-                  ? const LoadStateView.loading()
-                  : filtered.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/illustrations/empty_search_2k.png',
-                            width: 140,
-                            height: 140,
-                            fit: BoxFit.contain,
-                            errorBuilder: (ctx, err, stack) => const Icon(
-                              Icons.search_off_rounded,
-                              size: 80,
-                              color: NomadKit.secondary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Không tìm thấy công thức phù hợp',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: NomadKit.ink,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Thử đổi từ khóa hoặc bộ lọc danh mục.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: NomadKit.secondary,
-                            ),
-                          ),
-                        ],
+                            );
+                          },
+                        ),
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, idx) {
-                        final recipe = filtered[idx];
-                        return _buildRecipeCard(context, recipe);
-                      },
+                    if (_sopMode)
+                      _bookRows(
+                        recipeCount: allRecipes.length,
+                        sopCount: training.sops.length,
+                      ),
+                    RhSectionHeading(
+                      title: _sopMode
+                          ? 'Quy trình tại quầy'
+                          : 'Công thức đồ uống',
+                      trailing: _sopMode
+                          ? '${sops.length} quy trình'
+                          : '${filtered.length} món',
                     ),
+                    Expanded(child: _sopMode ? sopContent : content),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -312,193 +370,218 @@ class _CounterRecipeLookupPageState extends State<CounterRecipeLookupPage> {
     );
   }
 
+  Widget _bookRows({required int recipeCount, required int sopCount}) {
+    void open() => go(context, const SopBookPage());
+    return Column(
+      children: [
+        InkWell(
+          onTap: open,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 70),
+            child: Row(
+              children: [
+                const RhSvgIcon('assets/redesign/book.svg', size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Sổ tay công thức & SOP', style: NomadKit.subtitle),
+                      Text(
+                        '$recipeCount công thức · $sopCount SOP',
+                        style: NomadKit.caption,
+                      ),
+                    ],
+                  ),
+                ),
+                const RhChevron(),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1),
+        InkWell(
+          onTap: open,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44),
+            child: Row(
+              children: [
+                const SizedBox(width: 36),
+                Expanded(
+                  child: Text(
+                    'Mục lục, tìm kiếm & PDF',
+                    style: NomadKit.caption.copyWith(
+                      color: NomadKit.ink,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const RhChevron(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sopTile(BuildContext context, SopItem sop, int index) => PressScale(
+    child: Material(
+    color: NomadKit.surface,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: const BorderSide(color: NomadKit.border),
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => go(context, SopDetailPage(sop: sop)),
+      child: SizedBox(
+        height: 78,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 44,
+                child: Text(
+                  index.toString().padLeft(2, '0'),
+                  style: NomadKit.caption.copyWith(color: NomadKit.sandDark),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sop.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: NomadKit.label.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text('${sop.steps.length} bước', style: NomadKit.caption),
+                  ],
+                ),
+              ),
+              const RhChevron(),
+            ],
+          ),
+        ),
+      ),
+    ),
+    ),
+  );
+
+  Widget _documentTab(String label, bool selected, VoidCallback? onTap) =>
+      PressScale(
+       child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Center(
+                child: Text(
+                  label,
+                  style: NomadKit.body.copyWith(
+                    fontSize: 16,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected ? NomadKit.sandDark : NomadKit.secondary,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 3),
+          ],
+        ),
+       ),
+      );
+
   Widget _buildRecipeCard(BuildContext context, RecipeItem recipe) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: NomadKit.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: NomadKit.border),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
+      constraints: const BoxConstraints(minHeight: 110),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: NomadKit.lineSoft)),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
           key: AppKeys.recipeCard(recipe.id),
-          onTap: () => go(context, RecipeDetailSizePage(recipe: recipe)),
+          onTap: () async {
+            await Navigator.push(
+              context,
+              RhPageRoute(
+                builder: (_) => RecipeDetailSizePage(recipe: recipe),
+              ),
+            );
+            if (mounted) _bookmarks?.load();
+          },
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
               children: [
-                // Recipe name beside its icon
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/icons/icon_recipe_book.png',
-                      width: 22,
-                      height: 22,
-                      filterQuality: FilterQuality.medium,
-                      errorBuilder: (ctx, err, stack) => const Icon(
-                        Icons.receipt_long_rounded,
-                        size: 20,
-                        color: NomadKit.sandDark,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
+                RecipeThumb(imageUrl: recipe.imageUrl),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         recipe.name,
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.ink,
+                        style: NomadKit.subtitle.copyWith(
+                          fontSize: 16,
+                          height: 23 / 16,
                         ),
                       ),
-                    ),
-                    if (recipe.hasNewerVersion)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: NomadKit.warningLight,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: NomadKit.warning.withOpacity(0.3),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.fiber_new_rounded,
-                              size: 14,
-                              color: NomadKit.warning,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Có bản mới',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.warning,
-                              ),
-                            ),
-                          ],
-                        ),
+                      Text(recipe.category, style: NomadKit.caption),
+                      Text(
+                        '${recipe.standardTime} · ${recipe.steps.length} bước',
+                        style: NomadKit.caption,
                       ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                Text(
-                  recipe.description,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: NomadKit.secondary,
-                    height: 1.35,
+                    ],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 14),
-
-                // Category & Metrics Bar (Không dùng Size)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: NomadKit.canvas,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: NomadKit.border),
-                            ),
-                            child: Text(
-                              recipe.category,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: NomadKit.ink,
-                              ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    tooltip: 'Lưu công thức',
+                    onPressed: () async {
+                      final messenger = ToastMessenger.of(context);
+                      final saved = await _bookmarks?.toggle(recipe.code);
+                      if (!mounted || saved == null) return;
+                      messenger
+                        ..clearSnackBars()
+                        ..showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              saved
+                                  ? 'Đã lưu ${recipe.name}'
+                                  : 'Đã bỏ lưu ${recipe.name}',
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: NomadKit.canvas,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: NomadKit.border),
-                            ),
-                            child: Text(
-                              '${recipe.steps.length} bước chuẩn',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: NomadKit.secondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                    },
+                    icon: SvgPicture.asset(
+                      'assets/redesign/bookmark.svg',
+                      width: 19,
+                      height: 19,
+                      colorFilter:
+                          (_bookmarks?.isBookmarked(recipe.code) ?? false)
+                          ? const ColorFilter.mode(
+                              NomadKit.sandDark,
+                              BlendMode.srcIn,
+                            )
+                          : null,
                     ),
-                    const SizedBox(width: 6),
-
-                    // Time & Temp Icons
-                    Row(
-                      children: [
-                        if (recipe.steps.isNotEmpty &&
-                            recipe.steps.every(
-                              (s) => s.durationText != null,
-                            )) ...[
-                          const Icon(
-                            Icons.timer_outlined,
-                            size: 15,
-                            color: NomadKit.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            recipe.standardTime,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: NomadKit.secondary,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 12,
-                          color: NomadKit.secondary,
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),

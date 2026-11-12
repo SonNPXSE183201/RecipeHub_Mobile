@@ -89,7 +89,64 @@ class RecipeHubApp extends StatelessWidget {
             surface: NomadKit.surface,
             error: NomadKit.error,
           ),
-          fontFamily: 'Inter',
+          fontFamily: 'BeVietnamPro',
+          dividerColor: NomadKit.border,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: NomadKit.canvas,
+            foregroundColor: NomadKit.ink,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+          ),
+          filledButtonTheme: FilledButtonThemeData(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 52),
+              backgroundColor: NomadKit.sandDark,
+              foregroundColor: Colors.white,
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              foregroundColor: NomadKit.ink,
+              side: const BorderSide(color: NomadKit.border),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: NomadKit.surface,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: NomadKit.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: NomadKit.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: NomadKit.sandDark),
+            ),
+            labelStyle: NomadKit.label,
+            hintStyle: NomadKit.body.copyWith(color: NomadKit.secondary),
+          ),
         ),
         home: ValueListenableBuilder<Widget?>(
           valueListenable: debugScreenOverride,

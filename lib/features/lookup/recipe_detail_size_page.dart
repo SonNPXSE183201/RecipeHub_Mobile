@@ -11,6 +11,10 @@ import '../practice/self_practice_timer_page.dart';
 import '../feedback/create_feedback_page.dart';
 import '../sop/sop_detail_page.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
+import '../../core/viewmodels/recipe_bookmark_viewmodel.dart';
+import '../../core/services/interfaces/i_recipe_bookmark_store.dart';
+import '../../core/services/recipe_bookmark_store.dart';
+import '../../core/widgets/app_toast.dart';
 
 class RecipeDetailSizePage extends StatefulWidget {
   const RecipeDetailSizePage({
@@ -18,7 +22,13 @@ class RecipeDetailSizePage extends StatefulWidget {
     required this.recipe,
     this.initialSizeCode,
     this.source = 'lookup',
+    this.bookmarkStore,
+    this.bookmarkUid,
   });
+
+  /// Nơi lưu món đã đánh dấu; mặc định lưu trên máy theo người dùng.
+  final IRecipeBookmarkStore? bookmarkStore;
+  final String? bookmarkUid;
 
   final RecipeItem recipe;
   final String? initialSizeCode;
@@ -32,10 +42,23 @@ class RecipeDetailSizePage extends StatefulWidget {
 
 class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
   late int _selectedSizeIndex;
+  late final RecipeBookmarkViewModel _bookmarks;
 
   @override
   void initState() {
     super.initState();
+    String? uid = widget.bookmarkUid;
+    if (uid == null) {
+      try {
+        uid = context.read<TrainingViewModel>().uid;
+      } catch (_) {
+        uid = null;
+      }
+    }
+    _bookmarks = RecipeBookmarkViewModel(
+      store: widget.bookmarkStore ?? const PrefsRecipeBookmarkStore(),
+      uid: uid,
+    )..load();
     if (widget.initialSizeCode != null) {
       final idx = widget.recipe.sizes.indexWhere(
         (s) => s.sizeCode == widget.initialSizeCode,
@@ -58,6 +81,41 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
   }
 
   @override
+  void dispose() {
+    _bookmarks.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleBookmark() async {
+    final messenger = ToastMessenger.of(context);
+    final saved = await _bookmarks.toggle(widget.recipe.code);
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(switch (saved) {
+          true => 'Đã lưu công thức.',
+          false => 'Đã bỏ lưu công thức.',
+          null => 'Không lưu được. Vui lòng thử lại.',
+        }),
+      ),
+    );
+  }
+
+  void _openFeedback(RecipeStepItem? step) {
+    final recipe = widget.recipe;
+    go(
+      context,
+      CreateFeedbackPage(
+        initialRecipeCode: recipe.code,
+        initialRecipeName: recipe.name,
+        initialVersion: recipe.version,
+        initialStepNumber: step?.stepNumber,
+        initialStepTitle: step?.title,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final recipe = widget.recipe;
     final currentSize = recipe.sizes[_selectedSizeIndex];
@@ -68,48 +126,65 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
         backgroundColor: NomadKit.canvas,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        toolbarHeight: 64,
+        shape: const Border(bottom: BorderSide(color: NomadKit.border)),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: NomadKit.ink,
-          ),
+          icon: const Icon(Icons.arrow_back_rounded, size: 22),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          recipe.name,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
+        title: const Text(
+          'Công thức',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: NomadKit.secondary,
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: 'Gửi phản hồi món này',
-            icon: Image.asset(
-              'assets/icons/icon_feedback_pencil.png',
-              width: 22,
-              height: 22,
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (ctx, err, stack) => const Icon(
-                Icons.feedback_outlined,
-                size: 20,
-                color: NomadKit.sandDark,
-              ),
-            ),
-            onPressed: () {
-              go(
-                context,
-                CreateFeedbackPage(
-                  initialRecipeCode: recipe.code,
-                  initialRecipeName: recipe.name,
-                  initialVersion: recipe.version,
+          ListenableBuilder(
+            listenable: _bookmarks,
+            builder: (context, _) {
+              final saved = _bookmarks.isBookmarked(recipe.code);
+              return IconButton(
+                tooltip: saved ? 'Bỏ lưu công thức' : 'Lưu công thức',
+                onPressed: _bookmarks.loaded ? _toggleBookmark : null,
+                icon: Icon(
+                  saved
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
+                  color: saved ? NomadKit.sandDark : NomadKit.secondary,
                 ),
               );
             },
           ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+          decoration: const BoxDecoration(
+            color: NomadKit.canvas,
+            border: Border(top: BorderSide(color: NomadKit.border)),
+          ),
+          child: SizedBox(
+            height: 52,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: NomadKit.sandDark,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => _openFeedback(null),
+              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+              label: const Text(
+                'Góp ý công thức',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -210,14 +285,17 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                   ),
                 ),
 
-              // Title & Description
+              Text(
+                recipe.category,
+                style: NomadKit.caption.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: NomadKit.sandDark,
+                ),
+              ),
+              const SizedBox(height: 3),
               Text(
                 recipe.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: NomadKit.ink,
-                ),
+                style: NomadKit.title.copyWith(fontSize: 26, height: 34 / 26),
               ),
               const SizedBox(height: 6),
               Text(
@@ -281,19 +359,44 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                 const SizedBox(height: 20),
               ],
 
+              if (recipe.sizes.length > 1) ...[
+                Row(
+                  children: [
+                    for (var i = 0; i < recipe.sizes.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(recipe.sizes[i].sizeCode),
+                          selected: i == _selectedSizeIndex,
+                          showCheckmark: false,
+                          selectedColor: NomadKit.sandDark,
+                          backgroundColor: NomadKit.canvas,
+                          side: BorderSide(
+                            color: i == _selectedSizeIndex
+                                ? NomadKit.sandDark
+                                : NomadKit.border,
+                          ),
+                          labelStyle: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: i == _selectedSizeIndex
+                                ? Colors.white
+                                : NomadKit.ink,
+                          ),
+                          onSelected: (_) =>
+                              setState(() => _selectedSizeIndex = i),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // Ingredients Portion Table
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'ĐỊNH LƯỢNG NGUYÊN LIỆU',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: NomadKit.sandDark,
-                      letterSpacing: 0.7,
-                    ),
-                  ),
+                  const Text('Nguyên liệu', style: NomadKit.section),
                   Text(
                     '${currentSize.ingredients.length} thành phần',
                     style: const TextStyle(
@@ -306,17 +409,8 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               const SizedBox(height: 8),
 
               Container(
-                decoration: BoxDecoration(
-                  color: NomadKit.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: NomadKit.border),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x06000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: NomadKit.lineSoft)),
                 ),
                 child: ListView.separated(
                   shrinkWrap: true,
@@ -333,25 +427,6 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                       ),
                       child: Row(
                         children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: NomadKit.canvas,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${idx + 1}',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: NomadKit.secondary,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,22 +464,13 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                             ),
                           ),
                           // Exact Amount & Unit
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: NomadKit.sandLight,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${ing.amount.toString().replaceAll('.0', '')} ${ing.unit}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.sandDark,
-                              ),
+                          Text(
+                            '${ing.amount.toString().replaceAll('.0', '')} ${ing.unit}',
+                            style: const TextStyle(
+                              fontSize: 19,
+                              height: 28 / 19,
+                              fontWeight: FontWeight.w600,
+                              color: NomadKit.sandDark,
                             ),
                           ),
                         ],
@@ -419,17 +485,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    recipe.videoUrl.isEmpty
-                        ? 'CÁC BƯỚC PHA CHẾ'
-                        : 'CÁC BƯỚC PHA CHẾ & MỐC VIDEO',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: NomadKit.sandDark,
-                      letterSpacing: 0.7,
-                    ),
-                  ),
+                  const Text('Pha chế', style: NomadKit.section),
                   GestureDetector(
                     onTap: () => go(
                       context,
@@ -466,12 +522,11 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
 
               ...recipe.steps.map((st) {
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: NomadKit.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: NomadKit.border),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: NomadKit.lineSoft),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,20 +535,19 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
+                            width: 30,
+                            height: 30,
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: NomadKit.sand,
-                              borderRadius: BorderRadius.circular(8),
+                              color: NomadKit.sandLight,
+                              shape: BoxShape.circle,
                             ),
                             child: Text(
-                              'Bước ${st.stepNumber}',
+                              '${st.stepNumber}',
                               style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: NomadKit.sandDark,
                               ),
                             ),
                           ),
@@ -520,6 +574,19 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 18,
+                                color: NomadKit.secondary,
+                              ),
+                              tooltip: 'Góp ý bước ${st.stepNumber}',
+                              onPressed: () => _openFeedback(st),
                             ),
                           ),
                         ],
@@ -621,7 +688,7 @@ class _RecipeDetailSizePageState extends State<RecipeDetailSizePage> {
                                 .read<TrainingViewModel>()
                                 .sopByCode(st.linkedSopId ?? '');
                             if (sop == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ToastMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
                                     'SOP liên kết chưa có trong thư viện.',

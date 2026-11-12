@@ -7,6 +7,7 @@ import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
 import '../../core/navigation/app_keys.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
+import '../../core/widgets/app_toast.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
   void _showError() {
     final msg = _auth.errorMessage;
     if (msg == null) return;
-    ScaffoldMessenger.of(context)
+    ToastMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(

@@ -253,7 +253,7 @@ void main() {
     expect(find.text('Bước tiếp theo'), findsOneWidget);
     await tester.tap(find.text('Bước tiếp theo'));
     await tester.pump();
-    expect(find.text('BƯỚC 2'), findsOneWidget);
+    expect(find.textContaining('BƯỚC 2 / 2'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 }

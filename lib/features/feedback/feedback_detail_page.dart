@@ -6,7 +6,10 @@ import '../../core/models/app_models.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/feedback_viewmodel.dart';
+import '../../core/widgets/redesign_widgets.dart';
 import 'feedback_widgets.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/rh_motion.dart';
 
 /// Chi tiết phản hồi: thông tin đầy đủ, ảnh đính kèm (phóng to), luồng trả lời real-time.
 /// Admin trả lời và đổi trạng thái; Barista trả lời bổ sung.
@@ -48,15 +51,30 @@ class _DetailViewState extends State<_DetailView> {
     super.dispose();
   }
 
-  Future<void> _send(FeedbackDetailViewModel vm) async {
-    final ok = await vm.sendReply(_replyCtrl.text, newStatus: _statusOnSend);
+  Future<void> _send(
+    FeedbackDetailViewModel vm, {
+    FeedbackStatus? status,
+  }) async {
+    if (_replyCtrl.text.trim().isEmpty && vm.isAdmin) {
+      ToastMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng nhập nội dung xử lý.'),
+          backgroundColor: NomadKit.error,
+        ),
+      );
+      return;
+    }
+    final ok = await vm.sendReply(
+      _replyCtrl.text,
+      newStatus: status ?? _statusOnSend,
+    );
     if (!mounted) return;
     if (ok) {
       _replyCtrl.clear();
       setState(() => _statusOnSend = null);
       FocusScope.of(context).unfocus();
     } else if (vm.actionError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(vm.actionError!),
           backgroundColor: NomadKit.error,
@@ -71,7 +89,7 @@ class _DetailViewState extends State<_DetailView> {
   ) async {
     final ok = await vm.changeStatus(s);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    ToastMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           ok
@@ -86,7 +104,7 @@ class _DetailViewState extends State<_DetailView> {
   void _openImage(String url) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      RhPageRoute(
         fullscreenDialog: true,
         builder: (_) => Scaffold(
           backgroundColor: Colors.black,
@@ -113,12 +131,15 @@ class _DetailViewState extends State<_DetailView> {
     return Scaffold(
       backgroundColor: NomadKit.canvas,
       appBar: AppBar(
+        toolbarHeight: 64,
         backgroundColor: NomadKit.canvas,
         foregroundColor: NomadKit.ink,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        shape: const Border(bottom: BorderSide(color: NomadKit.border)),
+        title: Text(
           'Chi tiết phản hồi',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          style: NomadKit.label.copyWith(color: NomadKit.secondary),
         ),
         actions: [
           if (vm.isAdmin && fb != null)
@@ -167,151 +188,104 @@ class _DetailViewState extends State<_DetailView> {
 
   Widget _content(FeedbackDetailViewModel vm, FeedbackItemModel fb) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: NomadKit.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: NomadKit.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  FeedbackTypeTag(fb.typeLabel),
-                  const Spacer(),
-                  FeedbackStatusChip(fb.status),
-                ],
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${feedbackStatusLabel(fb.status)} · ${fb.typeLabel}',
+              style: NomadKit.caption.copyWith(
+                color: NomadKit.sandDark,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 12),
-              Text(
-                fb.targetName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: NomadKit.ink,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                [fb.version].where((e) => e.isNotEmpty).join(' · '),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: NomadKit.secondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              if (fb.stepNote != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.format_list_numbered_rounded,
-                      size: 16,
-                      color: NomadKit.ocean,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        fb.stepNote!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: NomadKit.ocean,
+            ),
+            const SizedBox(height: 4),
+            Text(fb.targetName, style: NomadKit.title.copyWith(fontSize: 26)),
+            const SizedBox(height: 6),
+            Text(
+              [
+                if (fb.stepNote != null)
+                  'Liên quan ${fb.stepNote!.split(':').first.trim().toLowerCase()}',
+                fb.version,
+              ].where((e) => e.isNotEmpty).join(' · '),
+              style: NomadKit.caption,
+            ),
+            const Divider(height: 30, color: NomadKit.border),
+            _infoRow(
+              Icons.person_rounded,
+              'Người gửi',
+              fb.senderRole.isEmpty
+                  ? fb.senderName
+                  : '${fb.senderName} · ${fb.senderRole}',
+            ),
+            if (fb.storeBranch.isNotEmpty)
+              _infoRow(Icons.storefront_rounded, 'Chi nhánh', fb.storeBranch),
+            _infoRow(Icons.schedule_rounded, 'Gửi lúc', fb.createdAt),
+            const SizedBox(height: 18),
+            Text('Nội dung góp ý', style: NomadKit.section),
+            const SizedBox(height: 8),
+            Text(fb.content, style: NomadKit.body),
+            if (fb.hasAttachment) ...[
+              const SizedBox(height: 14),
+              Semantics(
+                button: true,
+                label: 'Xem ảnh đính kèm cỡ lớn',
+                child: GestureDetector(
+                  onTap: () => _openImage(fb.attachmentUrl!),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: FeedbackNetworkImage(
+                          fb.attachmentUrl!,
+                          height: 220,
+                          width: double.infinity,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-              const Divider(height: 24, color: NomadKit.border),
-              _infoRow(
-                Icons.person_rounded,
-                'Người gửi',
-                fb.senderRole.isEmpty
-                    ? fb.senderName
-                    : '${fb.senderName} · ${fb.senderRole}',
-              ),
-              if (fb.storeBranch.isNotEmpty)
-                _infoRow(Icons.storefront_rounded, 'Chi nhánh', fb.storeBranch),
-              _infoRow(Icons.schedule_rounded, 'Gửi lúc', fb.createdAt),
-              const SizedBox(height: 12),
-              Text(
-                fb.content,
-                style: const TextStyle(
-                  fontSize: 15,
-                  height: 1.5,
-                  color: NomadKit.ink,
-                ),
-              ),
-              if (fb.hasAttachment) ...[
-                const SizedBox(height: 14),
-                Semantics(
-                  button: true,
-                  label: 'Xem ảnh đính kèm cỡ lớn',
-                  child: GestureDetector(
-                    onTap: () => _openImage(fb.attachmentUrl!),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: FeedbackNetworkImage(
-                            fb.attachmentUrl!,
-                            height: 220,
-                            width: double.infinity,
+                      Positioned(
+                        right: 8,
+                        bottom: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                        ),
-                        Positioned(
-                          right: 8,
-                          bottom: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.55),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.zoom_out_map_rounded,
-                                  size: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.zoom_out_map_rounded,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Phóng to',
+                                style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                 ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Phóng to',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
+          ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 28),
         Text(
           vm.replies.isEmpty ? 'Trao đổi' : 'Trao đổi (${vm.replies.length})',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            color: NomadKit.ink,
-          ),
+          style: NomadKit.section,
         ),
         const SizedBox(height: 8),
         if (vm.replies.isEmpty)
@@ -325,8 +299,80 @@ class _DetailViewState extends State<_DetailView> {
               color: NomadKit.secondary,
             ),
           ),
-        ...vm.replies.map((r) => _bubble(r, mine: r.authorUid == vm.myUid)),
+        ...vm.replies.map(
+          (r) => Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: RhNotice(
+              icon: r.isAdmin
+                  ? Icons.verified_user_outlined
+                  : Icons.person_outline_rounded,
+              title: '${r.senderName} · ${r.time}',
+              message: r.message,
+            ),
+          ),
+        ),
+        if (vm.isAdmin) ...[const SizedBox(height: 20), _replyCard()],
       ],
+    );
+  }
+
+  /// Card "Nội dung xử lý" của quản lý (Figma 109:466).
+  Widget _replyCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: NomadKit.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: NomadKit.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(
+              style: NomadKit.label.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              children: const [
+                TextSpan(text: 'Nội dung xử lý '),
+                TextSpan(
+                  text: '*',
+                  style: TextStyle(color: NomadKit.error),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _replyCtrl,
+            minLines: 4,
+            maxLines: 6,
+            maxLength: 2000,
+            style: NomadKit.body.copyWith(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Ghi hướng xử lý và điều cần thông báo cho barista…',
+              hintStyle: NomadKit.caption.copyWith(fontSize: 13),
+              counterText: '',
+              filled: true,
+              fillColor: NomadKit.canvas,
+              contentPadding: const EdgeInsets.all(13),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: NomadKit.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: NomadKit.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: NomadKit.sand, width: 1.5),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -358,68 +404,97 @@ class _DetailViewState extends State<_DetailView> {
     ),
   );
 
-  Widget _bubble(FeedbackReplyModel r, {required bool mine}) {
-    final bg = r.isAdmin ? NomadKit.forestLight : NomadKit.sandLight;
-    final fg = r.isAdmin ? NomadKit.forest : NomadKit.sandDark;
-    return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(top: 8),
-        constraints: const BoxConstraints(maxWidth: 320),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: fg.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
+  /// Thanh hành động của Admin: chọn trạng thái khi gửi + nút xác nhận.
+  Widget _adminActions(FeedbackDetailViewModel vm) {
+    final confirmsResolved =
+        _statusOnSend == null || _statusOnSend == FeedbackStatus.resolved;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      decoration: const BoxDecoration(
+        color: NomadKit.surface,
+        border: Border(top: BorderSide(color: NomadKit.border)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
-                Icon(
-                  r.isAdmin
-                      ? Icons.verified_user_rounded
-                      : Icons.person_rounded,
-                  size: 14,
-                  color: fg,
+                Text(
+                  'Khi gửi, chuyển sang: ',
+                  style: NomadKit.caption.copyWith(fontSize: 13),
                 ),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    r.senderName,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: fg,
+                for (final s in [
+                  FeedbackStatus.inProgress,
+                  FeedbackStatus.waitingInfo,
+                  FeedbackStatus.resolved,
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: ChoiceChip(
+                      label: Text(
+                        feedbackStatusLabel(s),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      selected: _statusOnSend == s,
+                      showCheckmark: false,
+                      selectedColor: feedbackStatusColors(s).bg,
+                      side: BorderSide(
+                        color: _statusOnSend == s
+                            ? feedbackStatusColors(s).fg
+                            : NomadKit.border,
+                      ),
+                      onSelected: (v) =>
+                          setState(() => _statusOnSend = v ? s : null),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              r.message,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.4,
-                color: NomadKit.ink,
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: vm.sending
+                  ? null
+                  : () => _send(
+                      vm,
+                      status: _statusOnSend ?? FeedbackStatus.resolved,
+                    ),
+              style: FilledButton.styleFrom(
+                backgroundColor: NomadKit.sandDark,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
+              child: vm.sending
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      confirmsResolved ? 'Xác nhận đã xử lý' : 'Gửi trả lời',
+                      style: NomadKit.label.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              r.time,
-              style: const TextStyle(fontSize: 12, color: NomadKit.secondary),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _composer(FeedbackDetailViewModel vm, FeedbackItemModel fb) {
+    if (vm.isAdmin) return _adminActions(vm);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
       decoration: const BoxDecoration(
@@ -429,42 +504,6 @@ class _DetailViewState extends State<_DetailView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (vm.isAdmin)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  const Text(
-                    'Khi gửi, chuyển sang: ',
-                    style: TextStyle(fontSize: 13, color: NomadKit.secondary),
-                  ),
-                  for (final s in [
-                    FeedbackStatus.inProgress,
-                    FeedbackStatus.waitingInfo,
-                    FeedbackStatus.resolved,
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: ChoiceChip(
-                        label: Text(
-                          feedbackStatusLabel(s),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        selected: _statusOnSend == s,
-                        showCheckmark: false,
-                        selectedColor: feedbackStatusColors(s).bg,
-                        side: BorderSide(
-                          color: _statusOnSend == s
-                              ? feedbackStatusColors(s).fg
-                              : NomadKit.border,
-                        ),
-                        onSelected: (v) =>
-                            setState(() => _statusOnSend = v ? s : null),
-                      ),
-                    ),
-                ],
-              ),
-            ),
           Row(
             children: [
               Expanded(
@@ -475,9 +514,7 @@ class _DetailViewState extends State<_DetailView> {
                   maxLength: 2000,
                   textInputAction: TextInputAction.newline,
                   decoration: InputDecoration(
-                    hintText: vm.isAdmin
-                        ? 'Trả lời Barista…'
-                        : 'Bổ sung thông tin cho Admin…',
+                    hintText: 'Bổ sung thông tin cho Admin…',
                     counterText: '',
                     filled: true,
                     fillColor: NomadKit.canvas,

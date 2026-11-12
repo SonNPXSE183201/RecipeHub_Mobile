@@ -31,7 +31,6 @@ import 'package:recipehub_mobile/features/practice/practical_evaluation_page.dar
 import 'package:recipehub_mobile/features/practice/practice_history_page.dart';
 import 'package:recipehub_mobile/features/practice/quiz_exam_page.dart';
 import 'package:recipehub_mobile/features/practice/self_practice_timer_page.dart';
-import 'package:recipehub_mobile/features/sop/sop_catalog_page.dart';
 import 'package:recipehub_mobile/features/sop/sop_detail_page.dart';
 import 'package:recipehub_mobile/features/system/error_recovery_page.dart';
 import 'package:recipehub_mobile/features/system/loading_transition_page.dart';
@@ -259,8 +258,6 @@ void main() {
   ) async {
     _ignoreOverflow();
     final h = _Harness(training: testTrainingRepo());
-    await _pumpPage(tester, h, const SopCatalogPage());
-    await _dispose(tester);
     await _pumpPage(tester, h, const SopDetailPage(sop: testSop));
     expect(
       find.textContaining('(RC-'),

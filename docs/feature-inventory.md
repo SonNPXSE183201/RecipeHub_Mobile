@@ -2,14 +2,14 @@
 
 **Ngày đối chiếu:** 12/11/2026
 **Phạm vi:** ứng dụng Flutter trong repository này, cấu hình Firebase được khai báo tại `firebase/`, và các dịch vụ ngoài mà mobile gọi. Không tính giao diện web Admin như một màn hình mobile.
-**Nguồn đối chiếu:** mã trong `lib/`, Firestore/Storage rules, Remote Config template, cấu hình Firebase, cùng các báo cáo kiểm thử hiện hành. Khi tài liệu cũ khác mã nguồn, báo cáo này ưu tiên hành vi trong mã nguồn và báo cáo xác minh ngày 11/11/2026.
+**Nguồn đối chiếu:** mã trong `lib/`, Firestore/Storage rules, Remote Config template, cấu hình Firebase, cùng các báo cáo kiểm thử hiện hành. Khi tài liệu cũ khác mã nguồn, báo cáo này ưu tiên hành vi trong mã nguồn và kết quả kiểm tra ngày 12/11/2026 (xem [bản cập nhật](releases/2026-11-12.md)).
 
 ## 1. Tóm tắt phạm vi và thống kê
 
 | Hạng mục | Thống kê | Cách đếm / ghi chú |
 | --- | ---: | --- |
 | Nhóm tính năng trong `lib/features` | 11 | `account`, `admin_training`, `auth`, `feedback`, `learning`, `lookup`, `practice`, `shell`, `sop`, `sop_book`, `system` |
-| Tệp giao diện tên `*_page.dart` | 23 | Đếm theo tên tệp trong `lib/features`; một số là trang phụ điều hướng từ tab |
+| Tệp giao diện tên `*_page.dart` | 22 | Đếm theo tên tệp trong `lib/features`; một số là trang phụ điều hướng từ tab |
 | Trang vỏ điều hướng | 1 | `MainAppShell` nằm trong `main_app_shell.dart`, không có hậu tố `_page.dart` |
 | `ChangeNotifier` ViewModel | 13 | Đếm theo lớp: 2 training, 2 feedback và 9 lớp còn lại |
 | Service interface | 15 | Các interface `I...` trong `lib/core/services/interfaces` |
@@ -96,7 +96,7 @@ Remote Config fetch timeout 10 giây. Debug fetch mỗi lần (minimum interval 
 | Tra cứu | `features/lookup/counter_recipe_lookup_page.dart` — cả hai | Tìm/lọc danh sách công thức; mở chi tiết và bắt đầu tự luyện |
 | Chi tiết món | `features/lookup/recipe_detail_size_page.dart` — cả hai | Công thức, size/định lượng, lưu ý, liên kết phản hồi/SOP và video nếu có |
 | Video | `features/lookup/step_video_guide_page.dart` — cả hai | Video hướng dẫn và timeline từng bước; có xem toàn màn hình ngang |
-| SOP | `features/sop/sop_catalog_page.dart`, `sop_detail_page.dart` — cả hai | Danh sách sổ tay/quy trình đã phát hành và trang chi tiết từng SOP |
+| SOP | `features/sop/sop_detail_page.dart` — cả hai | Chi tiết SOP đã phát hành; thư viện nằm ở tab SOP trong Tra cứu |
 | Sổ tay số | `features/sop_book/sop_book_page.dart` — cả hai | Lật trang, nội dung, điều hướng trang và xuất sổ tay PDF |
 | Học việc | `features/learning/my_learning_page.dart`, `learning_task_detail_page.dart`, `personal_progress_page.dart` — Barista | Danh sách nhiệm vụ, nội dung/checkbox theo phần, tiến độ cá nhân và trạng thái cần học lại |
 | Quiz | `features/practice/quiz_exam_page.dart` — Barista | Trả lời câu hỏi, nộp bài, xem điểm/đáp án/giải thích sau khi nộp |
@@ -137,7 +137,7 @@ Video được stream từ URL gắn với recipe. Storage rules cho phép ngư�
 
 ### 5.4. SOP và sổ tay
 
-**Catalog/chi tiết:** đọc `sops` đã published; trình bày mã phiên bản, ngày phát hành, tóm tắt, bước, ghi chú và các món liên kết. Lỗi tải có thể thử lại. App không cho sửa nội dung SOP.
+**Tab SOP trong Tra cứu/chi tiết:** đọc `sops` đã published; trình bày mã phiên bản, ngày phát hành, tóm tắt, bước, ghi chú và các món liên kết. Lỗi tải có thể thử lại. App không cho sửa nội dung SOP.
 
 **Sổ tay:** ghép nội dung SOP thành trang sách có lật/trang mục lục; trang hiện tại có trạng thái dùng trong phiên; có thể xuất toàn bộ sổ tay thành PDF về thiết bị (`Download/RecipeHub`). Nếu có file SOP PDF trên Storage thì app lấy URL `sop/{code}.pdf`; người đăng nhập chỉ có quyền đọc.
 
@@ -169,7 +169,7 @@ Video được stream từ URL gắn với recipe. Storage rules cho phép ngư�
 
 **Mục tiêu và ranh giới:** AI đặt câu hỏi giúp nhớ nguyên liệu, định lượng, thứ tự pha và SOP của đúng món đang luyện. Đây là hỗ trợ ghi nhớ, không chấm điểm, không đẩy câu trả lời cho Admin và không lưu transcript/lịch sử chat. Không phải chatbot tự do.
 
-**Luồng:** chọn món → bật ôn → bấm giờ → câu đầu sau 10 giây → câu kế tiếp sau 20 giây tính từ lúc tiếp tục/bỏ qua → mỗi lần chỉ một câu, tối đa 5 câu/bộ. Đồng hồ vẫn chạy khi trả lời. Người dùng chọn một đáp án; UI phản hồi, giải thích và nguồn/phiên bản. Có gợi ý, bỏ qua, thu gọn/tắt AI, tạm dừng. Khi app xuống nền thì tự pause. Đổi món/thoát khi phiên còn hoạt động yêu cầu xác nhận; reset dùng lại bộ câu đã xác minh thay vì gọi model lại.
+**Luồng:** chọn món → bật ôn → bấm giờ → câu đầu sau 3 giây → câu kế tiếp sau 5 giây tính từ lúc tiếp tục/bỏ qua (đặt ở self_practice_timer_page để demo nhanh; mặc định ViewModel 10/20 giây) → mỗi lần chỉ một câu, tối đa 5 câu/bộ. Đồng hồ vẫn chạy khi trả lời. Người dùng chọn một đáp án; UI phản hồi, giải thích và nguồn/phiên bản. Có gợi ý, bỏ qua, thu gọn/tắt AI, tạm dừng. Khi app xuống nền thì tự pause. Đổi món/thoát khi phiên còn hoạt động yêu cầu xác nhận; reset dùng lại bộ câu đã xác minh thay vì gọi model lại.
 
 **Nguồn sự thật:** `RecipeRecallBuilder` sinh candidate từ dữ liệu recipe, nguyên liệu, thứ tự bước và SOP liên kết đã phát hành. Câu/đáp án đúng/giải thích lấy từ nguồn; không suy diễn thông số chưa có, không trộn các size khác định lượng (món nhiều size chỉ lấy phần chung đã xác định). Gemini chỉ chọn thứ tự/ref trong danh sách candidate; schema và validator loại ref lạ/trùng/không hợp lệ. Vì vậy model không tự tạo đáp án hoặc kiến thức pha chế.
 
@@ -302,3 +302,197 @@ Các số liệu là snapshot theo tài liệu `docs/ai-full-verification-202611
 - [Firestore rules](../firebase/firestore.rules)
 - [Storage rules](../firebase/storage.rules)
 - [Remote Config template](../firebase/remoteconfig.template.json)
+
+## 11. Đối chiếu Figma redesign với hệ thống hiện tại
+
+### 11.1. Phạm vi Figma đã kiểm tra
+
+- File: [Redesign RecipeHub Mobile](https://www.figma.com/design/XwsHKm5aLZULEg5VTGLrjZ/Redesign-RecipeHub-Mobile?node-id=51-2).
+- Ngày đối chiếu: 12/11/2026.
+- Các page đã đọc: `00 · Tổng quan`, `01 · User journey & flow`, `02 · Wireframe`, `03 · Hi-fi`, `04 · Final UI`, `05 · Components`, `06 · States & patterns`, `07 · Design system`, `08 · Assets`, `09 · Prototype`.
+- `04 · Final UI` hiện có **40 frame màn hình/trạng thái**, kích thước chuẩn `430 × 932`.
+- Việc đối chiếu dùng cấu trúc layer, tên component/action, prototype flow và ảnh render của các màn đại diện. Đây là audit chức năng và khả năng tích hợp; không phải xác nhận pixel-perfect hoặc prototype đã nối đủ mọi interaction.
+
+### 11.2. Kiến trúc thông tin của UI mới
+
+UI mới giữ mô hình 4 tab theo vai trò:
+
+- Barista: **Tra cứu → Việc học → Phản hồi → Tài khoản**.
+- Quản lý: **Tra cứu → Đào tạo → Phản hồi → Tài khoản**.
+
+Các luồng được thể hiện rõ trong Final UI gồm:
+
+- Tra cứu công thức/SOP, xem chi tiết và gửi góp ý theo bước.
+- Sổ tay: đọc tiếp, mục lục, tìm kiếm, tạo/mở/tải/chia sẻ PDF.
+- Việc học: đọc công thức → làm quiz → tự luyện.
+- Quiz: trả lời từng câu và xem kết quả/giải thích.
+- Tự luyện: sẵn sàng, đang chạy, tạm dừng, kết thúc, ghi nhận.
+- Phản hồi: tạo phản hồi có ảnh, xem chi tiết, Admin trả lời, trạng thái gửi thành công.
+- Đào tạo: danh sách nhân viên cần xử lý, chấm rubric, xem kết quả đã đánh giá.
+- Trạng thái/pattern dùng chung: loading, empty, offline, validation, quiz, timer, feedback, exit guard và PDF.
+
+UI mới có ngôn ngữ thị giác nhất quán, phân cấp nội dung rõ và đã tách luồng Barista/Quản lý. Tuy nhiên, các frame hiện tại mới đại diện cho happy path và một số trạng thái mẫu; chưa đủ làm danh sách route hoàn chỉnh để thay toàn bộ UI production.
+
+### 11.3. Ma trận giữ tính năng khi thay UI
+
+| Nhóm chức năng hiện tại | Mức bao phủ trong Figma mới | Kết luận tích hợp | Việc phải làm trước khi cắt UI cũ |
+| --- | --- | --- | --- |
+| Đăng nhập email/Google/guest, quên mật khẩu, tài khoản bị khóa | **Thiếu** | Không thể bỏ `AuthGate`/`AuthViewModel` | Bổ sung Login, reset password, auth loading/error, disabled-account và Google-cancel state |
+| Shell 4 tab theo role | **Có, nhưng thiếu trạng thái quyền** | Có thể bind lại `AuthViewModel` và role guard | Khóa tab theo `serverRole`; không dùng chip UI để nâng quyền |
+| Thông báo FCM, badge, lịch sử, deep link | **Thiếu** | Backend/service đã có nhưng không có điểm vào UI | Bổ sung chuông/badge, trang lịch sử, permission state và deep-link destination |
+| Tra cứu/lọc công thức và SOP | **Có một phần** | Tái dùng `RecipeViewModel`, `TrainingViewModel`, Remote Config | Bổ sung loading/empty/error/retry, giới hạn kết quả động và dữ liệu danh mục thật |
+| Chi tiết công thức theo size, ghi chú, yêu cầu đặc biệt | **Có một phần** | Model/backend hiện có phần lớn dữ liệu | Bổ sung size selector, warning/note, special request, metadata phiên bản và trạng thái thiếu dữ liệu |
+| Video hướng dẫn theo timeline bước | **Thiếu**; Figma ghi video chưa có trong prototype | `StepVideoViewModel` và `videoUrl` vẫn phải giữ | Thiết kế màn video, loading/error, fullscreen và thao tác nhảy tới bước |
+| SOP catalog/chi tiết | **Có** | Tái dùng `ITrainingRepository.watchSops()` | Bổ sung version/published date, linked recipe và loading/empty/error |
+| Sổ tay, tìm kiếm và PDF | **Có tốt** | Tái dùng `SopBookViewModel`, report/file service | Làm rõ tải/mở/chia sẻ; giữ lỗi tạo/lưu/mở PDF và quyền thiết bị |
+| Nhiệm vụ học, checklist section, hạn, tiến độ, học lại | **Thiếu phần lớn** | Figma mới chỉ biểu diễn một learning focus tuyến tính | Bổ sung danh sách task, task detail/checklist, due/overdue, progress và relearn |
+| Quiz và kết quả | **Có happy path** | Tái dùng submit bất biến và answer-key guard | Bổ sung loading/error, submit guard, retry, attempt number và quiz bị gỡ |
+| Tự luyện/bấm giờ | **Có luồng chính** | Tái dùng timer và `IPracticeHistoryStore` | Bổ sung chọn size/target nếu có, app lifecycle, exit guard, save lỗi/retry và offline sync |
+| AI hỏi ôn trong phiên luyện | **Có đủ 6 trạng thái Final UI** | Giữ `AiPracticeViewModel`/Firebase AI Logic | Đã map sẵn sàng/chuẩn bị/câu hỏi/phản hồi/lỗi/hoàn tất, fallback câu mẫu và nguồn câu hỏi |
+| Lịch sử tự luyện, thống kê, PDF báo cáo | **Thiếu** | Backend/cache/report hiện có nhưng không có UI mới | Bổ sung history, empty/error, chỉ số, xóa theo quyền, tạo/lưu/upload/mở PDF |
+| Đánh giá thực hành | **Có một phần** | Có thể bind `AdminTrainingViewModel` và criteria thật | Không hardcode 3 tiêu chí; bổ sung chọn nhân viên/món/template, validation, nhận xét, lịch sử và Barista xem kết quả |
+| Phản hồi hai chiều + ảnh + status | **Có một phần** | Firestore/Storage hiện đủ cho luồng chính | Bổ sung loại phản hồi, preview/xóa/upload ảnh, thread nhiều reply, Barista trả lời bổ sung, status/filter đầy đủ và lỗi upload |
+| Tài khoản, đổi mật khẩu, đăng xuất | **Thiếu một phần lớn** | Profile có trong Figma; thao tác tài khoản chưa có | Bổ sung đổi mật khẩu theo provider, đăng xuất, auth-mode, notification permission và lỗi profile |
+| Crash/incident/recovery | **Chỉ có pattern lỗi chung** | Giữ reporting ngầm; demo crash không cần hiện production | Bổ sung recovery theo màn; để công cụ chẩn đoán sau debug/admin guard |
+| Analytics 8 event hiện có | **Không thể hiện trong Figma** | Không phải UI nhưng phải giữ khi thay route/action | Map lại event tại đúng action mới và giữ schema tham số hiện tại |
+
+### 11.4. Trạng thái triển khai UI Final ngày 12/11/2026
+
+- Đã ánh xạ đủ **40/40 frame** thành route hoặc trạng thái động trong Flutter; các frame ready/loading/question/feedback/error/success dùng chung ViewModel thay vì tạo màn dữ liệu giả.
+- Đã thay shell 4 tab, tra cứu/recipe, SOP catalog/detail, learning/quiz, practice/AI, feedback, handbook/PDF, assessment, account Viewer/Admin và settings bằng token Be Vietnam Pro trong `NomadKit`.
+- Các thao tác dữ liệu tiếp tục dùng repository/ViewModel hiện có: recipe/SOP/task/quiz/evaluation/feedback/reply/practice/PDF/AI; không thêm mock vào `lib/`.
+- Exit guard phản hồi, picker món, trạng thái gửi thành công, quiz result, practice pause/end/recorded, assessment success và 6 trạng thái AI đã được nối vào luồng thật.
+- Nút bookmark trong Figma được render ở trạng thái disabled vì chưa có contract favorites; không giả lập lưu thành công. Đây là gap backend/product P2, không làm mất tính năng cũ vì app cũ chưa có favorites.
+- Network simulation chỉ có thể xuất hiện trong debug; bản release không cho người dùng production can thiệp kết nối.
+
+## 12. Thiếu hụt cần bổ sung vào Figma
+
+### P0 — bắt buộc để không giảm tính năng production
+
+1. **Auth:** Login email/password, Google, guest, quên mật khẩu, đang khởi tạo phiên, lỗi cấu hình Google, tài khoản bị khóa và đăng xuất cưỡng bức.
+2. **Thông báo:** badge/entry point, xin quyền, danh sách lịch sử, empty/error và các đích deep link hợp lệ.
+3. **Video công thức:** phát video, timeline bước, buffering/error, retry và fullscreen.
+4. **Learning đầy đủ:** danh sách nhiệm vụ, chi tiết/checklist section, hạn hoàn thành, quá hạn, tiến độ cá nhân và yêu cầu học lại.
+5. **Practice đầy đủ:** AI ôn tập, lịch sử luyện, thống kê, báo cáo PDF, offline/save retry và exit guard gắn vào màn thật.
+6. **Feedback đầy đủ:** chọn `inquiry/issue/suggestion`, thread nhiều tin, Barista bổ sung thông tin, Admin đổi đủ 5 status, filter và trạng thái upload ảnh.
+7. **Account:** đổi mật khẩu, đăng xuất, trạng thái theo auth provider và lỗi tải profile.
+8. **Role security:** chip `Barista/Quản lý` chỉ được phép là chế độ xem của tài khoản có `serverRole=admin`. Với Barista thật, phải ẩn hoặc disable lựa chọn Quản lý.
+9. **Data states theo màn:** loading, empty, error, retry, permission denied và offline phải có cho từng màn dữ liệu, không chỉ tồn tại dưới dạng card tham khảo ở page `States & patterns`.
+
+### P1 — cần để ánh xạ đủ dữ liệu hiện có
+
+- Size/định lượng, note/warning, special request và liên kết SOP trong chi tiết công thức.
+- Version, ngày ban hành, nội dung liên kết và trạng thái tài liệu bị gỡ/đổi phiên bản.
+- Quiz submit-in-progress, submit trùng, attempt kế tiếp và kết quả khi answer key lỗi.
+- Danh sách/lịch sử đánh giá của Barista và lịch sử nhân viên cho Admin.
+- Feedback attachment preview, hủy ảnh, upload progress/cancel và retry không làm mất nội dung.
+- Draft/exit confirmation cho form phản hồi, quiz, đánh giá và phiên luyện.
+- Trạng thái tạo/lưu/mở PDF thất bại; phân biệt lưu local thành công với upload cloud thất bại.
+
+### P2 — chức năng mới trong Figma cần chốt phạm vi
+
+- Bookmark công thức ở danh sách/chi tiết và bộ lọc Đã lưu đã có qua `RecipeBookmarkViewModel`/`IRecipeBookmarkStore`, lưu local theo tài khoản; chưa đồng bộ đa thiết bị hoặc hỗ trợ bookmark SOP.
+- Ảnh Tra cứu đã nối `recipes.imageUrl` qua Firestore adapter/DTO/mapper/`RecipeItem` tới `RecipeThumb`; Storage path và quyền đã có. Hero chi tiết vẫn cần đối chiếu riêng với Figma.
+- Màn `Cài đặt trải nghiệm` riêng đã được xóa; hiệu ứng dùng cài đặt giảm chuyển động của hệ điều hành. Không đưa mô phỏng mạng của prototype vào production.
+- `Chia sẻ PDF` đã có qua capability thiết bị của file service; lỗi native được giữ ở UI và đã có test.
+- Tìm kiếm trong sổ tay có thể làm local trên dữ liệu đã tải; không cần backend nếu dữ liệu vẫn nhỏ như hiện tại.
+
+## 13. Tác động backend/API của UI mới
+
+### 13.1. Không cần backend mới nếu tái sử dụng đúng contract hiện tại
+
+Các luồng sau đã có repository/service thật: Auth/profile/role, recipe, SOP, learning task/progress, quiz/answer key/attempt, practice history, evaluation, feedback/replies/status, Storage upload, FCM, Remote Config, Analytics, Crashlytics/incident và Firebase AI Logic. Flutter mới phải gọi qua ViewModel/interface hiện có; widget không gọi Firebase SDK, Dio hoặc Storage trực tiếp.
+
+### 13.2. Các yêu cầu backend/data mới hoặc cần quyết định
+
+| Nhu cầu UI mới | Hiện trạng | Đề xuất |
+| --- | --- | --- |
+| Bookmark/yêu thích công thức và SOP | Công thức đã có interface/store local theo tài khoản; chưa có sync cloud hoặc bookmark SOP | Chỉ thêm repository/Firestore/rules nếu cần đồng bộ đa thiết bị hoặc mở rộng sang SOP |
+| Ảnh recipe dùng ở list/detail | `imageUrl` đã xuyên suốt Firestore adapter/DTO/mapper/UI model; Tra cứu tải ảnh qua `RecipeThumb`, có fallback | Cần Internet; hero chi tiết đối chiếu riêng. Script upload/rules ở `tools/seed/` và `firebase/storage.rules` |
+| Đồng bộ accessibility giữa thiết bị | Chưa có user preference contract | Mặc định lưu local. Chỉ thêm `users/{uid}/preferences` và rules nếu product yêu cầu sync đa thiết bị |
+| Chia sẻ PDF | Đã có `sharePdf` qua native content URI và MIME PDF | Không cần backend; giữ fallback mở file/tải xuống nếu share sheet lỗi |
+| Draft phản hồi tồn tại qua lần mở app sau | Figma hiện ghi draft chỉ tồn tại trong phiên | Nếu cần lưu bền: ưu tiên local encrypted/preferences; chỉ thêm backend draft nếu cần đa thiết bị |
+| Ảnh chụp trực tiếp trong feedback | `image_picker`/Storage đã có | Xác nhận source camera/gallery và permission UX; thường không cần backend mới |
+
+Mọi thay đổi schema Firestore phải đi cùng rules, index, emulator tests và migration dữ liệu tiến; không sửa/xóa lịch sử migration hoặc dữ liệu production. Nếu bật lại nguồn `.NET Gateway`, phải mở rộng DTO/endpoint tương ứng thay vì để hai nguồn trả model khác nhau.
+
+## 14. Kế hoạch triển khai Flutter redesign
+
+### Giai đoạn 0 — khóa phạm vi và contract
+
+- Chốt các mục P2: bookmark, ảnh recipe, persistence của accessibility, share PDF và draft.
+- Bổ sung các frame P0/P1 vào Figma hoặc ghi acceptance criteria đủ rõ cho màn chưa thiết kế.
+- Lập bảng `route → ViewModel → interface → Firestore/API → analytics event` cho từng màn.
+- Viết characterization test cho ViewModel/service hiện tại trước khi thay widget; không đổi backend và UI cùng một lần nếu không bắt buộc.
+
+### Giai đoạn 1 — nền tảng giao diện mới
+
+- Chuyển token Figma vào `lib/core/theme/nomad_kit.dart`; không hardcode màu, typography, spacing mới trong page.
+- Xây component dùng chung: app header, bottom navigation, flow header, button, chip, field, list row, state view, confirmation/exit guard và PDF state.
+- Component chỉ nhận state/callback; không biết Firebase, repository hoặc DTO.
+- Chuẩn hóa responsive cho chiều rộng nhỏ hơn/lớn hơn 430 và text scale tới 200%.
+
+### Giai đoạn 2 — app shell, Auth và navigation
+
+- Giữ `AuthGate` làm root; thay presentation của Login/Shell nhưng không bỏ bootstrap/profile/device-token hooks.
+- Route/tab lấy từ `displayRole`, quyền mutation lấy từ `serverRole`.
+- Khôi phục notification entry/deep link trước khi chuyển shell mới thành mặc định.
+- Có thể dùng feature flag nội bộ để chạy song song UI cũ/mới trong thời gian migration; không nhân đôi service graph.
+
+### Giai đoạn 3 — tra cứu, recipe, SOP và sổ tay
+
+- Bind Home/SOP tab vào `RecipeViewModel` và `TrainingViewModel`; giữ Remote Config `max_lookup_results`.
+- Bind detail vào dữ liệu size, notes, steps, linked SOP và video thật.
+- Tích hợp `StepVideoViewModel` thành route riêng.
+- Bind handbook/search/PDF vào `SopBookViewModel` và `IFileSaveService`; thêm share client-side nếu được duyệt.
+
+### Giai đoạn 4 — learning, quiz và practice
+
+- Map learning focus trong Figma thành projection của task/progress thật, không hardcode `Caramel Latte` hoặc 3 bước cố định.
+- Giữ submit quiz bất biến và answer-key guard; UI kết quả chỉ hiện sau response đã chấm.
+- Tách timer UI khỏi lifecycle/persistence logic; giữ cache theo UID và đồng bộ Firestore.
+- Bổ sung AI recall, practice history và report PDF trước khi bỏ các page cũ.
+
+### Giai đoạn 5 — feedback và đào tạo Admin
+
+- Bind form feedback vào `FeedbackViewModel`/`StorageViewModel`; upload ảnh xong mới tạo record hoặc có rollback rõ ràng.
+- Detail phải stream parent + replies; hỗ trợ Barista/Admin reply theo quyền và Admin đổi status.
+- Danh sách Admin dùng `watchAll`, Barista dùng `watchMine`; không lọc quyền chỉ ở client.
+- Rubric/nhân viên/món lấy từ repository thật; không dùng dữ liệu mẫu trong frame Figma.
+
+### Giai đoạn 6 — account, notification và recovery
+
+- Hoàn thiện profile, đổi mật khẩu, logout, notification permission/history và admin view-mode.
+- Gắn loading/empty/error/offline/retry vào từng route.
+- Giữ Analytics, Crashlytics, incident flush và FCM token lifecycle khi thay navigation.
+- Cài đặt test như mô phỏng mạng/crash phải nằm sau debug flag hoặc admin diagnostics guard.
+
+### Giai đoạn 7 — cắt chuyển và loại UI cũ
+
+- Chỉ xóa page/widget cũ sau khi ma trận parity có test và route mới đã thay thế.
+- Chạy test theo cả Barista/Admin, email/Google/guest, online/offline và account disabled.
+- Kiểm tra deep link notification, app resume trong timer, upload ảnh/PDF, role switch và quyền Firestore trên thiết bị thật.
+- Trước khi báo hoàn tất: `flutter analyze` 0 issue và `flutter test` pass; sau đó chạy bộ E2E trọng yếu trên Android thật.
+
+## 15. Quy tắc tích hợp để bạn code UI không làm gãy backend
+
+1. Page/widget chỉ đọc state và gọi action trên ViewModel; không gọi SDK trực tiếp.
+2. Giữ các interface trong `AppServices` làm ranh giới. Nếu UI cần capability mới, mở rộng interface trước rồi mới viết adapter Firebase/device.
+3. Không truyền raw Firestore document/DTO vào widget; map sang model/view state ổn định.
+4. Mọi màn tải dữ liệu phải có `loading/empty/error/data`; action ghi phải có `idle/submitting/success/failure` và chống submit lặp.
+5. Không hiển thị ID/code kỹ thuật; route dùng ID nội bộ nhưng tiêu đề/UI dùng tên nghiệp vụ.
+6. Không hardcode dữ liệu mẫu từ Figma (`Caramel Latte`, `Ngọc Linh`, số lượng 6 món/3 SOP, 3 rubric item).
+7. Giữ real-time stream cho feedback, training/progress, profile disable và Remote Config; không đổi thành fetch một lần chỉ vì mockup tĩnh.
+8. Mọi role/action quan trọng phải được backend/rules xác thực; UI ẩn nút không phải cơ chế phân quyền.
+9. Giữ analytics event tại action nghiệp vụ, không gắn vào `build()` hoặc render lại widget.
+10. Không thêm mock data vào `lib/`; fake chỉ được inject trong test.
+
+## 16. Definition of Done cho redesign
+
+- Tất cả hàng trong ma trận mục 11.3 đạt parity hoặc có quyết định product bằng văn bản.
+- Không còn action nhìn như hoạt động nhưng chưa có callback/backend contract, đặc biệt bookmark, role switch, upload ảnh và share PDF.
+- Hai role truy cập đúng tab, dữ liệu và mutation; Barista không thể tự chuyển thành Admin.
+- Auth, notification/deep link, offline, permission, loading/empty/error và app lifecycle có test.
+- Dữ liệu production đến từ Firestore/Gateway thật; không lấy text/data mẫu từ Figma làm nguồn.
+- Theme mới dùng token tập trung và đạt text scale 200%, màn 430 × 932 và thiết bị Android nhỏ đang dùng để E2E.
+- `flutter analyze` 0 issue, `flutter test` pass và các ca E2E trọng yếu pass trên thiết bị thật trước khi xóa UI cũ.

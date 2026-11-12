@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/models/app_models.dart';
 import '../../core/theme/nomad_kit.dart';
+import '../../core/widgets/redesign_widgets.dart';
 
 /// Màu chip theo trạng thái (cùng quy ước với web Admin).
 ({Color bg, Color fg}) feedbackStatusColors(FeedbackStatus s) => switch (s) {
@@ -122,7 +123,7 @@ class FeedbackNetworkImage extends StatelessWidget {
   }
 }
 
-/// Thẻ phản hồi trong danh sách.
+/// Thẻ phản hồi trong danh sách (Figma: nội dung 2 dòng, ngữ cảnh, trạng thái có icon).
 class FeedbackCard extends StatelessWidget {
   const FeedbackCard({
     super.key,
@@ -138,174 +139,105 @@ class FeedbackCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fb = item;
     final isNew = fb.status == FeedbackStatus.newFeedback;
+    final done =
+        fb.status == FeedbackStatus.resolved ||
+        fb.status == FeedbackStatus.closed;
+    final statusColor = done ? NomadKit.forest : NomadKit.sandDark;
+    final step = fb.stepNote?.split(':').first.trim();
+    final contextLine = [
+      if (showSender)
+        fb.storeBranch.isEmpty
+            ? fb.senderName
+            : '${fb.senderName} · ${fb.storeBranch}',
+      fb.targetName,
+      if (step != null && step.isNotEmpty) step,
+    ].join(' · ');
     return Semantics(
       button: true,
       label:
           'Phản hồi ${fb.typeLabel} về ${fb.targetName}, ${feedbackStatusLabel(fb.status)}',
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
-          color: NomadKit.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isNew && showSender
-                ? NomadKit.ocean.withValues(alpha: 0.5)
-                : NomadKit.border,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x06000000),
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
+          color: isNew && showSender
+              ? NomadKit.sandLight.withValues(alpha: 0.35)
+              : Colors.transparent,
+          border: const Border(bottom: BorderSide(color: NomadKit.border)),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(18),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      FeedbackTypeTag(fb.typeLabel),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          fb.version.isEmpty
-                              ? fb.targetName
-                              : '${fb.targetName} · ${fb.version}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: NomadKit.ink,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FeedbackStatusChip(fb.status),
-                    ],
-                  ),
-                  if (showSender) ...[
-                    const SizedBox(height: 8),
-                    Row(
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.person_rounded,
-                          size: 16,
-                          color: NomadKit.secondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            fb.storeBranch.isEmpty
-                                ? fb.senderName
-                                : '${fb.senderName} · ${fb.storeBranch}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: NomadKit.ink,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (fb.stepNote != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      'Ngữ cảnh: ${fb.stepNote}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: NomadKit.ocean,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
+                        Text(
                           fb.content,
-                          maxLines: 3,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: NomadKit.ink,
-                            height: 1.4,
+                          style: NomadKit.body.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                            height: 25 / 16,
                           ),
                         ),
-                      ),
-                      if (fb.hasAttachment) ...[
-                        const SizedBox(width: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: FeedbackNetworkImage(
-                            fb.attachmentUrl!,
-                            width: 64,
-                            height: 64,
-                          ),
+                        const SizedBox(height: 6),
+                        Text(
+                          contextLine,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: NomadKit.caption,
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            RhSvgIcon(
+                              done
+                                  ? 'assets/redesign/circle_check.svg'
+                                  : 'assets/redesign/clock.svg',
+                              size: 14,
+                              color: statusColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                feedbackStatusLabel(fb.status),
+                                overflow: TextOverflow.ellipsis,
+                                style: NomadKit.caption.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            if (fb.hasAttachment) ...[
+                              const SizedBox(width: 10),
+                              const Icon(
+                                Icons.image_outlined,
+                                size: 14,
+                                color: NomadKit.secondary,
+                              ),
+                            ],
+                            if (fb.replyCount > 0) ...[
+                              const SizedBox(width: 10),
+                              const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 14,
+                                color: NomadKit.secondary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text('${fb.replyCount}', style: NomadKit.caption),
+                            ],
+                          ],
                         ),
                       ],
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.schedule_rounded,
-                        size: 14,
-                        color: NomadKit.secondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        fb.createdAt,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: NomadKit.secondary,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (fb.hasAttachment) ...[
-                        const Icon(
-                          Icons.image_rounded,
-                          size: 16,
-                          color: NomadKit.secondary,
-                        ),
-                        const SizedBox(width: 10),
-                      ],
-                      const Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 16,
-                        color: NomadKit.secondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        fb.replyCount == 0
-                            ? 'Chưa trả lời'
-                            : '${fb.replyCount} trả lời',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: NomadKit.secondary,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: NomadKit.secondary,
-                      ),
-                    ],
-                  ),
+                  const SizedBox(width: 12),
+                  const RhChevron(),
                 ],
               ),
             ),

@@ -5,6 +5,7 @@ rules_version = '2';
 // - Cô lập theo uid: chỉ chủ sở hữu đọc / tạo / xóa thư mục của mình.
 // - feedback/: ảnh PNG / JPEG / WEBP / HEIC tối đa 5 MB (không nhận SVG – có thể chứa script).
 // - reports/: chỉ PDF tối đa 5 MB.
+// - recipe-images/: Admin ghi ảnh món (≤ 5 MB), người dùng đăng nhập đọc.
 // - delete tách riêng vì khi xóa request.resource là null.
 service firebase.storage {
   match /b/{bucket}/o {
@@ -37,6 +38,15 @@ service firebase.storage {
       allow create, update: if request.auth != null && request.auth.token.role == 'admin'
                             && request.resource.size < 100 * 1024 * 1024
                             && request.resource.contentType == 'video/mp4';
+      allow delete: if request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    // Ảnh đại diện món: Admin tải lên từ web/script import (JPEG/PNG/WEBP ≤ 5 MB), mọi tài khoản đăng nhập xem.
+    match /recipe-images/{code}/{file} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.token.role == 'admin'
+                            && underLimit()
+                            && request.resource.contentType.matches('image/(png|jpeg|jpg|webp)');
       allow delete: if request.auth != null && request.auth.token.role == 'admin';
     }
 

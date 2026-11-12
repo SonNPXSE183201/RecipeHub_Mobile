@@ -28,13 +28,10 @@ class ScreenFrame extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
+        toolbarHeight: 64,
         leading: showBack
             ? IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 18,
-                  color: NomadKit.ink,
-                ),
+                icon: const Icon(Icons.arrow_back_rounded, size: 22),
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);
@@ -52,10 +49,9 @@ class ScreenFrame extends StatelessWidget {
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: NomadKit.ink,
-                  letterSpacing: -0.3,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: NomadKit.secondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

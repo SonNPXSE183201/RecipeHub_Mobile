@@ -6,13 +6,17 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/nomad_kit.dart';
 import '../../core/models/app_models.dart';
+import '../../core/viewmodels/notification_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/widgets/load_state_view.dart';
+import '../../core/widgets/redesign_widgets.dart';
 import '../../core/utils/navigation.dart';
 import 'learning_task_detail_page.dart';
+import 'notifications_page.dart';
 import 'personal_progress_page.dart';
 import '../practice/quiz_exam_page.dart';
 import '../practice/practical_evaluation_page.dart';
+import '../../core/widgets/rh_motion.dart';
 
 class MyLearningPage extends StatefulWidget {
   const MyLearningPage({super.key});
@@ -55,178 +59,84 @@ class _MyLearningPageState extends State<MyLearningPage>
         .where((t) => t.status == TaskStatus.completed)
         .toList();
 
+    final unread = context.watch<NotificationViewModel>().unreadCount;
     return Scaffold(
       backgroundColor: NomadKit.canvas,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            RhPageHeader(
+              title: 'Việc học',
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Việc học của tôi',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.ink,
-                        ),
+                  Semantics(
+                    label: 'Tiến độ cá nhân',
+                    button: true,
+                    child: IconButton(
+                      tooltip: 'Tiến độ cá nhân',
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
-                      Semantics(
-                        label: 'Tiến độ cá nhân',
-                        button: true,
-                        child: IconButton(
-                          tooltip: 'Tiến độ cá nhân',
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
-                          ),
-                          color: NomadKit.sandDark,
-                          onPressed: () =>
-                              go(context, const PersonalProgressPage()),
-                          icon: const Icon(Icons.insights_rounded),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Quick links to Extension modules (Quiz, Practical Results)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () => go(context, const QuizExamPage()),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: NomadKit.sandLight,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: NomadKit.border),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/icons/icon_quiz_exam.png',
-                                  width: 22,
-                                  height: 22,
-                                  filterQuality: FilterQuality.medium,
-                                  errorBuilder: (ctx, err, stack) => const Icon(
-                                    Icons.quiz_outlined,
-                                    size: 18,
-                                    color: NomadKit.sandDark,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Expanded(
-                                  child: Text(
-                                    'Làm bài Quiz',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: NomadKit.sandDark,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () =>
-                              go(context, const PracticalEvaluationPage()),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: NomadKit.forestLight,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: NomadKit.forest.withOpacity(0.2),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/icons/icon_evaluation_rubric.png',
-                                  width: 22,
-                                  height: 22,
-                                  filterQuality: FilterQuality.medium,
-                                  errorBuilder: (ctx, err, stack) => const Icon(
-                                    Icons.checklist_rounded,
-                                    size: 18,
-                                    color: NomadKit.forest,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Expanded(
-                                  child: Text(
-                                    'Kết quả thực hành',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: NomadKit.forest,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 3 Tabs
-                  Container(
-                    constraints: const BoxConstraints(minHeight: 48),
-                    decoration: BoxDecoration(
-                      color: NomadKit.surface,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: NomadKit.border),
+                      color: NomadKit.sandDark,
+                      onPressed: () =>
+                          go(context, const PersonalProgressPage()),
+                      icon: const Icon(Icons.insights_rounded),
                     ),
-                    child: TabBar(
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      dividerColor: Colors.transparent,
-                      controller: _tabController,
-                      indicatorColor: NomadKit.sand,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        color: NomadKit.sand,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: NomadKit.secondary,
-                      labelStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      tabs: [
-                        Tab(text: 'Đang học (${inProgressTasks.length})'),
-                        Tab(text: 'Chưa học (${notStartedTasks.length})'),
-                        Tab(text: 'Hoàn thành (${completedTasks.length})'),
-                      ],
-                    ),
+                  ),
+                  _BellButton(
+                    hasUnread: unread > 0,
+                    onTap: () => go(context, const NotificationsPage()),
                   ),
                 ],
               ),
             ),
-
-            const Divider(height: 1, color: NomadKit.border),
-
-            // Tab Views
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Việc học của tôi',
+                    style: NomadKit.title.copyWith(fontSize: 25),
+                  ),
+                  const SizedBox(height: 14),
+                  _DarkButton(
+                    label: 'Làm bài Quiz',
+                    onTap: () => go(context, const QuizExamPage()),
+                  ),
+                  const SizedBox(height: 12),
+                  _DarkButton(
+                    label: 'Kết quả thực hành',
+                    onTap: () => go(context, const PracticalEvaluationPage()),
+                  ),
+                  const SizedBox(height: 8),
+                  TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerColor: NomadKit.border,
+                    controller: _tabController,
+                    indicatorColor: NomadKit.sandDark,
+                    indicatorWeight: 2,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    labelColor: NomadKit.sandDark,
+                    unselectedLabelColor: NomadKit.secondary,
+                    labelPadding: const EdgeInsets.only(right: 18),
+                    labelStyle: NomadKit.label.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: NomadKit.label,
+                    tabs: [
+                      Tab(text: 'Đang học (${inProgressTasks.length})'),
+                      Tab(text: 'Chưa học (${notStartedTasks.length})'),
+                      Tab(text: 'Hoàn thành (${completedTasks.length})'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child:
                   (training.taskState == LoadState.error && tasks.isEmpty) ||
@@ -275,190 +185,192 @@ class _MyLearningPageState extends State<MyLearningPage>
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       padding: const EdgeInsets.all(20),
       itemCount: list.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, idx) {
         final task = list[idx];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: NomadKit.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: NomadKit.border),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x06000000),
-                blurRadius: 10,
-                offset: Offset(0, 2),
+        Future<void> open() async {
+          await Navigator.push(
+            context,
+            RhPageRoute(
+              builder: (_) => LearningTaskDetailPage(task: task),
+            ),
+          );
+          if (mounted) setState(() {});
+        }
+
+        final statusLabel = task.status == TaskStatus.completed
+            ? 'Hoàn thành'
+            : task.status == TaskStatus.inProgress
+            ? 'Đang học'
+            : 'Chưa học';
+        final flag = task.isOverdue
+            ? 'Quá hạn'
+            : task.isRelearnRequired
+            ? 'Cần học lại'
+            : null;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Material(
+              color: NomadKit.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: NomadKit.border),
               ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(18),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => LearningTaskDetailPage(task: task),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: open,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: NomadKit.section.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${task.type} · $statusLabel · Người giao: ${task.assignedBy}',
+                        style: NomadKit.label.copyWith(
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        'Hạn hoàn thành: ${task.dueDate}${flag == null ? '' : ' · $flag'}',
+                        style: NomadKit.label.copyWith(
+                          fontWeight: FontWeight.w400,
+                          color: task.isOverdue ? NomadKit.error : NomadKit.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: LinearProgressIndicator(
+                                value: task.progress,
+                                minHeight: 6,
+                                backgroundColor: NomadKit.sandLight,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  task.progress >= 1.0
+                                      ? NomadKit.forest
+                                      : NomadKit.sandDark,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${(task.progress * 100).toInt()}%',
+                            style: NomadKit.label,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                );
-                if (mounted) setState(() {});
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top: Tag + Code & Badges
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: task.type == 'Công thức'
-                                ? NomadKit.sandLight
-                                : NomadKit.oceanLight,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            task.type,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: 'monospace',
-                              color: task.type == 'Công thức'
-                                  ? NomadKit.sandDark
-                                  : NomadKit.ocean,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          task.version,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: NomadKit.secondary,
-                          ),
-                        ),
-                        const Spacer(),
-
-                        if (task.isOverdue)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEE2E2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Quá hạn',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.error,
-                              ),
-                            ),
-                          )
-                        else if (task.isRelearnRequired)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: NomadKit.warningLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Cần học lại',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.warning,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Title
-                    Text(
-                      task.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: NomadKit.ink,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    Text(
-                      'Người giao: ${task.assignedBy}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: NomadKit.secondary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Hạn hoàn thành: ${task.dueDate}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: task.isOverdue
-                            ? NomadKit.error
-                            : NomadKit.secondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Progress Bar
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: LinearProgressIndicator(
-                              value: task.progress,
-                              minHeight: 6,
-                              backgroundColor: NomadKit.canvas,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                task.progress >= 1.0
-                                    ? NomadKit.forest
-                                    : NomadKit.sand,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${(task.progress * 100).toInt()}%',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: NomadKit.ink,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
             ),
-          ),
+            if (task.status == TaskStatus.inProgress) ...[
+              const SizedBox(height: 12),
+              _DarkButton(label: 'Mở nhiệm vụ học', onTap: open),
+            ],
+          ],
         );
       },
     );
   }
+}
+
+class _DarkButton extends StatelessWidget {
+  const _DarkButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: NomadKit.sandDark,
+    borderRadius: BorderRadius.circular(12),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 48),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(14),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: NomadKit.label.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _BellButton extends StatelessWidget {
+  const _BellButton({required this.hasUnread, required this.onTap});
+
+  final bool hasUnread;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Thông báo',
+    child: InkResponse(
+      onTap: onTap,
+      radius: 24,
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Center(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: NomadKit.sandLight,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_none_rounded,
+                  size: 22,
+                  color: NomadKit.sandDark,
+                ),
+              ),
+              if (hasUnread)
+                Positioned(
+                  right: 1,
+                  top: 1,
+                  child: Container(
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: NomadKit.sandDark,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: NomadKit.canvas, width: 1.5),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

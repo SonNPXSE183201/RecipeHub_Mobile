@@ -5,9 +5,13 @@ import '../../core/di/app_services.dart';
 import '../../core/theme/nomad_kit.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/feedback_viewmodel.dart';
+import '../../core/widgets/redesign_widgets.dart';
+import '../../core/utils/navigation.dart';
+import '../learning/notifications_page.dart';
 import 'create_feedback_page.dart';
 import 'feedback_detail_page.dart';
 import 'feedback_widgets.dart';
+import '../../core/widgets/rh_motion.dart';
 
 /// M-12 Phản hồi: Barista xem phản hồi của mình, Admin xem mọi phản hồi. Real-time từ Firestore.
 class MyFeedbackListPage extends StatelessWidget {
@@ -43,49 +47,58 @@ class _FeedbackListView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            const RhPageHeader(title: 'Phản hồi', trailing: _BellButton()),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          isAdmin ? 'Phản hồi từ Barista' : 'Phản hồi của tôi',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            color: NomadKit.ink,
+                  SizedBox(
+                    height: 44,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${vm.countFor(FeedbackFilter.all)} phản hồi',
+                            style: NomadKit.label.copyWith(
+                              color: NomadKit.secondary,
+                            ),
                           ),
                         ),
-                      ),
-                      if (!isAdmin)
-                        Semantics(
-                          label: 'Gửi phản hồi',
-                          button: true,
-                          child: IconButton(
-                            tooltip: 'Gửi phản hồi',
-                            constraints: const BoxConstraints(
-                              minWidth: 48,
-                              minHeight: 48,
-                            ),
-                            style: IconButton.styleFrom(
-                              backgroundColor: NomadKit.sand,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CreateFeedbackPage(),
+                        if (!isAdmin)
+                          Semantics(
+                            label: 'Gửi phản hồi',
+                            button: true,
+                            child: OutlinedButton.icon(
+                              onPressed: () => Navigator.push(
+                                context,
+                                RhPageRoute(
+                                  builder: (_) => const CreateFeedbackPage(),
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(48, 44),
+                                backgroundColor: NomadKit.surface,
+                                foregroundColor: NomadKit.ink,
+                                side: const BorderSide(color: NomadKit.border),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              icon: const RhSvgIcon(
+                                'assets/redesign/image_plus.svg',
+                                size: 16,
+                              ),
+                              label: Text(
+                                'Tạo phản hồi',
+                                style: NomadKit.label,
                               ),
                             ),
-                            icon: const Icon(Icons.rate_review_rounded),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -97,11 +110,7 @@ class _FeedbackListView extends StatelessWidget {
                           child: ChoiceChip(
                             label: Text(
                               count > 0 ? '${f.label} · $count' : f.label,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: selected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                              style: NomadKit.label.copyWith(
                                 color: selected ? Colors.white : NomadKit.ink,
                               ),
                             ),
@@ -153,16 +162,22 @@ class _FeedbackListView extends StatelessWidget {
             : 'Không có phản hồi trong mục này.',
       ),
       FeedbackListData() => ListView.builder(
-        padding: const EdgeInsets.all(20),
-        itemCount: vm.visible.length,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        itemCount: vm.visible.length + 1,
         itemBuilder: (context, i) {
-          final fb = vm.visible[i];
+          if (i == 0) {
+            return RhSectionHeading(
+              title: isAdmin ? 'Cần xử lý' : 'Phản hồi của bạn',
+              trailing: '${vm.visible.length} phản hồi',
+            );
+          }
+          final fb = vm.visible[i - 1];
           return FeedbackCard(
             item: fb,
             showSender: isAdmin,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              RhPageRoute(
                 builder: (_) => FeedbackDetailPage(feedbackId: fb.id),
               ),
             ),
@@ -171,4 +186,19 @@ class _FeedbackListView extends StatelessWidget {
       ),
     };
   }
+}
+
+class _BellButton extends StatelessWidget {
+  const _BellButton();
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: 'Thông báo',
+    onPressed: () => go(context, const NotificationsPage()),
+    style: IconButton.styleFrom(backgroundColor: NomadKit.sandLight),
+    icon: const Icon(
+      Icons.notifications_none_rounded,
+      color: NomadKit.sandDark,
+    ),
+  );
 }

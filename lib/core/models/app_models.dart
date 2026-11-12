@@ -94,6 +94,7 @@ class RecipeItem {
   final List<RecipeSizeOption> sizes;
   final List<RecipeStepItem> steps;
   final String videoUrl;
+  final String? imageUrl; // Firebase Storage; null → ảnh bundle/biểu tượng
 
   const RecipeItem({
     required this.id,
@@ -112,6 +113,7 @@ class RecipeItem {
     required this.sizes,
     required this.steps,
     required this.videoUrl,
+    this.imageUrl,
   });
 
   @override

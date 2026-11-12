@@ -7,6 +7,7 @@ import '../../core/utils/navigation.dart';
 import '../../core/viewmodels/auth_viewmodel.dart';
 import '../../core/viewmodels/training_viewmodel.dart';
 import '../../core/widgets/app_dropdown.dart';
+import '../../core/widgets/redesign_widgets.dart';
 import '../practice/practical_evaluation_page.dart';
 
 class AdminStoreTrainingPage extends StatefulWidget {
@@ -46,246 +47,75 @@ class _AdminStoreTrainingPageState extends State<AdminStoreTrainingPage> {
         ? 0
         : (shown.fold<int>(0, (a, x) => a + x.readingPercent) / shown.length)
               .round();
+    final pending = shown.where((x) => x.latestEvaluation == null).length;
+    final evaluated = shown.length - pending;
     return Scaffold(
       backgroundColor: NomadKit.canvas,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.only(bottom: 24),
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'GIÁM SÁT CHI NHÁNH',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.sandDark,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Theo dõi đào tạo',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: NomadKit.ink,
-                        ),
-                      ),
-                    ],
-                  ),
+            RhPageHeader(
+              title: 'Đào tạo',
+              trailing: IconButton(
+                tooltip: 'Chấm thực hành tại quầy',
+                icon: const Icon(
+                  Icons.checklist_rtl_rounded,
+                  size: 24,
+                  color: NomadKit.sandDark,
                 ),
-                IconButton(
-                  tooltip: 'Chấm thực hành tại quầy',
-                  icon: const Icon(
-                    Icons.checklist_rtl_rounded,
-                    size: 26,
-                    color: NomadKit.sandDark,
-                  ),
-                  onPressed: () => go(context, const PracticalEvaluationPage()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Store Scope Selector (Single clean card without nested card border)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: NomadKit.surface,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: NomadKit.border),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x06000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+                onPressed: () => go(context, const PracticalEvaluationPage()),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/icons/icon_store_branch.png',
-                        width: 22,
-                        height: 22,
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (ctx, err, stack) => const Icon(
-                          Icons.storefront_rounded,
-                          size: 20,
-                          color: NomadKit.sandDark,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'CHI NHÁNH PHỤ TRÁCH QUẢN LÝ',
-                              maxLines: 2,
+                  Text(
+                    'CHI NHÁNH PHỤ TRÁCH QUẢN LÝ',
+                    style: NomadKit.caption.copyWith(
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  AppDropdown<String>(
+                    value: store,
+                    items: options
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(
+                              s,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: NomadKit.sandDark,
-                                letterSpacing: 0.6,
-                              ),
                             ),
-                            const SizedBox(height: 2),
-                            AppDropdown<String>(
-                              value: store,
-                              items: options
-                                  .map(
-                                    (s) => DropdownMenuItem(
-                                      value: s,
-                                      child: Text(
-                                        s,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (v) =>
-                                  setState(() => _selectedStore = v ?? store),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) =>
+                        setState(() => _selectedStore = v ?? store),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: NomadKit.border,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 4,
                     children: [
-                      Expanded(child: _metricBox('${shown.length}', 'Nhân sự')),
-                      Container(width: 1, height: 26, color: NomadKit.border),
-                      Expanded(child: _metricBox('$avg%', 'Tiến độ TB')),
-                      Container(width: 1, height: 26, color: NomadKit.border),
-                      Expanded(
-                        child: _metricBox(
-                          '$totalOverdue',
-                          'Bài quá hạn',
-                          isWarning: true,
-                        ),
-                      ),
+                      _metric('$pending', 'Chờ chấm'),
+                      _metric('$evaluated', 'Đã đánh giá'),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${shown.length} nhân sự · Tiến độ TB $avg% · $totalOverdue bài quá hạn',
+                    style: NomadKit.caption,
+                  ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: NomadKit.border),
+                  const RhSectionHeading(title: 'Cần xử lý'),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Quick Action: Chấm thực hành tại quầy
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: NomadKit.sandLight,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: NomadKit.border),
-              ),
-              child: Row(
-                children: [
-                  Image.asset(
-                    'assets/icons/icon_evaluation_rubric.png',
-                    width: 28,
-                    height: 28,
-                    filterQuality: FilterQuality.medium,
-                    errorBuilder: (ctx, err, stack) => const Icon(
-                      Icons.checklist_rounded,
-                      size: 24,
-                      color: NomadKit.sandDark,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Đánh giá thực hành tại quầy',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            color: NomadKit.ink,
-                          ),
-                        ),
-                        Text(
-                          'Quan sát thao tác của Barista và tick tiêu chí chuẩn.',
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: NomadKit.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: NomadKit.sandDark,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () =>
-                        go(context, const PracticalEvaluationPage()),
-                    child: const Text(
-                      'Chấm ngay',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Staff Training List
-            const Text(
-              'TIẾN ĐỘ TỪNG NHÂN SỰ TẠI CỬA HÀNG (FR-13)',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: NomadKit.sandDark,
-                letterSpacing: 0.7,
-              ),
-            ),
-            const SizedBox(height: 10),
-
             if (vm.state == LoadState.loading)
               const Padding(
                 padding: EdgeInsets.all(32),
@@ -307,153 +137,110 @@ class _AdminStoreTrainingPageState extends State<AdminStoreTrainingPage> {
                 text: 'Chưa có Barista nào được cấp tài khoản',
               ),
             ...shown.map((st) {
-              final int percent = st.readingPercent;
-              final bool hasOverdue = st.overdueTasks.isNotEmpty;
+              final percent = st.readingPercent;
+              final eval = st.latestEvaluation;
               final name = st.member.displayName.isEmpty
                   ? 'Chưa cập nhật'
                   : st.member.displayName;
               final role = st.member.title ?? 'Barista';
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: NomadKit.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: NomadKit.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/icons/icon_user_profile.png',
-                          width: 36,
-                          height: 36,
-                          filterQuality: FilterQuality.medium,
-                          errorBuilder: (ctx, err, stack) => const Icon(
-                            Icons.person_rounded,
-                            size: 24,
-                            color: NomadKit.sandDark,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: NomadKit.ink,
-                                ),
+              final done = eval != null;
+              final statusColor = !done
+                  ? NomadKit.sandDark
+                  : (eval.isPassed ? NomadKit.forest : NomadKit.error);
+              return InkWell(
+                onTap: () => go(context, const PracticalEvaluationPage()),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: NomadKit.border)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RhAvatar(initials: rhInitials(name), size: 40),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: NomadKit.body.copyWith(
+                                fontWeight: FontWeight.w500,
                               ),
-                              Text(
-                                role,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: NomadKit.secondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: percent >= 80
-                                ? NomadKit.forestLight
-                                : NomadKit.warningLight,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '$percent% đã học',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: percent >= 80
-                                  ? NomadKit.forest
-                                  : NomadKit.warning,
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Overdue / Relearn plain text notes (no background box)
-                    if (hasOverdue)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          'Quá hạn: ${st.overdueTasks.first.title}',
-                          maxLines: 2,
-                          style: const TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            color: NomadKit.error,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                            Text(
+                              role,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: NomadKit.caption,
+                            ),
+                            Text('$percent% đã học', style: NomadKit.caption),
+                            if (st.overdueTasks.isNotEmpty)
+                              Text(
+                                'Quá hạn: ${st.overdueTasks.first.title}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: NomadKit.caption.copyWith(
+                                  color: NomadKit.error,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  done
+                                      ? (eval.isPassed
+                                            ? Icons.check_circle_outline_rounded
+                                            : Icons.error_outline_rounded)
+                                      : Icons.schedule_rounded,
+                                  size: 14,
+                                  color: statusColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    'Thực hành: ${_practicalLabel(eval)}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: NomadKit.caption.copyWith(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Thực hành: ${_practicalLabel(st.latestEvaluation)}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              color: NomadKit.secondary,
+                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Row(
+                          children: [
+                            Text(
+                              done ? 'Xem' : 'Chấm',
+                              style: NomadKit.label.copyWith(
+                                color: NomadKit.sandDark,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
+                            const RhChevron(color: NomadKit.sandDark),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 28),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: () =>
-                              go(context, const PracticalEvaluationPage()),
-                          child: const Text(
-                            'Chấm điểm',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: NomadKit.sandDark,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -465,7 +252,7 @@ class _AdminStoreTrainingPageState extends State<AdminStoreTrainingPage> {
     required String text,
     Widget? action,
   }) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 24),
+    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
     child: Column(
       children: [
         Icon(icon, size: 36, color: NomadKit.secondary),
@@ -473,35 +260,24 @@ class _AdminStoreTrainingPageState extends State<AdminStoreTrainingPage> {
         Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 13, color: NomadKit.secondary),
+          style: NomadKit.label.copyWith(
+            color: NomadKit.secondary,
+            fontWeight: FontWeight.w400,
+          ),
         ),
         ?action,
       ],
     ),
   );
 
-  Widget _metricBox(String val, String label, {bool isWarning = false}) {
-    return Column(
-      children: [
-        Text(
-          val,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: isWarning ? NomadKit.error : NomadKit.ink,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 11, color: NomadKit.secondary),
-        ),
-      ],
-    );
-  }
+  Widget _metric(String val, String label) => Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.baseline,
+    textBaseline: TextBaseline.alphabetic,
+    children: [
+      Text(val, style: NomadKit.title.copyWith(color: NomadKit.sandDark)),
+      const SizedBox(width: 6),
+      Text(label, style: NomadKit.caption),
+    ],
+  );
 }
